@@ -33,7 +33,7 @@ setuptools.setup(
     description="A module for creating and using application commands on discord.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(exclude=["docs"]),
+    packages=setuptools.find_packages(exclude=["docs", ".github", "examples", "tests"]),
     install_requires=[
         "discord.py@git+https://github.com/Rapptz/discord.py"
     ],
@@ -43,7 +43,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     project_urls={
-        "Documentation": "https://dpy-slash.rtfd.io/"
+        "Documentation": "https://dpy-appcommands.rtfd.io/",
+        "Issue tracker": "https://github.com/Rishiraj0100/dpy-appcommands/issues"
     },
     python_requires=">=3.8",
     license="MIT"
