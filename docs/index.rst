@@ -1,4 +1,4 @@
-Welcome to slash documentation
+Welcome to dpy-appcommands documentation
 ==============================
 .. toctree::
    :maxdepth: 2
