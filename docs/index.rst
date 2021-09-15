@@ -7,4 +7,5 @@ Welcome to slash documentation
    quickstart
    gettingstarted
    api
+   genindex
 
