@@ -1,8 +1,8 @@
 from appcommands import __version__
 
 project = 'dpy-appcommands'
-copyright = '2021, SilentJungle399'
-author = 'SilentJungle399'
+copyright = '2021, Rishiraj0100'
+author = 'Rishiraj0100'
 
 # The short X.Y version
 version = __version__
