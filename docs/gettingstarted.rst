@@ -105,7 +105,7 @@ Custom Options
 
     @bot.slash(name="number", description="Your favourite number", options=[Option(name="number", description="your favourite number", type=OptionType.NUMBER, required=True)])
     async def say(ctx, number):
-        await ctx.reply('your favourite number is ' + str(number))
+        await ctx.reply('your favourite number is ' + str(number), ephemeral=True)
 
 
 Main point
@@ -144,12 +144,12 @@ A sample is given here
             )
         ]
     )
-    async def embed(ctx, title: str, description: str, footer: str = "", timestamp: bool = False):
+    async def embed(ctx, title: str, description: str, footer: str = None, timestamp: bool = False):
         embed = discord.Embed(title, description)
         if footer:
             embed.set_footer(footer)
 
-        if str(timestamp).lower() == "true":
+        if timestamp:
             embed.timestamp = datetime.datetime.now()
 
         await ctx.reply(embed=embed)
@@ -162,12 +162,12 @@ as it is same as ↓
     for appcommands import Option, Choice, OptionType
 
     @bot.slash(name="embed", description = "creates an Embed")
-    async def embed(ctx, title: str, description: str, footer: str = "", timestamp: bool = False):
+    async def embed(ctx, title: str, description: str, footer: str = None, timestamp: bool = False):
         embed = discord.Embed(title, description)
-        if footer:
+        if footer is not None:
             embed.set_footer(footer)
 
-        if str(timestamp).lower() == "true":
+        if timestamp:
             embed.timestamp = datetime.datetime.now()
 
         await ctx.reply(embed=embed)
@@ -194,10 +194,9 @@ Making a slashcommand with choices
     from appcommands import Option, Choice
 
     choices = [Choice(name="dog"),Choice(name="cat"),Choice(name="tiger")]
-    opts = [Option(name="animal", description="Choose an animal", choices=choices)]
 
-    @bot.slash(name="animal", description="choose an animal", options=opts)
-    async def Animal(ctx, animal: str):
+    @bot.slash(name="animal", description="choose an animal")
+    async def Animal(ctx, animal: Option(name="animal", description="Choose an animal", choices=choices)):
        await ctx.reply(f"You chose {animal}")
 
 Working with cog commands
