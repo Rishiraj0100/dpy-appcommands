@@ -2,10 +2,10 @@
 
 ## Installation and Usage
 
-To install this version, run
+To install this module, run
 
 ```bash
-pip install -U git+https://github.com/SilentJungle399/dpy-appcommands
+pip install -U dpy-appcommands
 ```
 
 ### Usage
