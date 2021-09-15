@@ -1,5 +1,6 @@
 # dpy-appcommands
 [![PyPi](https://shields.io/pypi/v/dpy-appcommands.svg)](https://pypi.org/project/dpy-appcommands/)
+[![PyPi](https://shields.io/pypi/pyversions/dpy-appcommands.svg)](https://pypi.org/project/dpy-appcommands/)
 ## Installation and Usage
 
 To install this module, run
