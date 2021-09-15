@@ -34,9 +34,6 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(exclude=["docs", ".github", "examples", "tests"]),
-    install_requires=[
-        "discord.py@git+https://github.com/Rapptz/discord.py"
-    ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
