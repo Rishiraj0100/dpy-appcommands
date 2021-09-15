@@ -29,7 +29,7 @@ if version.endswith(('a', 'b', 'rc')):
 setuptools.setup(
     name="dpy-appcommands",
     version=version,
-    author="SilentJungle399",
+    author="Rishiraj0100",
     description="A module for creating and using application commands on discord.",
     long_description=long_description,
     long_description_content_type="text/markdown",
