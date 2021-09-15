@@ -3,7 +3,7 @@
 API Reference
 =============
 
-Modules
+SubModules
 
 appcommands.client Module
 ----------------------------------
