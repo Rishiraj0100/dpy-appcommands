@@ -143,11 +143,10 @@ class InteractionContext:
         The user who fired this cmd 
     token: :class:`~str`
         token of this interaction, (valid for 15 mins)"""
-    def __init__(self, bot: commands.Bot, client: AppClient) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot: commands.Bot = bot
         self.state = bot._connection
-        self.client: AppClient = client
-        self.__session: ClientSession = self.bot.http._HTTPClient__session
+        self._session: ClientSession = self.bot.http._HTTPClient__session
         self.version: int = None
         self.type: int = None
         self.token: str = None
@@ -158,13 +157,8 @@ class InteractionContext:
         self.channel: discord.TextChannel = None
         self.guild: discord.Guild = None
         self.kwargs: dict = {}
-        self.__responded: bool = False
 
     async def from_interaction(self, interaction) -> 'InteractionContext':
-        self.version = interaction.version
-        self.type = interaction.type
-        self.token = interaction.token
-        self.id = interaction.id
         self.data = InteractionData.from_dict(interaction.data)
         cmd = self.bot.appclient.commands.get(self.data.id, None)['command']
         self.command = cmd
@@ -173,173 +167,56 @@ class InteractionContext:
             params.pop(list(params.keys())[0])
         self.kwargs[str(list(params.keys())[0])] = self
         params.pop(str(list(params.keys())[0]))
-        self.application_id = interaction.application_id
-        self.user = self.author = interaction.user
-        self.guild = None
-
-        if isinstance(interaction.user, discord.Member):
-            self.guild = self.user.guild
-
-        if interaction.channel_id is not None and self.guild:
-            self.channel = self.guild.get_channel(
-                interaction.channel_id) or await self.guild.fetch_channel(
-                    interaction.channel_id)
-        elif interaction.channel_id is not None:
-            self.channel = await self.user._get_channel()
-
+        self.interaction = interaction
         self.kwargs = {**self.kwargs, **(await get_ctx_kw(self, params))}
         return self
 
-    async def respond(
-        self,
-        content: Optional[Any] = None,
-        *,
-        embed: Embed = MISSING,
-        embeds: List[discord.Embed] = MISSING,
-        view: discord.ui.View = MISSING,
-        tts: bool = False,
-        ephemeral: bool = False,
-        allowed_mentions = None
-    ) -> None:
-        """Responds to given interaction"""
-        state = self._state
-        if self.__responded:
-            raise TypeError('This interaction has already been responded.')
+    @cached_property
+    def channel(self):
+        return self.interaction.channel
 
-        payload: Dict[str, Any] = {
-            'tts': tts,
-        }
+    @cached_property
+    def channel_id(self):
+        return self.interaction.channel_id
 
-        if embed is not MISSING and embeds is not MISSING:
-            raise TypeError('cannot mix embed and embeds keyword arguments')
+    @cached_property
+    def guild(self):
+        return self.interaction.guild
 
-        if embed is not MISSING:
-            embeds = [embed]
+    @cached_property
+    def guild_id(self):
+        return self.interaction.guild_id
 
-        if embeds:
-            if len(embeds) > 10:
-                raise ValueError('embeds cannot exceed maximum of 10 elements')
-            payload['embeds'] = [e.to_dict() for e in embeds]
+    @cached_property
+    def message(self):
+        return self.interaction.message
 
-        if content is not None:
-            payload['content'] = str(content)
+    @cached_property
+    def user(self):
+        return self.interaction.user
 
-        if ephemeral:
-            payload['flags'] = 64
+    @cached_property
+    def response(self):
+        return self.interaction.response
 
-        if view is not MISSING:
-            payload['components'] = view.to_components()
+    author = user
 
-        if allowed_mentions:
-            payload['allowed_mentions'] = allowed_mentions.to_dict()
+    @property
+    def respond(self):
+        return self.interaction.response.send_message
 
-        adapter = async_context.get()
-        await adapter.create_interaction_response(
-            self.id,
-            self.token,
-            session=self.__session,
-            type=4,
-            data=payload,
-        )
+    @property
+    def send(self):
+        return self.respond
 
-        if view is not MISSING:
-            if ephemeral and view.timeout is None:
-                view.timeout = 15 * 60.0
+    @property
+    def defer(self):
+        return self.interaction.response.defer
 
-            state.store_view(view)
+    @property
+    def followup(self):
+        return self.interaction.followup
 
-        self.__responded = True
-        
-    async def follow(self,
-                     content: str = None,
-                     *,
-                     tts: bool = False,
-                     embed: discord.Embed = None,
-                     allowed_mentions=None,
-                     ephemeral: bool = False,
-                     view: ui.View = None):
-        """Sends a follow-up message."""
-        ret = {
-            "content": content,
-        }
-
-        if ephemeral:
-            ret["flags"] = 64
-
-        if embed:
-            ret["embeds"] = [embed.to_dict()]
-
-        if view:
-            ret["components"] = view.to_components()
-            for i in view.children:
-                if i._provided_custom_id:
-                    self.client._views[i.custom_id] = [view, i]
-
-        url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}"
-
-        async with self.__session.request('POST', url, json = ret) as response:
-            self.client.log(f"Follow msg response - {response.status}")
-
-            return response.text
-
-    async def edit(
-        self,
-        *,
-        content: Optional[str] = MISSING,
-        embeds: List[discord.Embed] = MISSING,
-        embed: Optional[discord.Embed] = MISSING,
-        file: File = MISSING,
-        files: List[discord.File] = MISSING,
-        view: Optional[discor.ui.View] = MISSING,
-        allowed_mentions = None,
-    ):
-        """edit the responded msg"""
-        previous_mentions = self._state.allowed_mentions
-        params = handle_message_parameters(
-            content=content,
-            file=file,
-            files=files,
-            embed=embed,
-            embeds=embeds,
-            view=view,
-            allowed_mentions=allowed_mentions,
-            previous_allowed_mentions=previous_mentions,
-        )
-        adapter = async_context.get()
-        data = await adapter.edit_original_interaction_response(
-            self.application_id,
-            self.token,
-            session=self.__session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-        )
-        message = InteractionMessage(state=self._state, channel=self.channel, data=data)  # type: ignore
-        if view and not view.is_finished():
-            self._state.store_view(view, message.id)
-        return message
-
-
-    async def delete(self):
-        """Delete the responded msg"""
-        url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
-
-        async with self.__session.request('DELETE', url) as response:
-            self.client.log(f"Delete reply response - {response.status}")
-
-            return response.text
-
-    async def defer(self, ephemeral: bool = False):
-        """Defers the interaction so discord knows bot has recieved it, this is considered a reply so you must edit it later."""
-        url = f"https://discord.com/api/v9/interactions/{self.id}/{self.token}/callback"
-        ret = {"type": 5}
-        if ephemeral:
-            ret["data"] = {"flags": 64}
-
-        async with self.__session.request('POST', url, json=ret) as response:
-            self.client.log(f"Deferred interaction - {response.status}")
-
-            return response.text
 
 class InteractionData:
     """The data given in `ctx.data`
