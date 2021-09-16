@@ -268,7 +268,7 @@ class AppClient:
             if int(interaction.data['id']) in self.__commands:
                 context = self.get_interaction_context(interaction)
                 await context.invoke()
-        elif interaction.type == InteractionType.component:
+        '''elif interaction.type == InteractionType.component:
             interactctx = interaction
             custom_id = interactctx.data['custom_id']
 
@@ -278,7 +278,7 @@ class AppClient:
                 return
 
             item.refresh_state(interactctx)
-            view._dispatch_item(item, interactctx)
+            view._dispatch_item(item, interactctx)'''
 
     async def fetch_commands(self, guild_id: Optional[int] = None) -> List[SlashCommand]:
         """fetch a list of slash command currently the bot has
