@@ -491,7 +491,7 @@ class SlashCommand:
         return self.__repr__()
 
     @classmethod
-    def from_dict(self, data: dict) -> SlashCommand:
+    def from_dict(self, data: dict):
         # TODO: Fix this
         self.version = int(data["version"])
         self.application_id = int(data["application_id"])
