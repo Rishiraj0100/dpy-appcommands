@@ -11,10 +11,25 @@ from .models import InteractionContext, SlashCommand, command as _cmd
 from discord import http, ui
 from discord.ext import commands
 from discord.enums import InteractionType
-from typing import List, Optional, Tuple, Union, Dict, Mapping
+from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable
+
+class ApplicationMixin:
+    # TODO: Fix this
+    # TODO: Add docs
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.to_register = []
+
+    def slash(self, *args, cls=MISSING, **kwargs) -> Callable[Callable, SlashCommand]:
+        def decorator(func) -> SlashCommand:
+            wrapped = _cmd(self, *args, cls=cls, **kwargs)
+            resp = wrapped(func)
+            return resp
+
+        return decorator
 
 
-class Bot(commands.Bot):
+class Bot(commands.Bot, ApplicationMixin):
     """The Bot
     This is fully same as :class:`~discord.ext.commands.Bot`
 
@@ -33,6 +48,7 @@ class Bot(commands.Bot):
         super().__init__(**options)
         self.appclient = self.get_app_client()
 
+'''
     def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
         same as :func:`~appcommands.client.AppClient.command`
@@ -69,13 +85,14 @@ class Bot(commands.Bot):
         :class:`~appcommands.models.SlashCommand`
             The slash command.
         """
-        return self.appclient.command(*args, **kwargs)
+        return self.appclient.command(*args, **kwargs)'''
+
 
     def get_app_client(self):
         """The method usually implemented to use custom appclient"""
         return AppClient(self)
 
-class AutoShardedBot(commands.AutoShardedBot):
+class AutoShardedBot(commands.AutoShardedBot, ApplicationMixin):
     """The AutoShardedBot class
     This is fully same as :class:`~discord.ext.commands.AutoShardedBot`
 
@@ -94,6 +111,7 @@ class AutoShardedBot(commands.AutoShardedBot):
         super().__init__(**options)
         self.appclient = self.get_app_client()
 
+'''
     def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
         same as :func:`~appcommands.client.AppClient.command`
@@ -130,7 +148,7 @@ class AutoShardedBot(commands.AutoShardedBot):
         :class:`~appcommands.models.SlashCommand`
             The slash command.
         """
-        return self.appclient.command(*args, **kwargs)
+        return self.appclient.command(*args, **kwargs)'''
 
     def get_app_client(self):
         """The method usually implemented to use custom appclient"""
