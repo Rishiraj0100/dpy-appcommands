@@ -354,7 +354,7 @@ class AppClient:
 
             resp = await self.bot.http.request(route=http.Route(
                 "POST", f"/applications/{self.bot.user.id}{add}/commands"),
-                                        json=command.ret_dict())
+                                        json=command.to_dict())
 
             self.log(f"Slash command '{command.name}' (ID: {resp['id']}) registered! {l_add}")
 
