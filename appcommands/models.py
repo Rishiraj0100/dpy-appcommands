@@ -9,11 +9,12 @@ from .utils import *
 from .types import AppClient
 from .enums import OptionType
 
-from discord import ui
-from discord import http
+from discord import ui, http
 from discord.ext import commands
 from aiohttp.client import ClientSession
+from discord.interactions import InteractionMessage
 from typing import Dict, List, Union, Optional, Coroutine, Callable
+from discord.webhook.async_ import async_context, handle_message_parameters
 
 
 __all__ = (
@@ -144,6 +145,7 @@ class InteractionContext:
         token of this interaction, (valid for 15 mins)"""
     def __init__(self, bot: commands.Bot, client: AppClient) -> None:
         self.bot: commands.Bot = bot
+        self.state = bot._connection
         self.client: AppClient = client
         self.__session: ClientSession = self.bot.http._HTTPClient__session
         self.version: int = None
@@ -200,7 +202,7 @@ class InteractionContext:
         allowed_mentions = None
     ) -> None:
         """Responds to given interaction"""
-        state = self.bot._connection
+        state = self._state
         if self.__responded:
             raise TypeError('This interaction has already been responded.')
 
@@ -231,6 +233,15 @@ class InteractionContext:
         if allowed_mentions:
             payload['allowed_mentions'] = allowed_mentions.to_dict()
 
+        adapter = async_context.get()
+        await adapter.create_interaction_response(
+            self.id,
+            self.token,
+            session=self.__session,
+            type=4,
+            data=payload,
+        )
+
         if view is not MISSING:
             if ephemeral and view.timeout is None:
                 view.timeout = 15 * 60.0
@@ -238,13 +249,7 @@ class InteractionContext:
             state.store_view(view)
 
         self.__responded = True
-        # TODO: Complete this
-
-        # url = f"https://discord.com/api/v9/interactions/{self.id}/{self.token}/callback"
-        # async with self.__session.request('POST', url, json = json) as response:
-        #     self.client.log(f"Reply response - {response.st
-        #     return state.create_message(channel=channel, data=data)
-
+        
     async def follow(self,
                      content: str = None,
                      *,
@@ -277,31 +282,43 @@ class InteractionContext:
 
             return response.text
 
-    async def edit(self,
-                   content: str = None,
-                   *,
-                   tts: bool = False,
-                   embed: discord.Embed = None,
-                   allowed_mentions=None,
-                   view: ui.View = None):
+    async def edit(
+        self,
+        *,
+        content: Optional[str] = MISSING,
+        embeds: List[discord.Embed] = MISSING,
+        embed: Optional[discord.Embed] = MISSING,
+        file: File = MISSING,
+        files: List[discord.File] = MISSING,
+        view: Optional[discor.ui.View] = MISSING,
+        allowed_mentions = None,
+    ):
         """edit the responded msg"""
-        ret = {
-            "content": content,
-        }
+        previous_mentions = self._state.allowed_mentions
+        params = handle_message_parameters(
+            content=content,
+            file=file,
+            files=files,
+            embed=embed,
+            embeds=embeds,
+            view=view,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=previous_mentions,
+        )
+        adapter = async_context.get()
+        data = await adapter.edit_original_interaction_response(
+            self.application_id,
+            self.token,
+            session=self.__session,
+            payload=params.payload,
+            multipart=params.multipart,
+            files=params.files,
+        )
+        message = InteractionMessage(state=self._state, channel=self.channel, data=data)  # type: ignore
+        if view and not view.is_finished():
+            self._state.store_view(view, message.id)
+        return message
 
-        if embed:
-            ret["embeds"] = [embed.to_dict()]
-
-        if view:
-            ret["components"] = view.to_components()
-            for i in view.children:
-                if i._provided_custom_id:
-                    self.client._views[i.custom_id] = [view, i]
-
-        url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
-
-        async with self.__session.request('PATCH', url, json = ret) as response:
-            self.client.log(f"Reply edit response - {response.status}")
 
     async def delete(self):
         """Delete the responded msg"""
