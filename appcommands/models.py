@@ -451,7 +451,7 @@ class SubCommandGroup(Option):
 
         return wrap
 
-    def slashgroup(self, name, description) -> SubCommandGroup:
+    def slashgroup(self, name, description) -> 'SubCommandGroup':
         if self.parent is not None:
             raise TypeError("Subcommand groups can't have more groups")
 
