@@ -29,6 +29,7 @@ class ApplicationMixin:
         return decorator
 
     async def on_connect(self):
+        print("connected to discord")
         for cmd in self.to_register:
             self.appclient.add_command(cmd)
 
