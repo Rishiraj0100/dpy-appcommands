@@ -143,7 +143,7 @@ class InteractionContext:
         The user who fired this cmd 
     token: :class:`~str`
         token of this interaction, (valid for 15 mins)"""
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: commands.Bot, interaction) -> None:
         self.bot: commands.Bot = bot
         self.state = bot._connection
         self._session: ClientSession = self.bot.http._HTTPClient__session
@@ -151,15 +151,14 @@ class InteractionContext:
         self.type: int = None
         self.token: str = None
         self.id: int = None
-        self.data: InteractionData = None
         self.application_id: int = None
         self.user: Union[discord.Member, discord.User] = None
         self.channel: discord.TextChannel = None
         self.guild: discord.Guild = None
         self.kwargs: dict = {}
+        self.interaction = interaction
+        self.data: dict = InteractionData.from_dict(self.interaction.data)
 
-    async def from_interaction(self, interaction) -> 'InteractionContext':
-        self.data = InteractionData.from_dict(interaction.data)
         cmd = self.bot.appclient.commands.get(self.data.id, None)['command']
         self.command = cmd
         params = copy.deepcopy(cmd.params)
@@ -167,9 +166,7 @@ class InteractionContext:
             params.pop(list(params.keys())[0])
         self.kwargs[str(list(params.keys())[0])] = self
         params.pop(str(list(params.keys())[0]))
-        self.interaction = interaction
         self.kwargs = {**self.kwargs, **(await get_ctx_kw(self, params))}
-        return self
 
     @cached_property
     def channel(self):
@@ -337,76 +334,13 @@ class Option:
         return f"<Option name={self.name} description={self.description} type={self.type} required={self.required} value={self.value} choices={self.choices}>"
 
 
-class SubCommand:
-    def __init__(self,
-                 client: AppClient,
-                 name: str = None,
-                 description: str = "No description.",
-                 options: List[Option] = [],
-                 callback=None,
-                 parent=None):
-        self.options = options
-        if callback is not None:
-            if not asyncio.iscoroutinefunction(callback):
-                raise TypeError('Callback must be a coroutine.')
-            self.name = name or callback.__name__
-            self.callback = callback
-            unwrap = unwrap_function(callback)
-            try:
-                globalns = unwrap.__globals__
-            except:
-                globalns = {}
-            self.params = get_signature_parameters(callback, globalns)
-            if not options:
-                self.options = generate_options(self.callback, description)
-        else:
-            if not name:
-                raise ValueError("You must specify name when callback is None")
-            self.name = name
-
-        self.client = client
-        self.description = description
-
-    def to_dict(self):
-        ret = {
-            "name": self.name,
-            "description": self.description,
-            "options": list(o.to_dict() for o in self.options),
-            "type": 1
-        }
-        return ret
-
-    @classmethod
-    def from_dict(self, client: AppClient, data: dict):
-        name = data.get("name")
-        if "description" in data:
-            description = data["description"]
-        else:
-            description = None
-        options = []
-        if data.get("options"):
-            for opt in data["options"]:
-                options.append(Option.from_dict(opt))
-        else:
-            options = []
-
-        return self(client,
-                    name=data.get("name"),
-                    description=description,
-                    options=options)
-
-    async def callback(self, *args, **kwargs):
-        raise NotImplementedError
-
-
 class SubCommandGroup:
     def __init__(self,
-                 client: AppClient,
                  name: str = None,
                  description: str = "No description.",
-                 options: List[Option] = [],
+                 guild_ids: List[int] = [],
                  callback=None,
-                 subcommands: List[SubCommand] = []):
+                 parent: Optional[SubCommandGroup] = []):
         self.options = options
         if callback is not None:
             if not asyncio.iscoroutinefunction(callback):
@@ -501,9 +435,7 @@ class SlashCommand:
                  description: Optional[str] = "No description.",
 				 guild: Optional[int] = None,
                  options: Optional[List[Option]] = [],
-                 callback: Optional[Coroutine] = None,
-                 subcommands: Optional[List[Union[SubCommandGroup,
-                                                  SubCommand]]] = []) -> None:
+                 callback: Optional[Coroutine] = None) -> None:
         self.options = options
         self.description = description
         self.guild = guild
@@ -541,7 +473,6 @@ class SlashCommand:
             if not name:
                 raise ValueError("You must specify name when callback is None")
             self.name  = name
-        self.options.extend(subcommands)
 
     def __repr__(self):
         return f"<SlashCommmand name='{self.name}' description='{self.description}'>"
@@ -550,7 +481,8 @@ class SlashCommand:
         return self.__repr__()
 
     @classmethod
-    def from_dict(self, client: AppClient, data: dict) -> 'SlashCommand':
+    def from_dict(self, data: dict) -> 'SlashCommand':
+        # TODO: Fix this
         self.version = int(data["version"])
         self.application_id = int(data["application_id"])
         self.id = int(data["id"])
@@ -580,7 +512,7 @@ class SlashCommand:
                     options=options,
                     subcommands=subcommands)
 
-    def ret_dict(self) -> dict:
+    def to_dict(self) -> dict:
         ret = {
             "name": self.name,
             "description": self.description,
