@@ -10,11 +10,9 @@ from .types import AppClient
 from .enums import OptionType
 
 from discord import ui, http
-from discord.ext import commands
 from aiohttp.client import ClientSession
-from discord.interactions import InteractionMessage
+from discord.utils import cached_property
 from typing import Dict, List, Union, Optional, Coroutine, Callable
-from discord.webhook.async_ import async_context, handle_message_parameters
 
 
 __all__ = (
@@ -26,7 +24,7 @@ __all__ = (
     "SlashCommand"
 )
 
-async def get_ctx_kw(ctx, params):
+async def get_ctx_kw(ctx, params) -> List[Option]:
     bot, cmd, kwargs = ctx.bot, ctx.command, {}
     if cmd is not None and len(ctx.data.options) > 0:
         for k, _ in params.items():
@@ -318,7 +316,7 @@ class Option:
         self.value = value
         self.required = required
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         ret = {
             "name": self.name,
             "description": self.description,
@@ -493,7 +491,7 @@ class SlashCommand:
         return self.__repr__()
 
     @classmethod
-    def from_dict(self, data: dict) -> 'SlashCommand':
+    def from_dict(self, data: dict) -> SlashCommand:
         # TODO: Fix this
         self.version = int(data["version"])
         self.application_id = int(data["application_id"])
@@ -537,7 +535,7 @@ class SlashCommand:
         raise NotImplementedError
 
 
-def command(bot, *args, cls: SlashCommand = MISSING, **kwargs):
+def command(bot, *args, cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
     """The slash commands wrapper 
     
     Parameters
@@ -575,7 +573,7 @@ def command(bot, *args, cls: SlashCommand = MISSING, **kwargs):
     if cls is MISSING:
         cls = SlashCommand
 
-    def wrapper(func):
+    def wrapper(func) -> SlashCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError('Callback must be a coroutine.')
         if hasattr(func, "__slash__") and isinstance(func.__slash__, SlashCommand):
