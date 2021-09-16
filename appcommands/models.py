@@ -579,7 +579,6 @@ class SlashCommand:
         Name not given when coroutine not given
     """
     def __init__(self,
-                 client: AppClient,
                  name: str = None,
                  description: Optional[str] = "No description.",
 				 guild: Optional[int] = None,
@@ -658,8 +657,7 @@ class SlashCommand:
         else:
             options = []
 
-        return self(client,
-                    name=data["name"],
+        return self(name=data["name"],
                     description=description,
                     options=options,
                     subcommands=subcommands)
