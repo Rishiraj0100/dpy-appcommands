@@ -340,6 +340,7 @@ class Option:
         return f"<Option name={self.name} description={self.description} type={self.type} required={self.required} value={self.value} choices={self.choices}>"
 
 class SlashCommand:
+    type = 1
     """SlashCmd base class 
     
     Parameters
@@ -428,6 +429,7 @@ class SlashCommand:
         raise NotImplementedError
 
 class SubCommandGroup(Option):
+    type = 1
     def __init__(self,
                  name: str = None,
                  description: str = "No description.",
