@@ -81,7 +81,7 @@ def get_signature_parameters(function, globalns) -> dict:
     return params
 
 
-def generate_options(function, description: str = "No description.") -> List[Option]:
+def generate_options(function, description: str = "No description.") -> List['Option']:
     options = []
     params = iter(inspect.signature(function).parameters.values())
     if next(params).name in ("self", "cls"):
