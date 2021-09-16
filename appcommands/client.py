@@ -48,7 +48,7 @@ class Bot(commands.Bot, ApplicationMixin):
         super().__init__(**options)
         self.appclient = self.get_app_client()
 
-'''
+    '''
     def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
         same as :func:`~appcommands.client.AppClient.command`
@@ -111,7 +111,7 @@ class AutoShardedBot(commands.AutoShardedBot, ApplicationMixin):
         super().__init__(**options)
         self.appclient = self.get_app_client()
 
-'''
+    '''
     def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
         same as :func:`~appcommands.client.AppClient.command`
