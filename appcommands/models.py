@@ -143,16 +143,13 @@ class InteractionContext:
         token of this interaction, (valid for 15 mins)"""
     def __init__(self, bot, interaction) -> None:
         self.bot: commands.Bot = bot
-        self.state = bot._connection
+        self._state = bot._connection
         self._session: ClientSession = self.bot.http._HTTPClient__session
-        self.version: int = None
-        self.type: int = None
-        self.token: str = None
-        self.id: int = None
-        self.application_id: int = None
-        self.user: Union[discord.Member, discord.User] = None
-        self.channel: discord.TextChannel = None
-        self.guild: discord.Guild = None
+        self.version: int = interaction.version
+        self.type: int = interaction.type
+        self.token: str = interaction.token
+        self.id: int = interaction.id
+        self.application_id: int = interaction.application_id
         self.kwargs: dict = {}
         self.interaction = interaction
         self.data: dict = InteractionData.from_dict(self.interaction.data)
@@ -214,7 +211,10 @@ class InteractionContext:
 
     @property
     def send(self):
-        return self.respond
+        if not self.response.is_done():
+            return self.respond
+
+        return self.channel.send
 
     @property
     def defer(self):
