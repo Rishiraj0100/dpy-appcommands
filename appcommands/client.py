@@ -19,6 +19,7 @@ class ApplicationMixin:
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.to_register = []
+        self.app_commands = {}
 
     def slash(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
         def decorator(func) -> SlashCommand:
@@ -28,14 +29,68 @@ class ApplicationMixin:
 
         return decorator
 
+    async def register_commands(self) -> None:
+        commands = []
+
+        registered_commands = await self.http.get_global_commands(self.user.id)
+        for command in [cmd for cmd in self.to_register if cmd.guild_ids is None]:
+            json = command.to_dict()
+            if len(registered_commands) > 0:
+                matches = [
+                    x
+                    for x in registered_commands
+                    if x["name"] == command.name and x["type"] == command.type
+                ]
+                if matches:
+                    json["id"] = matches[0]["id"]
+            commands.append(json)
+
+        guild_commands = {}
+        async for guild in self.fetch_guilds(limit=None):
+            guild_commands[guild.id] = []
+
+        for command in [cmd for cmd in self.to_register if cmd.guild_ids]:
+            json = command.to_dict()
+            for guild_id in command.guild_ids:
+                to_update = guild_commands[guild_id]
+                guild_commands[guild_id] = to_update + [json]
+
+        for guild_id in guild_commands:
+            try:
+                cmds = await self.http.bulk_upsert_guild_commands(self.user.id, guild_id, guild_commands[guild_id])
+            except discord.Forbidden:
+                if not guild_commands[guild_id]:
+                    continue
+                else:
+                    self.appclient.log(f"Failed to add command to guild {guild_id}", file=sys.stderr)
+                    raise
+            else:
+                for i in cmds:
+                    cmd = discord.utild.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
+                    self.app_commands[i["id"]] = cmd
+
+
+        cmds = await self.http.bulk_upsert_global_commands(self.user.id, commands)
+
+        for i in cmds:
+            cmd = discord.utils.get(
+                self.to_register,
+                name=i["name"],
+                description=i["description"],
+                type=i["type"],
+            )
+            self.app_commands[i["id"]] = cmd
+
+
     async def on_connect(self):
         print("connected to discord")
-        for cmd in self.to_register:
-            await self.appclient.add_command(cmd)
+        # for cmd in self.to_register:
+        #     await self.appclient.add_command(cmd)
+        await self.register_commands()
 
     @property
     def appcommands(self):
-        return self.appclient.commands
+        return self.app_commands
 
 class Bot(ApplicationMixin, commands.Bot):
     """The Bot
