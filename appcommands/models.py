@@ -156,6 +156,7 @@ class InteractionContext:
         self.channel: discord.TextChannel = None
         self.guild: discord.Guild = None
         self.kwargs: dict = {}
+        self.__responded: bool = False
 
     async def from_interaction(self, interaction) -> 'InteractionContext':
         self.version = interaction.version
@@ -187,39 +188,62 @@ class InteractionContext:
         self.kwargs = {**self.kwargs, **(await get_ctx_kw(self, params))}
         return self
 
-    async def reply(self,
-                    content: str = None,
-                    *,
-                    tts: bool = False,
-                    embed: discord.Embed = None,
-                    allowed_mentions=None,
-                    ephemeral: bool = False,
-                    view: ui.View = None):
-        """Replies to given interaction"""
-        ret = {
-            "content": content,
+    async def respond(
+        self,
+        content: Optional[Any] = None,
+        *,
+        embed: Embed = MISSING,
+        embeds: List[discord.Embed] = MISSING,
+        view: discord.ui.View = MISSING,
+        tts: bool = False,
+        ephemeral: bool = False,
+        allowed_mentions = None
+    ) -> None:
+        """Responds to given interaction"""
+        state = self.bot._connection
+        if self.__responded:
+            raise TypeError('This interaction has already been responded.')
+
+        payload: Dict[str, Any] = {
+            'tts': tts,
         }
 
+        if embed is not MISSING and embeds is not MISSING:
+            raise TypeError('cannot mix embed and embeds keyword arguments')
+
+        if embed is not MISSING:
+            embeds = [embed]
+
+        if embeds:
+            if len(embeds) > 10:
+                raise ValueError('embeds cannot exceed maximum of 10 elements')
+            payload['embeds'] = [e.to_dict() for e in embeds]
+
+        if content is not None:
+            payload['content'] = str(content)
+
         if ephemeral:
-            ret["flags"] = 64
+            payload['flags'] = 64
 
-        if embed:
-            ret["embeds"] = [embed.to_dict()]
+        if view is not MISSING:
+            payload['components'] = view.to_components()
 
-        if view:
-            ret["components"] = view.to_components()
-            for i in view.children:
-                if i._provided_custom_id:
-                    self.client._views[i.custom_id] = [view, i]
+        if allowed_mentions:
+            payload['allowed_mentions'] = allowed_mentions.to_dict()
 
-        url = f"https://discord.com/api/v9/interactions/{self.id}/{self.token}/callback"
+        if view is not MISSING:
+            if ephemeral and view.timeout is None:
+                view.timeout = 15 * 60.0
 
-        json = {"type": 4, "data": ret}
+            state.store_view(view)
 
-        async with self.__session.request('POST', url, json = json) as response:
-            self.client.log(f"Reply response - {response.status}")
+        self.__responded = True
+        # TODO: Complete this
 
-            return response.text
+        # url = f"https://discord.com/api/v9/interactions/{self.id}/{self.token}/callback"
+        # async with self.__session.request('POST', url, json = json) as response:
+        #     self.client.log(f"Reply response - {response.st
+        #     return state.create_message(channel=channel, data=data)
 
     async def follow(self,
                      content: str = None,
