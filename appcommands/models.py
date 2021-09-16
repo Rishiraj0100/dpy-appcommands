@@ -158,8 +158,13 @@ class InteractionContext:
         self.kwargs: dict = {}
         self.interaction = interaction
         self.data: dict = InteractionData.from_dict(self.interaction.data)
+        self.__invoked = False
 
-        cmd = self.bot.appclient.commands.get(self.data.id, None)['command']
+    async def invoke(self):
+        if self.__invoked:
+            raise TypeError("This context has already been invoked, you can't invoke it again")
+
+        cmd = self.bot.appcommands.get(self.data.id, None)['command']
         self.command = cmd
         params = copy.deepcopy(cmd.params)
         if cmd.cog and str(list(params.keys())[0]) in ("cls", "self"): # cls/self only
@@ -167,6 +172,13 @@ class InteractionContext:
         self.kwargs[str(list(params.keys())[0])] = self
         params.pop(str(list(params.keys())[0]))
         self.kwargs = {**self.kwargs, **(await get_ctx_kw(self, params))}
+        self.__invoked = True
+        if cmd.cog:
+            cog = self.bot.cogs.get(cmd.cog.qualified_name)
+            if cog:
+                return await (getattr(cog, cmd.callback.__name__))(**self.kwargs)
+
+            await cmd.callback(**self.kwargs)
 
     @cached_property
     def channel(self):
