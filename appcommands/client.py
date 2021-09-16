@@ -11,7 +11,7 @@ from .models import InteractionContext, SlashCommand, command as _cmd
 from discord import http, ui
 from discord.ext import commands
 from discord.enums import InteractionType
-from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable
+from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any
 
 class ApplicationMixin:
     # TODO: Fix this
@@ -20,7 +20,7 @@ class ApplicationMixin:
         super().__init__(*args, **kwargs)
         self.to_register = []
 
-    def slash(self, *args, cls=MISSING, **kwargs) -> Callable[Callable, SlashCommand]:
+    def slash(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable[[..., Any], Any], SlashCommand]:
         def decorator(func) -> SlashCommand:
             wrapped = _cmd(self, *args, cls=cls, **kwargs)
             resp = wrapped(func)
