@@ -372,7 +372,7 @@ class SlashCommand:
                  callback: Optional[Coroutine] = None) -> None:
         self.options = options
         self.description = description
-        self.guilds = guild_ids
+        self.guild_ids = guild_ids
         self.cog = None
         self.is_subcommand = False
         if callback:
@@ -437,7 +437,7 @@ class SubCommandGroup(Option):
         self.parent = parent
         self.name = name
         self.description = description
-        self.guilds = self.guild_ids
+        self.guild_ids = self.guild_ids
         self.subcommands: List[Union[SubCommandGroup, SlashCommand]] = []
 
     def command(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
