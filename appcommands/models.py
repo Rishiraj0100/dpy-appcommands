@@ -24,7 +24,7 @@ __all__ = (
     "SlashCommand"
 )
 
-async def get_ctx_kw(ctx, params) -> List['Option']:
+async def get_ctx_kw(ctx, params) -> dict:
     bot, cmd, kwargs = ctx.bot, ctx.command, {}
     if cmd is not None and len(ctx.data.options) > 0:
         for k, _ in params.items():
@@ -60,7 +60,7 @@ def unwrap_function(function):
             return function
 
 
-def get_signature_parameters(function, globalns):
+def get_signature_parameters(function, globalns) -> dict:
     signature = inspect.signature(function)
     params = {}
     cache = {}
@@ -81,7 +81,7 @@ def get_signature_parameters(function, globalns):
     return params
 
 
-def generate_options(function, description: str = "No description."):
+def generate_options(function, description: str = "No description.") -> List[Option]:
     options = []
     params = iter(inspect.signature(function).parameters.values())
     if next(params).name in ("self", "cls"):
@@ -141,7 +141,7 @@ class InteractionContext:
         The user who fired this cmd 
     token: :class:`~str`
         token of this interaction, (valid for 15 mins)"""
-    def __init__(self, bot: commands.Bot, interaction) -> None:
+    def __init__(self, bot, interaction) -> None:
         self.bot: commands.Bot = bot
         self.state = bot._connection
         self._session: ClientSession = self.bot.http._HTTPClient__session
