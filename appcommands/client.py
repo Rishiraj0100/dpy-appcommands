@@ -20,7 +20,7 @@ class ApplicationMixin:
         super().__init__(*args, **kwargs)
         self.to_register = []
 
-    def slash(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable[[..., Any], Any], SlashCommand]:
+    def slash(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable[[..., Any], Any]], SlashCommand]:
         def decorator(func) -> SlashCommand:
             wrapped = _cmd(self, *args, cls=cls, **kwargs)
             resp = wrapped(func)
