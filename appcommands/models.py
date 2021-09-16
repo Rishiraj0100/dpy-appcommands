@@ -440,16 +440,18 @@ class SubCommandGroup(Option):
         self.guilds = self.guild_ids
         self.subcommands: List[Union[SubCommandGroup, SlashCommand]] = []
 
-    def command(self, **kwargs) -> Callable[[Callable], SlashCommand]:
+    def command(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+        if cls is MISSING:
+            cls = SlashCommand
         def wrap(func) -> SlashCommand:
-            command = 
+            command = cls(*args, callback=func, **kwargs)
             command.is_subcommand = True
             self.subcommands.append(command)
             return command
 
         return wrap
 
-    def command_group(self, name, description) -> SubCommandGroup:
+    def slashgroup(self, name, description) -> SubCommandGroup:
         if self.parent is not None:
             raise TypeError("Subcommand groups can't have more groups")
 
