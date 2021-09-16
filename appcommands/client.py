@@ -34,7 +34,7 @@ class ApplicationMixin:
             self.appclient.add_command(cmd)
 
 
-class Bot(commands.Bot, ApplicationMixin):
+class Bot(ApplicationMixin, commands.Bot):
     """The Bot
     This is fully same as :class:`~discord.ext.commands.Bot`
 
@@ -97,7 +97,7 @@ class Bot(commands.Bot, ApplicationMixin):
         """The method usually implemented to use custom appclient"""
         return AppClient(self)
 
-class AutoShardedBot(commands.AutoShardedBot, ApplicationMixin):
+class AutoShardedBot(ApplicationMixin, commands.AutoShardedBot):
     """The AutoShardedBot class
     This is fully same as :class:`~discord.ext.commands.AutoShardedBot`
 
