@@ -24,7 +24,7 @@ __all__ = (
     "SlashCommand"
 )
 
-async def get_ctx_kw(ctx, params) -> List[Option]:
+async def get_ctx_kw(ctx, params) -> List['Option']:
     bot, cmd, kwargs = ctx.bot, ctx.command, {}
     if cmd is not None and len(ctx.data.options) > 0:
         for k, _ in params.items():
