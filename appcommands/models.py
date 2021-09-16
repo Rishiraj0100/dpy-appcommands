@@ -588,7 +588,6 @@ class SlashCommand:
                  subcommands: Optional[List[Union[SubCommandGroup,
                                                   SubCommand]]] = []) -> None:
         self.options = options
-        self.client = client
         self.description = description
         self.guild = guild
         self.cog = None
@@ -678,13 +677,13 @@ class SlashCommand:
         raise NotImplementedError
 
 
-def command(client: AppClient, *args, cls: SlashCommand = MISSING, **kwargs):
+def command(bot, *args, cls: SlashCommand = MISSING, **kwargs):
     """The slash commands wrapper 
     
     Parameters
     ------------
-    client: :class:`~appcommands.client.AppClient`
-        Your appclient instance, (required)
+    # client: :class:`~appcommands.client.AppClient`
+    #     Your appclient instance, (required)
     name: :class:`~str`
         Name of the command, (required)
     description: Optional[:class:`~str`]
@@ -722,10 +721,10 @@ def command(client: AppClient, *args, cls: SlashCommand = MISSING, **kwargs):
         if hasattr(func, "__slash__") and isinstance(func.__slash__, SlashCommand):
             raise TypeError('Callback is already a slashcommand.')
 
-        result = cls(client,*args, callback=func, **kwargs)
+        result = cls(*args, callback=func, **kwargs)
         func.__slash__ = result
         #result.client.bot.loop.create_task(result.client.add_command(result))
-        result.client.bot.to_register.append(result)
+        bot.to_register.append(result)
         return func
 
     return wrapper
