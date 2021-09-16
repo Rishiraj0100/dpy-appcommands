@@ -28,6 +28,10 @@ class ApplicationMixin:
 
         return decorator
 
+    async def on_connect(self):
+        for cmd in self.to_register:
+            self.appclient.add_command(cmd)
+
 
 class Bot(commands.Bot, ApplicationMixin):
     """The Bot
