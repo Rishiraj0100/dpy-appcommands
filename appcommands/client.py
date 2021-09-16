@@ -31,7 +31,7 @@ class ApplicationMixin:
     async def on_connect(self):
         print("connected to discord")
         for cmd in self.to_register:
-            self.appclient.add_command(cmd)
+            await self.appclient.add_command(cmd)
 
 
 class Bot(ApplicationMixin, commands.Bot):
