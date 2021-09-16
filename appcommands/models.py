@@ -350,7 +350,7 @@ class SubCommandGroup:
                  description: str = "No description.",
                  guild_ids: List[int] = [],
                  callback=None,
-                 parent: Optional[SubCommandGroup] = []):
+                 parent = []):
         self.options = options
         if callback is not None:
             if not asyncio.iscoroutinefunction(callback):
