@@ -305,10 +305,6 @@ class Option:
                  required: Optional[bool] = True,
                  value: str = None,
                  choices: Optional[List[Choice]] = []):
-        if type not in (3, 4, 5, 6, 7, 8, 9, 10):
-            raise ValueError(
-                "type should be one of the values (3,4,5,6,7,8,9,10) not {}".
-                format(type))
         self.name = name
         self.description = description
         self.type = type
@@ -343,78 +339,6 @@ class Option:
     def __repr__(self):
         return f"<Option name={self.name} description={self.description} type={self.type} required={self.required} value={self.value} choices={self.choices}>"
 
-
-class SubCommandGroup:
-    def __init__(self,
-                 name: str = None,
-                 description: str = "No description.",
-                 guild_ids: List[int] = [],
-                 callback=None,
-                 parent = []):
-        self.options = options
-        if callback is not None:
-            if not asyncio.iscoroutinefunction(callback):
-                raise TypeError('Callback must be a coroutine.')
-            self.name = name or callback.__name__
-            self.callback = callback
-            unwrap = unwrap_function(callback)
-            try:
-                globalns = unwrap.__globals__
-            except:
-                globalns = {}
-            self.params = get_signature_parameters(callback, globalns)
-            if not options:
-                self.options = generate_options(self.callback, description)
-        else:
-            if not name:
-                raise ValueError("You must specify name when callback is None")
-            self.name = name
-
-        self.client = client
-        self.description = description
-
-        self.subcommands = subcommands
-        self.options.extend(self.subcommands)
-
-    def to_dict(self):
-        ret = {
-            "name": self.name,
-            "description": self.description,
-            "options": list(o.to_dict() for o in self.options),
-            "type": 2
-        }
-        return ret
-
-    @classmethod
-    def from_dict(self, client: AppClient, data: dict):
-        self.name = data["name"]
-        self.type = int(data["type"]) if data.get("type",
-                                                  None) is not None else None
-        if "description" in data:
-            description = data["description"]
-        else:
-            description = None
-        subcommands = []
-        options = []
-        if data.get("options"):
-            for opt in data["options"]:
-                if opt["type"] == 1:
-                    subcommands.append(SubCommand.from_dict(client, opt))
-                else:
-                    options.append(Option.from_dict(opt))
-        else:
-            options = []
-
-        return self(client,
-                    name=data["name"],
-                    description=description,
-                    options=options,
-                    subcommands=subcommands)
-
-    async def callback(self, *args, **kwargs):
-        raise NotImplementedError
-
-
 class SlashCommand:
     """SlashCmd base class 
     
@@ -443,13 +367,14 @@ class SlashCommand:
     def __init__(self,
                  name: str = None,
                  description: Optional[str] = "No description.",
-				 guild: Optional[int] = None,
+                 guild_ids: Optional[List[int]] = None,
                  options: Optional[List[Option]] = [],
                  callback: Optional[Coroutine] = None) -> None:
         self.options = options
         self.description = description
-        self.guild = guild
+        self.guilds = guild_ids
         self.cog = None
+        self.is_subcommand = False
         if callback:
             if not asyncio.iscoroutinefunction(callback):
                 raise TypeError('Callback must be a coroutine.')
@@ -490,38 +415,6 @@ class SlashCommand:
     def __str__(self):
         return self.__repr__()
 
-    @classmethod
-    def from_dict(self, data: dict):
-        # TODO: Fix this
-        self.version = int(data["version"])
-        self.application_id = int(data["application_id"])
-        self.id = int(data["id"])
-        self.name = data["name"]
-        self.default_permission = data["default_permission"]
-        self.type = int(data["type"]) if data.get("type",
-                                                  None) is not None else None
-        if "description" in data:
-            description = data["description"]
-        else:
-            description = None
-        subcommands = []
-        options = []
-        if data.get("options"):
-            for opt in data["options"]:
-                if opt["type"] == 1:
-                    subcommands.append(SubCommand.from_dict(client, opt))
-                elif opt["type"] == 2:
-                    subcommands.append(SubCommandGroup.from_dict(client, opt))
-                else:
-                    options.append(Option(**opt))
-        else:
-            options = []
-
-        return self(name=data["name"],
-                    description=description,
-                    options=options,
-                    subcommands=subcommands)
-
     def to_dict(self) -> dict:
         ret = {
             "name": self.name,
@@ -533,6 +426,47 @@ class SlashCommand:
     @missing
     async def callback(self, ctx: InteractionContext):
         raise NotImplementedError
+
+class SubCommandGroup(Option):
+    def __init__(self,
+                 name: str = None,
+                 description: str = "No description.",
+                 guild_ids: Optional[List[int]] = [],
+                 parent = None):
+        super().__init__(name=name, description=description, type = OptionType.SUB_COMMAND_GROUP)
+        self.parent = parent
+        self.name = name
+        self.description = description
+        self.guilds = self.guild_ids
+        self.subcommands: List[Union[SubCommandGroup, SlashCommand]] = []
+
+    def command(self, **kwargs) -> Callable[[Callable], SlashCommand]:
+        def wrap(func) -> SlashCommand:
+            command = 
+            command.is_subcommand = True
+            self.subcommands.append(command)
+            return command
+
+        return wrap
+
+    def command_group(self, name, description) -> SubCommandGroup:
+        if self.parent is not None:
+            raise TypeError("Subcommand groups can't have more groups")
+
+        sub_command_group = SubCommandGroup(name, description, parent=self)
+        self.subcommands.append(sub_command_group)
+        return sub_command_group
+
+    def to_dict(self):
+        ret = {
+            "name": self.name,
+            "description": self.description,
+            "options": [o.to_dict() for o in self.subcommands]
+        }
+        if self.parent is not None:
+            ret["type"] = OptionType.SUB_COMMAND_GROUP
+        return ret
+
 
 
 def command(bot, *args, cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
