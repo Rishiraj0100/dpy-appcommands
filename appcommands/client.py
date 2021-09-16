@@ -33,6 +33,9 @@ class ApplicationMixin:
         for cmd in self.to_register:
             await self.appclient.add_command(cmd)
 
+    @property
+    def appcommands(self):
+        return self.appclient.commands
 
 class Bot(ApplicationMixin, commands.Bot):
     """The Bot
@@ -256,23 +259,15 @@ class AppClient:
         if self.logging:
             print(message)
 
-    def get_interaction_context(self):
+    def get_interaction_context(self, interaction):
         """The method usually implemented to use custom contexts"""
-        return InteractionContext(self.bot, self)
+        return InteractionContext(self.bot, interaction)
 
     async def socket_resp(self, interaction):
         if interaction.type == InteractionType.application_command:
             if int(interaction.data['id']) in self.__commands:
-                command = self.__commands[int(interaction.data['id'])]
-                context = await (self.get_interaction_context()).from_interaction(interaction)
-
-                cmd = (command['command'])
-                if cmd.cog:
-                    cog = self.bot.cogs.get(cmd.cog.qualified_name)
-                    if cog:
-                        return await (getattr(cog, cmd.callback.__name__))(**context.kwargs)
-                await cmd.callback(**context.kwargs)
-
+                context = self.get_interaction_context(interaction)
+                await context.invoke()
         elif interaction.type == InteractionType.component:
             interactctx = interaction
             custom_id = interactctx.data['custom_id']
