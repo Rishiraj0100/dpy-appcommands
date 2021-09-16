@@ -119,7 +119,6 @@ def generate_options(function, description: str = "No description."):
 
     return options
 
-
 class InteractionContext:
     """The ctx param given in CMD callbacks
     
@@ -725,7 +724,8 @@ def command(client: AppClient, *args, cls: SlashCommand = MISSING, **kwargs):
 
         result = cls(client,*args, callback=func, **kwargs)
         func.__slash__ = result
-        result.client.bot.loop.create_task(result.client.add_command(result))
+        #result.client.bot.loop.create_task(result.client.add_command(result))
+        result.client.bot.to_register.append(result)
         return func
 
     return wrapper
