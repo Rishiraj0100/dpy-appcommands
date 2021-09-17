@@ -39,7 +39,7 @@ class ApplicationMixin:
         commands = []
         print(self.to_register)
         registered_commands = await self.http.get_global_commands(self.user.id)
-        for command in [cmd for cmd in self.to_register if cmd.guild_ids is None]:
+        for command in [cmd for cmd in self.to_register if not cmd.guild_ids]:
             json = command.to_dict()
             if len(registered_commands) > 0:
                 matches = [
