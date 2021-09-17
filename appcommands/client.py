@@ -343,7 +343,8 @@ class AppClient:
         if interaction.type != InteractionType.application_command:
             return
 
-        bot, id, _data = self.bot, int(interaction.data['id']), interaction.data.copy()
+        bot, id = self.bot, int(interaction.data['id'])
+        _data = interaction.data.copy()
         context = self.get_interaction_context(interaction)
         if id in bot.subcommands:
             while 'options' in _data:
