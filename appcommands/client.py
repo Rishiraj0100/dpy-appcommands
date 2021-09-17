@@ -14,12 +14,12 @@ from discord.enums import InteractionType
 from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any
 
 class ApplicationMixin:
-    # TODO: Fix this
+    # TODO: Complete this
     # TODO: Add docs
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.to_register = []
-        self.app_commands = {}
+        self.__appcommands = {}
 
     def slash(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
         def decorator(func) -> SlashCommand:
@@ -67,7 +67,7 @@ class ApplicationMixin:
             else:
                 for i in cmds:
                     cmd = discord.utild.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
-                    self.app_commands[i["id"]] = cmd
+                    self.__appcommands[i["id"]] = cmd
 
 
         cmds = await self.http.bulk_upsert_global_commands(self.user.id, commands)
@@ -79,7 +79,7 @@ class ApplicationMixin:
                 description=i["description"],
                 type=i["type"],
             )
-            self.app_commands[i["id"]] = cmd
+            self.__appcommands[i["id"]] = cmd
 
 
     async def on_connect(self):
@@ -90,7 +90,7 @@ class ApplicationMixin:
 
     @property
     def appcommands(self):
-        return self.app_commands
+        return types.MappingProxyType(self.__appcommands)
 
 class Bot(ApplicationMixin, commands.Bot):
     """The Bot
@@ -320,7 +320,7 @@ class AppClient:
 
     async def socket_resp(self, interaction):
         if interaction.type == InteractionType.application_command:
-            if int(interaction.data['id']) in self.__commands:
+            if int(interaction.data['id']) in self.bot.appcommands:
                 context = self.get_interaction_context(interaction)
                 await context.invoke()
         '''elif interaction.type == InteractionType.component:
