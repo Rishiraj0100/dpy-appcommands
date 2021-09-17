@@ -87,7 +87,7 @@ class ApplicationMixin:
             )
             self.__appcommands[int(i["id"])] = cmd
             self.appclient.log(f"Command {i.get('name')} registered (ID: {i.get('id')})")
-        self.to_register = []
+        #self.to_register = []
 
     async def on_connect(self):
         print("connected to discord")
