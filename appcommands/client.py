@@ -6,7 +6,7 @@ import importlib
 from .utils import *
 from .exceptions import *
 from .types import StoredCommand
-from .models import InteractionContext, SlashCommand, command as _cmd
+from .models import InteractionContext, SlashCommand, command as _cmd, SubCommandGroup
 
 from discord import http, ui
 from discord.ext import commands
