@@ -2,27 +2,17 @@ import discord
 import asyncio
 
 from .utils import *
-from .models import SlashCommand, Option, command as _cmd
+from .models import SlashCommand, Option, command as _cmd, SubCommandGroup
 
 from discord.ext.commands import Cog
 from typing import Optional, Union, List
 
 __all__ = ("command", "SlashCog")
 
-class CogSlashCommand(object):
-    def __init__(self, *args, cls, callback, **kwargs):
-        self.args = args
-        self.callback = callback
-        self._cls = cls
-        self.kwargs = kwargs
-        
-    def to_dict(self):
-      return {}
 
-
-def command(*args, cls=MISSING, **kwargs):
+def slash(*args, cls=MISSING, **kwargs):
     """Same as :func:`~appcommands.models.command` but doesn't
-    requires appclient and is to be used in cogs only
+    requires bot and is to be used in cogs only
 
     Parameters
     ------------
@@ -45,7 +35,7 @@ def command(*args, cls=MISSING, **kwargs):
         from slash import cog
         
         class MyCog(cog.SlashCog):
-            @cog.command(name="hi", description="Hello!")
+            @cog.slash(name="hi", description="Hello!")
             async def hi(ctx, user: discord.Member = None):
                 user = user or ctx.user
                 await ctx.reply(f"Hi {user.mention}")
@@ -61,15 +51,46 @@ def command(*args, cls=MISSING, **kwargs):
     def wrapper(func):
         if not asyncio.iscoroutinefunction(func):
             raise TypeError('Callback must be a coroutine.')
-        if hasattr(func, "__slash__") and isinstance(func.__slash__, (CogSlashCommand, SlashCommand)):
+        if hasattr(func, "__slash__") and isinstance(func.__slash__, SlashCommand):
             raise TypeError('Callback is already a slashcommand.')
 
-        result = CogSlashCommand(*args, callback=func, cls=cls, **kwargs)
+        result = cls(*args, callback=func, **kwargs)
         func.__slash__ = result
         return func
 
     return wrapper
 
+
+def slashgroup(name: str, description: Optional[str] = "No description.") -> SubCommandGroup:
+    """The group by which subcommands are to be derived for slash commands
+
+    Parameters
+    -------------
+    name: :class:`~str`
+        Name of the group, (required)
+    description: Optional[:class:`~str`]
+        Description of the group, (optional)
+
+    Example
+    ---------
+
+    .. code-block:: python3
+
+        from appcommands import cog
+
+        mygrp = cog.slashgroup(name='test', description='test group')
+
+        class MyCog(cog.SlashCog):
+            @mygrp.command(description="test cmd of test grp")
+            async def test1(self, ctx):
+                await ctx.send("tested")
+
+    Returns
+    ---------
+    :class:`~appcommands.models.SubCommandGroup`
+        The group by which commands will be made"""
+    sub_command_group = SubCommandGroup(name, description)
+    return sub_command_group
 
 class SlashCog(Cog):
     """The cog for extensions
@@ -85,7 +106,7 @@ class SlashCog(Cog):
             def __init__(self, bot):
                 self.bot = bot
 
-            @cog.command(name="test")
+            @cog.slash(name="test")
             async def test(self, ctx):
                 await ctx.reply("tested!")
 
@@ -102,28 +123,31 @@ class SlashCog(Cog):
                 if elem in slashcmds:
                     del slashcmds[elem]
     
-                if hasattr(value, "__slash__") and isinstance(value.__slash__, CogSlashCommand):
-                    slashcmds[elem] = value
+                if (
+                    hasattr(value, "__slash__")
+                    and isinstance(value.__slash__, SlashCommand)
+                    and not value.__slash__.is_subcommand
+                ):
+                    slashcmds[elem] = value.__slash__
+                elif (
+                    hasattr(value, "__slash__")
+                    and isinstance(value.__slash__, SubCommandGroup)
+                    and value.__slash__.parent is None
+                ):
+                    slashcmds[elem] = value.__slash__
+                    
         self.__slash_commands__ = tuple(cmd for cmd in slashcmds.values())
         return self
 
     def _inject(self, bot):
-        new_list = []
-        for i, func in enumerate(self.__slash_commands__):
-            cmd = func.__slash__
-            new_cmd = cmd._cls(bot.appclient, *cmd.args, callback=cmd.callback, **cmd.kwargs)
-            new_cmd.cog = self
-            func.__slash__ = new_cmd
-            bot.loop.create_task(bot.appclient.add_command(func.__slash__))
-            new_list.append(new_cmd)
-            setattr(self.__class__, new_cmd.callback.__name__, func)
+        for cmd in self.__slash_commands__:
+            bot.to_register.append(cmd)
 
-        self.__slash_commands__ = tuple(c for c in new_list)
         return super()._inject(bot)
         
     def _eject(self, bot):
-        slash, loop = bot.appclient, bot.loop
+        loop, http = bot.loop, bot.http
         for cmd in self.__slash_commands__:
-            loop.create_task(slash.remove_command(cmd.name))
+            loop.create_task(http.delete_global_command(bot.user.id, bot.get_slash_command(cmd.name)['id']))
             
         super()._eject(bot)
