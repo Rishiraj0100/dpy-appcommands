@@ -427,7 +427,7 @@ class SlashCommand:
             "options": list(d.to_dict() for d in self.options)
         }
         if self.is_subcommand:
-            ret["type"] = OptionType.SUB_COMMAND
+            ret["type"] = OptionType.SUB_COMMAND.value
         return ret
 
     @missing
@@ -473,7 +473,7 @@ class SubCommandGroup(Option):
             "options": [o.to_dict() for o in self.subcommands]
         }
         if self.parent is not None:
-            ret["type"] = OptionType.SUB_COMMAND_GROUP
+            ret["type"] = OptionType.SUB_COMMAND_GROUP.value
         return ret
 
     def __repr__(self):
