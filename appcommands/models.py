@@ -160,7 +160,7 @@ class InteractionContext:
         if self.__invoked:
             raise TypeError("This context has already been invoked, you can't invoke it again")
 
-        cmd = self.bot.appcommands[int(self.data.id]
+        cmd = self.bot.appcommands[int(self.data.id)]
         print(cmd)
         if not cmd:
             return
