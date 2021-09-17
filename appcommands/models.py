@@ -156,7 +156,7 @@ class InteractionContext:
         self.data: dict = InteractionData.from_dict(self.interaction.data)
         self.__invoked = False
 
-    async def invoke(self, cmd: SlashCommand):
+    async def invoke(self, cmd):
         if self.__invoked:
             raise TypeError("This context has already been invoked, you can't invoke it again")
 
