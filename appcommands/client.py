@@ -37,7 +37,7 @@ class ApplicationMixin:
 
     async def register_commands(self) -> None:
         commands = []
-
+        print(self.to_register)
         registered_commands = await self.http.get_global_commands(self.user.id)
         for command in [cmd for cmd in self.to_register if cmd.guild_ids is None]:
             json = command.to_dict()
