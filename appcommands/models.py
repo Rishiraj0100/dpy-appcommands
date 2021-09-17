@@ -156,13 +156,9 @@ class InteractionContext:
         self.data: dict = InteractionData.from_dict(self.interaction.data)
         self.__invoked = False
 
-    async def invoke(self):
+    async def invoke(self, cmd: SlashCommand):
         if self.__invoked:
             raise TypeError("This context has already been invoked, you can't invoke it again")
-
-        cmd = self.bot.appcommands[int(self.data.id)]
-        if not cmd:
-            return
 
         self.command = cmd
         params = copy.deepcopy(cmd.params)
