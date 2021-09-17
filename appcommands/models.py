@@ -21,7 +21,8 @@ __all__ = (
     "InteractionContext",
     "InteractionData",
     "Option",
-    "SlashCommand"
+    "SlashCommand",
+    "SubCommandGroup"
 )
 
 async def get_ctx_kw(ctx, params) -> dict:
@@ -435,7 +436,6 @@ class SubCommandGroup(Option):
                  description: str = "No description.",
                  guild_ids: Optional[List[int]] = [],
                  parent = None):
-        super().__init__(name=name, description=description, type = OptionType.SUB_COMMAND_GROUP)
         self.parent = parent
         self.name = name
         self.description = description
