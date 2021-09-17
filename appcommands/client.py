@@ -90,7 +90,7 @@ class ApplicationMixin:
         await self.register_commands()
 
     @property
-    def appcommands(self):
+    def appcommands(self) -> Dict[str, Union[SlashCommand, SubCommandGroup]]:
         return types.MappingProxyType(self.__appcommands)
 
 class Bot(ApplicationMixin, commands.Bot):
