@@ -72,12 +72,12 @@ class ApplicationMixin:
                     raise
             else:
                 for i in cmds:
-                    cmd = discord.utild.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
+                    cmd = discord.utils.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
                     self.__appcommands[int(i["id"])] = cmd
 
-
+        print(commands)
         cmds = await self.http.bulk_upsert_global_commands(self.user.id, commands)
-
+        print("\n\n\n"+str(cmds))
         for i in cmds:
             cmd = discord.utils.get(
                 self.to_register,
