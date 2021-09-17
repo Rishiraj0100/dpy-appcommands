@@ -347,7 +347,7 @@ class AppClient:
         _data = interaction.data.copy()
         context = self.get_interaction_context(interaction)
         if id in bot.subcommands:
-            _data = _data['options']
+            _data = _data['options'][0]
             while 'options' in _data and _data['type'] == 2:
                 if _data.get('options'):
                     _data = _data.get('options')[0]
