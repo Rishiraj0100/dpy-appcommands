@@ -88,9 +88,9 @@ class ApplicationMixin:
             )
             if isinstance(cmd, SubCommandGroup):
                 self.__subcommands[int(i['id'])] = {}
-                for subcommand in cmd.options:
+                for subcommand in cmd.subcommands:
                     if isinstance(subcommand, SubCommandGroup):
-                        for _subcmd in subcommand.options:
+                        for _subcmd in subcommand.subcommands:
                             self.__subcommands[int(i['id'])][_subcmd.name] = _subcmd
                     else:
                         self.__subcommands[int(i['id'])][subcommand.name] = subcommand
