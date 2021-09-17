@@ -161,7 +161,6 @@ class InteractionContext:
             raise TypeError("This context has already been invoked, you can't invoke it again")
 
         cmd = self.bot.appcommands[int(self.data.id)]
-        print(not cmd)
         if not cmd:
             return
 
@@ -178,7 +177,7 @@ class InteractionContext:
             if cog:
                 return await (getattr(cog, cmd.callback.__name__))(**self.kwargs)
 
-            await cmd.callback(**self.kwargs)
+        await cmd.callback(**self.kwargs)
 
     @cached_property
     def channel(self):
