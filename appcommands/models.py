@@ -442,7 +442,7 @@ class SubCommandGroup(Option):
         self.parent = parent
         self.name = name
         self.description = description
-        self.guild_ids = self.guild_ids
+        self.guild_ids = guild_ids
         self.subcommands: List[Union[SubCommandGroup, SlashCommand]] = []
 
     def command(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
