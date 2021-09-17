@@ -346,7 +346,7 @@ class AppClient:
         bot, id = self.bot, int(interaction.data['id'])
         context = self.get_interaction_context(interaction)
         print((id in bot.subcommands))
-        print(interaction.data['name'])
+        print(interaction.data['options'])
         if (
             id in bot.subcommands
             and interaction.data['name'] in bot.subcommands[id]
