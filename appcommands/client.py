@@ -29,6 +29,12 @@ class ApplicationMixin:
 
         return decorator
 
+    def slashgroup(self, name, description) -> SubCommandGroup:
+        sub_command_group = SubCommandGroup(name, description)
+        self.to_register.append(sub_command_group)
+        return sub_command_group
+
+
     async def register_commands(self) -> None:
         commands = []
 
@@ -80,8 +86,8 @@ class ApplicationMixin:
                 type=i["type"],
             )
             self.__appcommands[int(i["id"])] = cmd
-            self.appclient.log(f"Command {i.get('name')} registered (ID: {i.get('name')})")
-
+            self.appclient.log(f"Command {i.get('name')} registered (ID: {i.get('id')})")
+        self.to_register = []
 
     async def on_connect(self):
         print("connected to discord")
