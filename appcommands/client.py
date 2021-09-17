@@ -350,7 +350,7 @@ class AppClient:
             id in bot.subcommands
             and interaction.data['name'] in bot.subcommands[id]
         ):
-            return await context.invoke(bot.subcommands[id][interaction.data['name']]
+            return await context.invoke(bot.subcommands[id][interaction.data['name']])
 
         if int(interaction.data['id']) in self.bot.appcommands:
             context = self.get_interaction_context(interaction)
