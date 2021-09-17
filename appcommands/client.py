@@ -343,7 +343,7 @@ class AppClient:
         if interaction.type != InteractionType.application_command:
             return
 
-        bot, id = self.bot, interaction.data['id']
+        bot, id = self.bot, int(interaction.data['id'])
         context = self.get_interaction_context(interaction)
 
         if (
