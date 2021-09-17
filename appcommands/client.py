@@ -67,7 +67,7 @@ class ApplicationMixin:
             else:
                 for i in cmds:
                     cmd = discord.utild.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
-                    self.__appcommands[i["id"]] = cmd
+                    self.__appcommands[int(i["id"])] = cmd
 
 
         cmds = await self.http.bulk_upsert_global_commands(self.user.id, commands)
@@ -79,7 +79,8 @@ class ApplicationMixin:
                 description=i["description"],
                 type=i["type"],
             )
-            self.__appcommands[i["id"]] = cmd
+            self.__appcommands[int(i["id"])] = cmd
+            self.appclient.log(f"Command {i.get('name')} registered (ID: {i.get('name')})")
 
 
     async def on_connect(self):
