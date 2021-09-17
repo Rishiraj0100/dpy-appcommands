@@ -352,7 +352,7 @@ class AppClient:
                     _data = _data.get('options')[0]
                 else:
                     break
-            print((_data, bot.subcommands))
+            print((_data,))
             if (_data['name'] in bot.subcommands[id]):
                 return await context.invoke(bot.subcommands[id][_data['name']])
 
