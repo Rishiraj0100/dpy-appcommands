@@ -426,6 +426,8 @@ class SlashCommand:
             "description": self.description,
             "options": list(d.to_dict() for d in self.options)
         }
+        if self.is_subcommand:
+            ret["type"] = OptionType.SUB_COMMAND
         return ret
 
     @missing
