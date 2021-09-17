@@ -456,7 +456,7 @@ class SubCommandGroup(Option):
 
         return wrap
 
-    def slashgroup(self, name, description) -> 'SubCommandGroup':
+    def slashgroup(self, name: str, description: Optional[str] = "No description.") -> 'SubCommandGroup':
         if self.parent is not None:
             raise TypeError("Subcommand groups can't have more groups")
 
@@ -474,6 +474,8 @@ class SubCommandGroup(Option):
             ret["type"] = OptionType.SUB_COMMAND_GROUP
         return ret
 
+    def __repr__(self):
+        return "<SubCommandGroup name={0.name} description={1} subcommands={0.subcommands}>".format(self, self.description)
 
 
 def command(bot, *args, cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
