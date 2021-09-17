@@ -346,11 +346,11 @@ class AppClient:
         bot, id = self.bot, int(interaction.data['id'])
         context = self.get_interaction_context(interaction)
         print((id in bot.subcommands))
-        print(bot.subcommands.get(id))
+        print(bot.subcommands.get(id).get(interaction.data['name']))
         if (
             id in bot.subcommands
             and interaction.data['name'] in bot.subcommands[id]
-        ):
+        )
             return await context.invoke(bot.subcommands[id][interaction.data['name']])
 
         if int(interaction.data['id']) in self.bot.appcommands:
