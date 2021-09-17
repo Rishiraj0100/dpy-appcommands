@@ -20,6 +20,7 @@ class ApplicationMixin:
         super().__init__(*args, **kwargs)
         self.to_register = []
         self.__appcommands = {}
+        self.__subcommands = {}
 
     def slash(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
         def decorator(func) -> SlashCommand:
@@ -85,6 +86,15 @@ class ApplicationMixin:
                 description=i["description"],
                 type=i["type"],
             )
+            if isinstance(cmd, SubCommandGroup):
+                self.__subcommands[int(i['id'])] = {}
+                for subcommand in cmd.options:
+                    if isinstance(subcommand, SubCommandGroup):
+                        for _subcmd in subcommand.options:
+                            self.__subcommands[int(i['id'])][_subcmd.name] = _subcmd
+                    else:
+                        self.__subcommands[int(i['id'])][subcommand.name] = subcommand
+
             self.__appcommands[int(i["id"])] = cmd
             self.appclient.log(f"Command {i.get('name')} registered (ID: {i.get('id')})")
         #self.to_register = []
@@ -96,8 +106,12 @@ class ApplicationMixin:
         await self.register_commands()
 
     @property
-    def appcommands(self) -> Dict[str, Union[SlashCommand, SubCommandGroup]]:
+    def appcommands(self) -> Dict[int, Union[SlashCommand, SubCommandGroup]]:
         return types.MappingProxyType(self.__appcommands)
+
+    @property
+    def subcommands(self) -> Dict[int, Union[SlashCommand, SubCommandGroup]]:
+        return types.MappingProxyType(self.__subcommands)
 
 class Bot(ApplicationMixin, commands.Bot):
     """The Bot
@@ -326,21 +340,22 @@ class AppClient:
         return InteractionContext(self.bot, interaction)
 
     async def socket_resp(self, interaction):
-        if interaction.type == InteractionType.application_command:
-            if int(interaction.data['id']) in self.bot.appcommands:
-                context = self.get_interaction_context(interaction)
-                await context.invoke()
-        '''elif interaction.type == InteractionType.component:
-            interactctx = interaction
-            custom_id = interactctx.data['custom_id']
+        if interaction.type != InteractionType.application_command:
+            return
 
-            try:
-                view, item = self._views[custom_id]
-            except:
-                return
+        bot, id = self.bot, interaction.data['id']
+        context = self.get_interaction_context(interaction)
 
-            item.refresh_state(interactctx)
-            view._dispatch_item(item, interactctx)'''
+        if (
+            id in bot.subcommands
+            and interaction.data['name'] in bot.subcommands[id]
+        ):
+            return await context.invoke(bot.subcommands[id][interaction.data['name']]
+
+        if int(interaction.data['id']) in self.bot.appcommands:
+            context = self.get_interaction_context(interaction)
+            await context.invoke(bot.appcommands[id])
+        
 
     async def fetch_commands(self, guild_id: Optional[int] = None) -> List[SlashCommand]:
         """fetch a list of slash command currently the bot has
