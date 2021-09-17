@@ -176,6 +176,26 @@ class ApplicationMixin:
         """
         return types.MappingProxyType(self.__subcommands)
 
+    def get_slash_commands(self) -> Dict[str, Union[SlashCommand, SubCommandGroup]:
+        """Gets every slash command registered in the current running instance"""
+        ret = {}
+
+        for i in self.__commands:
+            ret[self.__commands[i]['command'].name] = self.__appcommands[i]['command']
+
+        return ret
+
+    def get_slash_command(self, name: str) -> Union[SlashCommand, SubCommandGroup]:
+        """Gives a command registered in this module
+        
+        Parameters
+        -----------
+        name: :class:`~str`
+            the name from which the slash command is to be found"""
+
+        return (self.get_commands()).get(name)
+
+
     def get_interaction_context(self, interaction: discord.Interaction) -> InteractionContext:
         """The method usually implemented to use custom contexts
 
