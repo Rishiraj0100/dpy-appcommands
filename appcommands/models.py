@@ -160,7 +160,10 @@ class InteractionContext:
         if self.__invoked:
             raise TypeError("This context has already been invoked, you can't invoke it again")
 
-        cmd = self.bot.appcommands.get(self.data.id, None)['command']
+        cmd = self.bot.appcommands.get(int(self.data.id), None)
+        if not cmd:
+            return
+
         self.command = cmd
         params = copy.deepcopy(cmd.params)
         if cmd.cog and str(list(params.keys())[0]) in ("cls", "self"): # cls/self only
