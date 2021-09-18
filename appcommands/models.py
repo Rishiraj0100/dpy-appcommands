@@ -482,7 +482,7 @@ class SubCommandGroup(BaseCommand):
         return "<SubCommandGroup name={0.name} description={1} subcommands={0.subcommands}>".format(self, self.description)
 
 
-def command(*args, cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+def command(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
     """The slash commands wrapper 
     
     Parameters
@@ -528,3 +528,6 @@ def command(*args, cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable]
         return result
 
     return wrapper
+
+def group(name: str, description: Optional[str] = "No description.", guild_ids: Optional[List[int]]) -> SubCommandGroup:
+    return SubCommandGroup(name=name, description=description, guild_ids=guild_ids)
