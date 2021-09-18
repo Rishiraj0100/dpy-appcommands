@@ -181,7 +181,7 @@ class InteractionContext:
         await cmd.callback(**self.kwargs)
 
     @cached_property
-    def channel(self) -> Union[discord.abc.GuildChannel, discord.PrivateChannel, None]:
+    def channel(self) -> Union[discord.abc.GuildChannel, discord.DMChannel, None]:
         return self.interaction.channel
 
     @cached_property
