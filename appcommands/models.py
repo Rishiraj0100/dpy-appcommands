@@ -176,7 +176,7 @@ class InteractionContext:
         if cmd.cog:
             cog = self.bot.cogs.get(cmd.cog.qualified_name)
             if cog:
-                return await (getattr(cog, cmd.callback.__name__))(**self.kwargs)
+                return await (getattr(cog, cmd.callback.__name__)).callback(**self.kwargs)
 
         await cmd.callback(**self.kwargs)
 
