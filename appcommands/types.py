@@ -78,16 +78,6 @@ class SlashCommand:
 	def register(self):
 		...
 
-class AppClient:
-	bot: commands.Bot
-	_listeners: Dict[str, SlashCommand]
-	_views: Dict[str, Tuple[ui.View, Item]]
-
-	async def get_commands(self) -> List['SlashCommand']:
-		...
-
-	async def add_command(self, command: SlashCommand):
-		...
 
 class Option:
 	name: str
