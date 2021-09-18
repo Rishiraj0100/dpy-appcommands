@@ -49,8 +49,8 @@ class SlashCog(Cog):
 
     def _inject(self, bot):
         for cmd in self.__slash_commands__:
+            cmd.cog = self
             bot.to_register.append(cmd)
-
         return super()._inject(bot)
         
     def _eject(self, bot):
