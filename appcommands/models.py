@@ -162,7 +162,7 @@ class InteractionContext:
         self.data: dict = InteractionData.from_dict(self.interaction.data)
         self.__invoked = False
 
-    async def invoke(self, cmd):
+    async def invoke(self, cmd) -> None:
         if self.__invoked:
             raise TypeError("This context has already been invoked, you can't invoke it again")
 
@@ -182,31 +182,31 @@ class InteractionContext:
         await cmd.callback(**self.kwargs)
 
     @cached_property
-    def channel(self):
+    def channel(self) -> Union[discord.abc.GuildChannel, discord.PrivateChannel, None]:
         return self.interaction.channel
 
     @cached_property
-    def channel_id(self):
+    def channel_id(self) -> int:
         return self.interaction.channel_id
 
     @cached_property
-    def guild(self):
+    def guild(self) -> Union[discord.Guild, None]:
         return self.interaction.guild
 
     @cached_property
-    def guild_id(self):
+    def guild_id(self) -> int:
         return self.interaction.guild_id
 
     @cached_property
-    def message(self):
+    def message(self) -> discord.InteractionMessage:
         return self.interaction.message
 
     @cached_property
-    def user(self):
+    def user(self) -> Union[discord.User, discord.Member]:
         return self.interaction.user
 
     @cached_property
-    def response(self):
+    def response(self) -> discord.InteractionResponse:
         return self.interaction.response
 
     author = user
@@ -245,16 +245,16 @@ class InteractionData:
     options: List[:class:`~appcommands.models.Option`]
         Options passed in command
     """
-    def __init__(self, type: int, name: str, _id: int, options: Optional[List['Option']] = None) -> None:
+    def __init__(self, type: int, name: str, id: int, options: Optional[List['Option']] = None) -> None:
         self.type = type
         self.name = name
-        self.id = int(_id)
+        self.id = int(id)
         self.options = options
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<InteractionData type={self.type} id={self.id} name={self.name} options={self.options}>"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__repr__()
 
     @classmethod
@@ -275,14 +275,14 @@ class Choice:
         name of the choice, (required)
     value: Optional[:class:`~str`]
         value of the choice used for backends, (optional)"""
-    def __init__(self, name: str, value: Optional[str] = None):
+    def __init__(self, name: str, value: Optional[str] = None) -> None:
         self.name = name
         self.value = value or self.name
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, str]:
         return {"name": self.name, "value": self.value}
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Choice name={0} value={1.value}>".format(self.name, self)
 
 
@@ -308,7 +308,7 @@ class Option:
                  type: Optional[int] = 3,
                  required: Optional[bool] = True,
                  value: str = None,
-                 choices: Optional[List[Choice]] = []):
+                 choices: Optional[List[Choice]] = []) -> None:
         self.name = name
         self.description = description
         self.type = type
@@ -328,7 +328,7 @@ class Option:
         return ret
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data) -> 'Option':
         required = True if data.get("required") else False
         name = data.get("name")
         description = data.get("description")
@@ -340,7 +340,7 @@ class Option:
                 choices.append(Choice(**choice))
         return cls(name, description, type, required, value, choices)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Option name={self.name} description={self.description} type={self.type} required={self.required} value={self.value} choices={self.choices}>"
 
 class SlashCommand(BaseCommand):
@@ -414,7 +414,7 @@ class SlashCommand(BaseCommand):
                 raise ValueError("You must specify name when callback is None")
             self.name  = name
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__repr__()
 
     def to_dict(self) -> dict:
@@ -431,7 +431,7 @@ class SlashCommand(BaseCommand):
         return self.name == other.name and self.description == other.description
 
     @missing
-    async def callback(self, ctx: InteractionContext):
+    async def callback(self, ctx: InteractionContext) -> Any:
         raise NotImplementedError
 
 class SubCommandGroup(BaseCommand):
@@ -439,7 +439,7 @@ class SubCommandGroup(BaseCommand):
                  name: str = None,
                  description: str = "No description.",
                  guild_ids: Optional[List[int]] = [],
-                 parent = None):
+                 parent = None) -> None:
         self.parent = parent
         self.name: str = name
         self.description: str = description
@@ -458,7 +458,7 @@ class SubCommandGroup(BaseCommand):
 
         return wrap
 
-    def __eq__(self, other: BaseCommand):
+    def __eq__(self, other: BaseCommand) -> bool:
         return self.name == other.name and self.description == other.description
 
     def subcommandgroup(self, name: str, description: Optional[str] = "No description.") -> 'SubCommandGroup':
