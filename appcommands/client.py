@@ -5,7 +5,6 @@ import importlib
 
 from .utils import *
 from .exceptions import *
-from .types import StoredCommand
 from .models import (
     InteractionContext,
     SlashCommand,
