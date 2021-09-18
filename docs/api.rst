@@ -36,7 +36,6 @@ appcommands.models Module
     :members:
 
 .. automethod:: appcommands.models.command()
-    :decorator:
 
 appcommands.cog Module
 ----------------------------------
@@ -44,7 +43,6 @@ appcommands.cog Module
 .. currentmodule:: appcommands.cog
 
 .. automethod:: appcommands.cog.slash()
-    :decorator:
 
 .. autofunction:: slashgroup
 
