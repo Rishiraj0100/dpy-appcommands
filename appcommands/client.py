@@ -190,7 +190,7 @@ class ApplicationMixin:
         return types.MappingProxyType(self.__subcommands)
 
     @property
-    def slashcommands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]:
+    def slashcommands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]]:
         """All slashcommands with id
 
         Returns
