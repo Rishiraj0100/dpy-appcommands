@@ -36,13 +36,15 @@ appcommands.models Module
     :members:
 
 .. automethod:: command
+    :decorator:
 
 appcommands.cog Module
 ----------------------------------
 
 .. currentmodule:: appcommands.cog
 
-.. automethod:: slash
+    .. automethod:: slash
+        :decorator:
 
 .. autofunction:: slashgroup
 
