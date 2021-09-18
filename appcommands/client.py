@@ -152,16 +152,20 @@ class ApplicationMixin:
                 guild_commands[guild_id] = to_update + [json]
 
         for guild_id in guild_commands:
+            if not guild_commands[guild_id]:
+                continue
+
             try:
                 cmds = await self.http.bulk_upsert_guild_commands(self.user.id, guild_id, guild_commands[guild_id])
-            except discord.Forbidden:
-                if not guild_commands[guild_id]:
-                    continue
-                else:
-                    raise
+            except Exception as e:
+                print(f"Failed to add guild commands for guild {guild_id}")
+                traceback.print_exc()
+                self.dispatch("on_guild_command_register_fail", guild_id, guild_commands[guild_id])
             else:
                 for i in cmds:
                     cmd = discord.utils.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
+                    if cmd.type == 1:
+                        self.__slashcommands[int(i.get('id'))] = cmd
                     self.__appcommands[int(i["id"])] = cmd
 
         cmds = await self.http.bulk_upsert_global_commands(self.user.id, commands)
