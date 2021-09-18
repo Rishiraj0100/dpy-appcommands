@@ -11,7 +11,6 @@ from typing import Coroutine, Dict, List, Optional, Tuple, TypedDict, Union
 
 class InteractionContext:
 	bot: commands.Bot
-	client: 'AppClient'
 	version: int
 	type: int
 	token: str
@@ -100,21 +99,3 @@ class Option:
 class Choice:
 	name: str
 	value: Optional[str]
-
-class StoredCommand(TypedDict):
-	"""The stored command Type
-
-        Parameters
-        ------------
-        guild: Union[:class:`~int`, None]
-            The guild id of command, None if it is glob
-        command: :class:`~appcommands.models.SlashCommand`
-            The command itself
-
-        Returns
-        --------
-        :class:`~dict`
-            The json resp"""
-	guild: Union[int, None]
-	command: SlashCommand
-
