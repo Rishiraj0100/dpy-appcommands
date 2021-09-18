@@ -42,10 +42,6 @@ appcommands.cog Module
 
 .. currentmodule:: appcommands.cog
 
-.. automethod:: appcommands.cog.slash()
-
-.. autofunction:: slashgroup
-
 .. autoclass:: SlashCog
 
 appcommands.enums Module
