@@ -199,7 +199,7 @@ class ApplicationMixin:
         """
         return types.MappingProxyType(self.__slashcommands)
 
-    def get_slash_commands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]:
+    def get_slash_commands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]]:
         """Gets every slash command registered in the current running instance
 
         Returns
@@ -219,8 +219,12 @@ class ApplicationMixin:
         Parameters
         -----------
         name: :class:`~str`
-            the name from which the slash command is to be found"""
+            the name from which the slash command is to be found
 
+        Returns
+        ---------
+        Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]
+            The found thing"""
         return (self.get_commands()).get(name)
 
 
