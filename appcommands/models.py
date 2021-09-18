@@ -11,7 +11,7 @@ from .enums import OptionType
 from discord import ui, http
 from aiohttp.client import ClientSession
 from discord.utils import cached_property
-from typing import Dict, List, Union, Optional, Coroutine, Callable
+from typing import Dict, List, Union, Optional, Coroutine, Callable, Any
 
 
 __all__ = (
