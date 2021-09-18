@@ -264,7 +264,7 @@ class ApplicationMixin:
         ---------
         :class:`~appcommands.models.InteractionContext`
             The context that will be used for handling interactions"""
-        return InteractionContext(self.bot, interaction)
+        return InteractionContext(self, interaction)
 
     async def interaction_handler(self, interaction):
         if interaction.type != InteractionType.application_command:
