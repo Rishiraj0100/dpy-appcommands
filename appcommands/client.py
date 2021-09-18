@@ -25,7 +25,30 @@ class ApplicationMixin:
         self.__slashcommands = {}
         self.add_listener(self.interaction_handler, "on_interaction")
 
-    def slash(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+    def add_app_command(self, command: SlashCommand) -> None:
+        """Adds a app command,
+        usually used when subclassed
+
+        Parameters
+        ------------
+        command: :class:`~appcommands.models.SlashCommand`
+            The command which is to be added"""
+        self.to_register.append(command)
+
+    def remove_app_command(self, command) -> None:
+        """Remove a :class:`.ApplicationCommand` from the internal list
+        of commands.
+
+        Parameters
+        -----------
+        command: :class:`~appcommands.models.BaseCommand`
+            The command to remove.
+        """
+        self.__appcommands.pop(command.id)
+        self.__subcommands.pop(command.id)
+        self.__slashcommands.pop(command.id)
+
+    def slash(self, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
         """Adds a slash command to bot
         same as :meth:`~appcommands.models.command`
 
@@ -61,9 +84,10 @@ class ApplicationMixin:
         Callable[[Callable], :class:`~appcommands.models.SlashCommand`]
             The slash command."""
         def decorator(func) -> SlashCommand:
-            wrapped = _cmd(*args, cls=cls, **kwargs)
-            resp = wrapped(func)
-            return resp
+            wrapped = _cmd(cls=cls, **kwargs)
+            cmd = wrapped(func)
+            self.add_app_command(cmd)
+            return cmd
 
         return decorator
 
@@ -95,15 +119,6 @@ class ApplicationMixin:
         sub_command_group = SubCommandGroup(name, description)
         self.add_slash_command(sub_command_group)
         return sub_command_group
-
-    def add_slash_command(self, command: SlashCommand) -> None:
-        """Adds a slash command usually when subclassed
-
-        Parameters
-        ------------
-        command: :class:`~appcommands.models.SlashCommand`
-            The command which is to be added"""
-        self.to_register.append(command)
 
     async def register_commands(self) -> None:
         """The coro which registers slash commands"""
