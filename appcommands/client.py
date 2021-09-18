@@ -6,7 +6,13 @@ import importlib
 from .utils import *
 from .exceptions import *
 from .types import StoredCommand
-from .models import InteractionContext, SlashCommand, command as _cmd, SubCommandGroup
+from .models import (
+    InteractionContext,
+    SlashCommand,
+    command as _cmd,
+    SubCommandGroup,
+    BaseCommand
+)
 
 from discord import http, ui
 from discord.ext import commands
@@ -25,18 +31,18 @@ class ApplicationMixin:
         self.__slashcommands = {}
         self.add_listener(self.interaction_handler, "on_interaction")
 
-    def add_app_command(self, command: SlashCommand) -> None:
+    def add_app_command(self, command: BaseCommand) -> None:
         """Adds a app command,
         usually used when subclassed
 
         Parameters
         ------------
-        command: :class:`~appcommands.models.SlashCommand`
+        command: :class:`~appcommands.models.BaseCommand`
             The command which is to be added"""
         self.to_register.append(command)
 
-    def remove_app_command(self, command) -> None:
-        """Remove a :class:`.ApplicationCommand` from the internal list
+    def remove_app_command(self, command: BaseCommand) -> None:
+        """Remove a :class:`~appcommands.models.BaseCommand` from the internal list
         of commands.
 
         Parameters
