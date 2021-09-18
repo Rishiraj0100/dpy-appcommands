@@ -35,14 +35,16 @@ appcommands.models Module
 .. autoclass:: SlashCommand
     :members:
 
-.. autofunction:: command
+.. automethod:: command
 
 appcommands.cog Module
 ----------------------------------
 
 .. currentmodule:: appcommands.cog
 
-.. autofunction:: command
+.. automethod:: slash
+
+.. autofunction:: slashgroup
 
 .. autoclass:: SlashCog
 
@@ -54,36 +56,3 @@ appcommands.enums Module
 .. autoclass:: OptionType
     :members:
 
-appcommands.types Module
----------------------------------
-
-.. currentmodule:: appcommands.types
-
-.. autoclass:: StoredCommand
-    :members:
-
-appcommands.exceptions Module
-----------------------------------
-
-.. currentmodule:: appcommands.exceptions
-
-.. autoclass:: Error
-    :members:
-    
-.. autoclass:: CommandExixts
-    :members:
-
-.. autoclass:: CommandDoesNotExists
-    :members:
-
-.. autoclass:: CommandNotRegistered
-    :members:
-
-.. autoclass:: ExtensionNotFound
-    :members:
-
-.. autoclass:: LoadFailed
-    :members:
-
-.. autoclass:: ExtensionNotLoaded
-    :members:
