@@ -12,7 +12,7 @@ appcommands.client Module
 
 .. autoclass:: Bot
     :members:
-    :inherited-members: ApplicationMixin
+    :inherited-members: appcommands.client.ApplicationMixin
 
 .. autoclass:: AutoShardedBot
     :members:
