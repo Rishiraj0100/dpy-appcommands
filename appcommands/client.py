@@ -163,6 +163,7 @@ class ApplicationMixin:
             else:
                 for i in cmds:
                     cmd = discord.utils.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
+                    setattr(cmd, "id", int(i['id']))
                     if cmd.type == 1:
                         self.__slashcommands[int(i.get('id'))] = cmd
                     self.__appcommands[int(i["id"])] = cmd
@@ -175,6 +176,7 @@ class ApplicationMixin:
                 description=i["description"],
                 type=i["type"],
             )
+            setattr(cmd, "id", int(i['id']))
             if cmd.type == 1:
                 self.__slashcommands[int(i.get('id'))] = cmd
             if isinstance(cmd, SubCommandGroup):
