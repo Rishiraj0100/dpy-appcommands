@@ -122,8 +122,6 @@ def generate_options(function, description: str = "No description.") -> List['Op
 class InteractionContext:
     """The ctx param given in CMD callbacks
     
-    **Attributes**
-
     Attributes
     ------------
     bot: Union[:class:`~discord.ext.commands.Bot`, :class:`~discord.ext.commands.AutoShardedBot`]
@@ -227,8 +225,6 @@ class InteractionContext:
 
 class InteractionData:
     """The data given in `ctx.data`
-
-    **Attributes**
 
     Attributes
     ------------
@@ -431,19 +427,19 @@ class SlashCommand:
         raise NotImplementedError
 
 class SubCommandGroup(Option):
-    type = 1
     def __init__(self,
                  name: str = None,
                  description: str = "No description.",
                  guild_ids: Optional[List[int]] = [],
                  parent = None):
         self.parent = parent
-        self.name = name
-        self.description = description
-        self.guild_ids = guild_ids
+        self.name: str = name
+        self.description: str = description
+        self.guild_ids: List[int] = guild_ids
+        self.type: int = 1
         self.subcommands: List[Union[SubCommandGroup, SlashCommand]] = []
 
-    def command(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+    def subcommand(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
         if cls is MISSING:
             cls = SlashCommand
         def wrap(func) -> SlashCommand:
@@ -454,7 +450,7 @@ class SubCommandGroup(Option):
 
         return wrap
 
-    def slashgroup(self, name: str, description: Optional[str] = "No description.") -> 'SubCommandGroup':
+    def subcommandgroup(self, name: str, description: Optional[str] = "No description.") -> 'SubCommandGroup':
         if self.parent is not None:
             raise TypeError("Subcommand groups can't have more groups")
 
@@ -462,7 +458,7 @@ class SubCommandGroup(Option):
         self.subcommands.append(sub_command_group)
         return sub_command_group
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         ret = {
             "name": self.name,
             "description": self.description,
@@ -472,22 +468,20 @@ class SubCommandGroup(Option):
             ret["type"] = OptionType.SUB_COMMAND_GROUP.value
         return ret
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<SubCommandGroup name={0.name} description={1} subcommands={0.subcommands}>".format(self, self.description)
 
 
-def command(bot, *args, cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+def command(*args, cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
     """The slash commands wrapper 
     
     Parameters
     ------------
-    # client: :class:`~appcommands.client.AppClient`
-    #     Your appclient instance, (required)
     name: :class:`~str`
         Name of the command, (required)
     description: Optional[:class:`~str`]
         Description of the command, (optional)
-    guild: Optional[:class:`~str`]
+    guild_ids: Optional[List[:class:`~int`]]
         Id of the guild for which command is to be added, (optional)
     options: Optional[List[:class:`~appcommands.models.Option`]]
         Options for the command, detects automatically if None given, (optional)
@@ -501,7 +495,7 @@ def command(bot, *args, cls: SlashCommand = MISSING, **kwargs) -> Callable[[Call
     
         from appcommands.models import command
         
-        @command(bot.appclient, name="hi", description="Hello!")
+        @command(name="hi", description="Hello!")
         async def hi(ctx, user: discord.Member = None):
             user = user or ctx.user
             await ctx.reply(f"Hi {user.mention}")
@@ -517,13 +511,10 @@ def command(bot, *args, cls: SlashCommand = MISSING, **kwargs) -> Callable[[Call
     def wrapper(func) -> SlashCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError('Callback must be a coroutine.')
-        if hasattr(func, "__slash__") and isinstance(func.__slash__, SlashCommand):
-            raise TypeError('Callback is already a slashcommand.')
+        if isinstance(func, cls):
+            raise TypeError('Callback is already a appcommand.')
 
-        result = cls(*args, callback=func, **kwargs)
-        func.__slash__ = result
-        #result.client.bot.loop.create_task(result.client.add_command(result))
-        bot.to_register.append(result)
-        return func
+        result = cls(callback=func, **kwargs)
+        return result
 
     return wrapper
