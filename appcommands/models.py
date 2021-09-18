@@ -529,5 +529,5 @@ def command(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], Slash
 
     return wrapper
 
-def group(name: str, description: Optional[str] = "No description.", guild_ids: Optional[List[int]]) -> SubCommandGroup:
+def group(name: str, description: Optional[str] = "No description.", guild_ids: Optional[List[int]] = []) -> SubCommandGroup:
     return SubCommandGroup(name=name, description=description, guild_ids=guild_ids)
