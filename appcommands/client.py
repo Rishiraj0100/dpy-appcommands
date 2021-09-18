@@ -4,7 +4,6 @@ import discord
 import importlib
 
 from .utils import *
-from .exceptions import *
 from .models import (
     InteractionContext,
     SlashCommand,
