@@ -16,6 +16,7 @@ from typing import Dict, List, Union, Optional, Coroutine, Callable
 
 
 __all__ = (
+    "BaseCommand",
     "Choice",
     "command",
     "InteractionContext",
@@ -413,9 +414,6 @@ class SlashCommand(BaseCommand):
                 raise ValueError("You must specify name when callback is None")
             self.name  = name
 
-    def __repr__(self):
-        return f"<SlashCommmand name='{self.name}' description='{self.description}'>"
-
     def __str__(self):
         return self.__repr__()
 
@@ -429,11 +427,14 @@ class SlashCommand(BaseCommand):
             ret["type"] = OptionType.SUB_COMMAND.value
         return ret
 
+    def __eq__(self, other: BaseCommand):
+        return self.name == other.name and self.description == other.description
+
     @missing
     async def callback(self, ctx: InteractionContext):
         raise NotImplementedError
 
-class SubCommandGroup(Option):
+class SubCommandGroup(BaseCommand):
     def __init__(self,
                  name: str = None,
                  description: str = "No description.",
@@ -456,6 +457,9 @@ class SubCommandGroup(Option):
             return command
 
         return wrap
+
+    def __eq__(self, other: BaseCommand):
+        return self.name == other.name and self.description == other.description
 
     def subcommandgroup(self, name: str, description: Optional[str] = "No description.") -> 'SubCommandGroup':
         if self.parent is not None:
