@@ -6,7 +6,6 @@ import inspect
 import functools
 
 from .utils import *
-from .types import AppClient
 from .enums import OptionType
 
 from discord import ui, http
