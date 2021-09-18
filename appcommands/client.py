@@ -27,7 +27,7 @@ class ApplicationMixin:
 
     def slash(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
         """Adds a slash command to bot
-        same as :func:`~appcommands.models.command` but doesn't requires bot parameter
+        same as :meth:`~appcommands.models.command`
 
         Parameters
         -----------
@@ -61,7 +61,7 @@ class ApplicationMixin:
         Callable[[Callable], :class:`~appcommands.models.SlashCommand`]
             The slash command."""
         def decorator(func) -> SlashCommand:
-            wrapped = _cmd(self, *args, cls=cls, **kwargs)
+            wrapped = _cmd(*args, cls=cls, **kwargs)
             resp = wrapped(func)
             return resp
 
