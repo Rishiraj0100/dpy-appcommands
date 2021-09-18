@@ -35,7 +35,7 @@ appcommands.models Module
 .. autoclass:: SlashCommand
     :members:
 
-.. automethod:: appcommands.models.command
+.. automethod:: appcommands.models.command()
     :decorator:
 
 appcommands.cog Module
@@ -43,7 +43,7 @@ appcommands.cog Module
 
 .. currentmodule:: appcommands.cog
 
-.. automethod:: appcommands.cog.slash
+.. automethod:: appcommands.cog.slash()
     :decorator:
 
 .. autofunction:: slashgroup
