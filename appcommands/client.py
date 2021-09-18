@@ -13,6 +13,8 @@ from discord.ext import commands
 from discord.enums import InteractionType
 from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any
 
+__all__ = ("Bot", "AutoShardedBot")
+
 class ApplicationMixin:
     """The mixin for appcommands module"""
     def __init__(self, *args, **kwargs) -> None:
@@ -20,6 +22,7 @@ class ApplicationMixin:
         self.to_register = []
         self.__appcommands = {}
         self.__subcommands = {}
+        self.__slashcommands = {}
         self.add_listener(self.interaction_handler, "on_interaction")
 
     def slash(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
@@ -90,9 +93,17 @@ class ApplicationMixin:
         :class:`~appcommands.models.SubCommandGroup`
             The group by which commands will be made"""
         sub_command_group = SubCommandGroup(name, description)
-        self.to_register.append(sub_command_group)
+        self.add_slash_command(sub_command_group)
         return sub_command_group
 
+    def add_slash_command(self, command: SlashCommand) -> None:
+        """Adds a slash command usually when subclassed
+
+        Parameters
+        ------------
+        command: :class:`~appcommands.models.SlashCommand`
+            The command which is to be added"""
+        self.to_register.append(command)
 
     async def register_commands(self) -> None:
         """The coro which registers slash commands"""
@@ -141,6 +152,8 @@ class ApplicationMixin:
                 description=i["description"],
                 type=i["type"],
             )
+            if cmd.type == 1:
+                self.__slashcommands[int(i.get('id'))] = cmd
             if isinstance(cmd, SubCommandGroup):
                 self.__subcommands[int(i['id'])] = {}
                 for subcommand in cmd.subcommands:
@@ -157,33 +170,48 @@ class ApplicationMixin:
         await self.register_commands()
 
     @property
-    def appcommands(self) -> Dict[int, Union[SlashCommand, SubCommandGroup]]:
+    def appcommands(self) -> Mapping[int, Union[SlashCommand, SubCommandGroup]]:
         """The all application command the bot has
 
         Returns
         --------
-        Dict[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
         """
         return types.MappingProxyType(self.__appcommands)
 
     @property
-    def subcommands(self) -> Dict[int, Union[SlashCommand, SubCommandGroup]]:
+    def subcommands(self) -> Mapping[int, Union[SlashCommand, SubCommandGroup]]:
         """The slashcommands' subcommands
 
         Returns
         --------
-        Dict[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
         """
         return types.MappingProxyType(self.__subcommands)
 
-    def get_slash_commands(self) -> Dict[str, Union[SlashCommand, SubCommandGroup]:
-        """Gets every slash command registered in the current running instance"""
+    @property
+    def slashcommands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]:
+        """All slashcommands with id
+
+        Returns
+        ---------
+        Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        """
+        return types.MappingProxyType(self.__slashcommands)
+
+    def get_slash_commands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]:
+        """Gets every slash command registered in the current running instance
+
+        Returns
+        ---------
+        Mapping[:class:`~str`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        """
         ret = {}
 
-        for i in self.__commands:
-            ret[self.__commands[i]['command'].name] = self.__appcommands[i]['command']
+        for id, cmd in self.__slashcommands:
+            ret[self.__slashcommands[id]] = cmd
 
-        return ret
+        return types.MappingProxyType(ret)
 
     def get_slash_command(self, name: str) -> Union[SlashCommand, SubCommandGroup]:
         """Gives a command registered in this module
