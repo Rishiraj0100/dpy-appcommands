@@ -119,6 +119,13 @@ def generate_options(function, description: str = "No description.") -> List['Op
 
     return options
 
+class BaseCommand:
+    def __repr__(self) -> str:
+        return "<appcommands.models.{0.__class__.__name__} name={0.name} description={1}>".format(self, self.description)
+
+    def __eq__(self, other: Any) -> bool:
+        return self.name == other.name and self.description == other.description
+
 class InteractionContext:
     """The ctx param given in CMD callbacks
     
@@ -335,8 +342,7 @@ class Option:
     def __repr__(self):
         return f"<Option name={self.name} description={self.description} type={self.type} required={self.required} value={self.value} choices={self.choices}>"
 
-class SlashCommand:
-    type = 1
+class SlashCommand(BaseCommand):
     """SlashCmd base class 
     
     Parameters
@@ -367,10 +373,11 @@ class SlashCommand:
                  guild_ids: Optional[List[int]] = None,
                  options: Optional[List[Option]] = [],
                  callback: Optional[Coroutine] = None) -> None:
-        self.options = options
-        self.description = description
-        self.guild_ids = guild_ids
+        self.options: str = options
+        self.description: str = description
+        self.guild_ids: List[int] = guild_ids
         self.cog = None
+        self.type: int = 1
         self.is_subcommand = False
         if callback:
             if not asyncio.iscoroutinefunction(callback):
