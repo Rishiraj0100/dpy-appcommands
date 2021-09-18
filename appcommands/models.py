@@ -176,7 +176,7 @@ class InteractionContext:
         if cmd.cog:
             cog = self.bot.cogs.get(cmd.cog.qualified_name)
             if cog:
-                return await (getattr(cog, cmd.callback.__name__)).callback(**self.kwargs)
+                return await (getattr(cog, cmd.callback.__name__))(**self.kwargs)
 
         await cmd.callback(**self.kwargs)
 
@@ -452,6 +452,7 @@ class SubCommandGroup(BaseCommand):
         def wrap(func) -> SlashCommand:
             command = cls(*args, callback=func, **kwargs)
             command.is_subcommand = True
+            command.__func__ = func
             self.subcommands.append(command)
             return command
 
@@ -525,6 +526,7 @@ def command(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], Slash
             raise TypeError('Callback is already a appcommand.')
 
         result = cls(callback=func, **kwargs)
+        result.__func__ = func
         return result
 
     return wrapper
