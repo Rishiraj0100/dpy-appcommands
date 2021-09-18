@@ -10,14 +10,16 @@ appcommands.client Module
 
 .. currentmodule:: appcommands.client
 
+.. autoclass:: ApplicationMixin
+    :members:
+
 .. autoclass:: Bot
     :members:
+    :inherited-members:
 
 .. autoclass:: AutoShardedBot
     :members:
 
-.. autoclass:: AppClient
-    :members:
 
 appcommands.models Module
 ----------------------------------
