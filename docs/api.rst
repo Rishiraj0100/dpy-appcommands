@@ -10,12 +10,12 @@ appcommands.client Module
 
 .. currentmodule:: appcommands.client
 
-.. autoclass:: ApplicationMixin
-    :members:
-
 .. autoclass:: Bot
     :members:
     :inherited-members:
+    :exclude-members: discord.ext.commands.Bot
+
+
 
 .. autoclass:: AutoShardedBot
     :members:
