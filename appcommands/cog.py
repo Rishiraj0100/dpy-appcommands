@@ -39,9 +39,9 @@ class SlashCog(Cog):
                 if elem in slashcmds:
                     del slashcmds[elem]
     
-                if isinstance(value, SlashCommand):
+                if isinstance(value, SlashCommand) and not value.is_subcommand:
                     slashcmds[elem] = value
-                elif isinstance(value, SubCommandGroup):
+                elif isinstance(value, SubCommandGroup) and not value.parent:
                     slashcmds[elem] = value
                     
         self.__slash_commands__ = tuple(cmd for cmd in slashcmds.values())
