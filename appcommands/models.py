@@ -277,7 +277,7 @@ class InteractionData:
         if data.get('options'):
             for i in data.get('options'):
                 options.append(Option.from_dict(i))
-        print(options)
+        
         return cls(d['type'], data['name'], d['id'], options)
 
 class Choice:
