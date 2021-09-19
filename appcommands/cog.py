@@ -48,7 +48,9 @@ class SlashCog(Cog):
         return self
 
     def _inject(self, bot):
-        for cmd in self.__slash_commands__:
+        new_list = [i for i in self.__slash_commands__]
+        to_remove, updated_list = [], []
+        for index, cmd in enumerate)new_list):
             cmd.cog = self
             if isinstance(cmd, SlashCommand):
                 setattr(self.__class__, cmd.callback.__name__, cmd.__func__)
@@ -71,7 +73,14 @@ class SlashCog(Cog):
                 and not cmd.parent
             ):
                 bot.to_register.append(cmd)
+            else:
+                to_remove.append(new_list[index])
 
+        for cmd in new_list:
+            if not cmd in to_remove:
+                updated_list.append(cmd)
+
+        self.__slash_commands__ = (i for i in updated_list)
         return super()._inject(bot)
         
     def _eject(self, bot):
