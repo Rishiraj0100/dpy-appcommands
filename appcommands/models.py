@@ -158,15 +158,8 @@ class InteractionContext:
         self.application_id: int = interaction.application_id
         self.kwargs: dict = {}
         self.interaction = interaction
-        _d = self.interaction.data
-        if int(_d.get('id')) in bot.subcommands:
-            for i in _d.get('options'):
-                if i['type'] == 2:
-                    data = i["options"][0]
-                else:
-                    data = i["options"][0]
-        else:
-            data = self.interaction.data
+        data = self.interaction.data
+        data['bot'] = self.bot
         self.data: dict = InteractionData.from_dict(data)
         self.__invoked = False
 
@@ -272,11 +265,20 @@ class InteractionData:
     @classmethod
     def from_dict(cls, d: dict) -> 'InteractionData':
         options = []
-        if d.get('options'):
+        bot=d.pop('bot')
+        if int(d.get('id')) in bot.subcommands:
             for i in d.get('options'):
+                if i['type'] == 2:
+                    data = i["options"][0]
+                else:
+                    data = i["options"][0]
+        else:
+            data = d
+        if data.get('options'):
+            for i in data.get('options'):
                 options.append(Option.from_dict(i))
 
-        return cls(d['type'], d['name'], d['id'], options)
+        return cls(d['type'], data['name'], d['id'], options)
 
 class Choice:
     """Choice for the option value 
