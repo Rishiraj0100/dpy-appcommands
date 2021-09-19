@@ -65,7 +65,7 @@ class SlashCog(Cog):
   
             if (
                 isinstance(cmd, SlashCommand)
-                and not cmd.is_subcommand)
+                and not cmd.is_subcommand
             ):
                 bot.to_register.append(cmd)
             elif  (
