@@ -271,13 +271,13 @@ class InteractionData:
                 if i['type'] == 2:
                     data = i["options"][0]
                 else:
-                    data = i["options"][0]
+                    data = i
         else:
             data = d
         if data.get('options'):
             for i in data.get('options'):
                 options.append(Option.from_dict(i))
-
+        print(options)
         return cls(d['type'], data['name'], d['id'], options)
 
 class Choice:
