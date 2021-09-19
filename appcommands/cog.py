@@ -39,9 +39,9 @@ class SlashCog(Cog):
                 if elem in slashcmds:
                     del slashcmds[elem]
     
-                if isinstance(value, SlashCommand) and not value.is_subcommand:
+                if isinstance(value, SlashCommand):
                     slashcmds[elem] = value
-                elif isinstance(value, SubCommandGroup) and not value.parent:
+                elif isinstance(value, SubCommandGroup):
                     slashcmds[elem] = value
                     
         self.__slash_commands__ = tuple(cmd for cmd in slashcmds.values())
@@ -50,7 +50,7 @@ class SlashCog(Cog):
     def _inject(self, bot):
         for cmd in self.__slash_commands__:
             cmd.cog = self
-            if isinstance(cmd, SlashCommand):
+            if isinstance(cmd, SlashCommand) and cmd.is_subcommand:
                 setattr(self.__class__, cmd.callback.__name__, cmd.__func__)
             bot.to_register.append(cmd)
         return super()._inject(bot)
