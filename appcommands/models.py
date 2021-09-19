@@ -159,13 +159,15 @@ class InteractionContext:
         self.kwargs: dict = {}
         self.interaction = interaction
         _d = self.interaction.data
-        print(_d)
-        '''if int(_d.get('id')) in bot.subcommands:
+        if int(_d.get('id')) in bot.subcommands:
             for i in _d.get('options'):
                 if i['type'] == 2:
-                    
-        '''
-        self.data: dict = InteractionData.from_dict(self.interaction.data)
+                    data = i["options"][0]
+                else:
+                    data = i["options"][0]
+        else:
+            data = self.interaction.data
+        self.data: dict = InteractionData.from_dict(data)
         self.__invoked = False
 
     async def invoke(self, cmd) -> None:
