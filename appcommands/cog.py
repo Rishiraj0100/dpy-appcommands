@@ -61,7 +61,17 @@ class SlashCog(Cog):
                     else:
                         subcmd.cog = self
   
-            bot.to_register.append(cmd)
+            if (
+                isinstance(cmd, SlashCommand)
+                and not cmd.is_subcommand)
+            ):
+                bot.to_register.append(cmd)
+            elif  (
+                isinstance(cmd, SubCommandGroup)
+                and not cmd.parent
+            ):
+                bot.to_register.append(cmd)
+
         return super()._inject(bot)
         
     def _eject(self, bot):
