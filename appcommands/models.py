@@ -215,6 +215,10 @@ class InteractionContext:
         return self.interaction.response.send_message
 
     @property
+    def edit(self):
+        return self.interaction.edit_original_message
+
+    @property
     def send(self):
         if not self.response.is_done():
             return self.respond
