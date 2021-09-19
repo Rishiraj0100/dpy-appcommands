@@ -53,8 +53,15 @@ class SlashCog(Cog):
             if isinstance(cmd, SlashCommand):
                 setattr(self.__class__, cmd.callback.__name__, cmd.__func__)
 
-            if not cmd.is_subcommand:
-                bot.to_register.append(cmd)
+            if isinstance(cmd, SubCommandGroup):
+                for subcmd in cmd.subcommands:
+                    if isinstance(subcmd, SubCommandGroup):
+                        for _subcmd in subcmd.subcommands:
+                            _subcmd.cog = self
+                    else:
+                        subcmd.cog = self
+  
+            bot.to_register.append(cmd)
         return super()._inject(bot)
         
     def _eject(self, bot):
