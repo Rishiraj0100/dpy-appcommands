@@ -50,7 +50,7 @@ class SlashCog(Cog):
     def _inject(self, bot):
         new_list = [i for i in self.__slash_commands__]
         to_remove, updated_list = [], []
-        for index, cmd in enumerate)new_list):
+        for index, cmd in enumerate(new_list):
             cmd.cog = self
             if isinstance(cmd, SlashCommand):
                 setattr(self.__class__, cmd.callback.__name__, cmd.__func__)
