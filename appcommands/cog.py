@@ -2,7 +2,12 @@ import discord
 import asyncio
 
 from .utils import *
-from .models import SlashCommand, SubCommandGroup
+from .models import (
+    SlashCommand,
+    SubCommandGroup,
+    UserCommand,
+    MessageCommand
+)
 
 from discord.ext.commands import Cog
 from typing import Optional, Union, List
@@ -72,6 +77,8 @@ class SlashCog(Cog):
                 isinstance(cmd, SubCommandGroup)
                 and not cmd.parent
             ):
+                bot.to_register.append(cmd)
+            elif isinstance(cmd, (MessageCommand, UserCommand)):
                 bot.to_register.append(cmd)
             else:
                 to_remove.append(new_list[index])
