@@ -54,7 +54,7 @@ class ApplicationMixin:
 
     def slash(self, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
         """Adds a slash command to bot
-        same as :meth:`~appcommands.models.command`
+        same as :meth:`~appcommands.models.slashcommand`
 
         Parameters
         -----------
