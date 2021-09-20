@@ -20,10 +20,13 @@ __all__ = (
     "command",
     "InteractionContext",
     "InteractionData",
+    "MessageCommand",
     "Option",
     "SlashCommand",
+    "slashcommand",
     "SubCommandGroup",
-    "UserCommand"
+    "UserCommand",
+    "usercommand"
 )
 
 async def get_ctx_kw(ctx, params) -> dict:
@@ -159,9 +162,6 @@ class InteractionContext:
         self.application_id: int = interaction.application_id
         self.kwargs: dict = {}
         self.interaction = interaction
-        data = self.interaction.data
-        data['bot'] = self.bot
-        self.data: dict = InteractionData.from_dict(data)
         self.__invoked = False
 
     async def invoke(self, cmd) -> None:
@@ -171,6 +171,9 @@ class InteractionContext:
         self.command = cmd
         self.__invoked = True
         if cmd.type == 1:
+            data = self.interaction.data
+            data['bot'] = self.bot
+            self.data: dict = InteractionData.from_dict(data)
             params = copy.deepcopy(cmd.params)
             if cmd.cog and str(list(params.keys())[0]) in ("cls", "self"): # cls/self only
                 params.pop(list(params.keys())[0])
@@ -184,28 +187,52 @@ class InteractionContext:
 
             return await cmd.callback(**self.kwargs)
 
-        if "members" not in self.interaction.data["resolved"]:
-            _data = self.interaction.data["resolved"]["users"]
-            for i, v in _data.items():
-                v["id"] = int(i)
-                user = v
-            target = discord.User(state=self.interaction._state, data=user)
+        elif cmd.type == 2
+            if "members" not in self.interaction.data["resolved"]:
+                _data = self.interaction.data["resolved"]["users"]
+                for i, v in _data.items():
+                    v["id"] = int(i)
+                    user = v
+                target = discord.User(state=self.interaction._state, data=user)
+            else:
+                _data = self.interaction.data["resolved"]["members"]
+                for i, v in _data.items():
+                    v["id"] = int(i)
+                    member = v
+                _data = self.interaction.data["resolved"]["users"]
+                for i, v in _data.items():
+                    v["id"] = int(i)
+                    user = v
+                    member["user"] = user
+                target = discord.Member(
+                    data=member,
+                    guild=self.interaction._state._get_guild(ctx.interaction.guild_id),
+                    state=self.interaction._state,
+                )
+            if cmd.cog:
+                cog = self.bot.cogs.get(cmd.cog.qualified_name)
+                if cog:
+                    return await (getattr(cog, cmd.callback.__name__))(self, target)
+            return await cmd.callback(self, target)
+
         else:
-            _data = self.interaction.data["resolved"]["members"]
+            _data = self.interaction.data["resolved"]["messages"]
             for i, v in _data.items():
                 v["id"] = int(i)
-                member = v
-            _data = self.interaction.data["resolved"]["users"]
-            for i, v in _data.items():
-                v["id"] = int(i)
-                user = v
-            member["user"] = user
-            target = discord.Member(
-                data=member,
-                guild=self.interaction._state._get_guild(ctx.interaction.guild_id),
-                state=self.interaction._state,
-            )
-        await cmd.callback(ctx, target)
+                message = v
+            channel = self.interaction._state.get_channel(int(message["channel_id"]))
+            if channel is None:
+                data = await self.interaction._state.http.start_private_message(
+                    int(message["author"]["id"])
+                )
+                channel = self.interaction._state.add_dm_channel(data)
+
+            target = Message(state=self.interaction._state, channel=channel, data=message)
+            if cmd.cog:
+                cog = self.bot.cogs.get(cmd.cog.qualified_name)
+                if cog:
+                    return await (getattr(cog, cmd.callback.__name__))(self, target)
+            return await cmd.callback(self, target)
 
 
     @cached_property
@@ -263,7 +290,7 @@ class InteractionContext:
 
 
 class InteractionData:
-    """The data given in `ctx.data`
+    """The data given for slash commands in `ctx.data`
 
     Attributes
     ------------
@@ -538,6 +565,7 @@ class UserCommand(BaseCommand):
     ) -> None:
         self.type: int = 2
         self.description = ""
+        self.cog = None
         self.guild_ids: Optional[List[int]] = guild_ids
         if callback:
             if not asyncio.iscoroutinefunction(callback):
@@ -556,17 +584,101 @@ class UserCommand(BaseCommand):
             self.name  = name
 
     @missing
-    async def callback(self, ctx):
+    async def callback(self, ctx, usr):
         raise NotImplementedError
 
     def __repr__(self) -> str:
-        return "<UserCommand name={0.name} guilds={0.guild_ids}>".format(self)
+        return "<UserCommand name={0.name} guild_ids={0.guild_ids}>".format(self)
 
     def to_dict(self) -> Dict[str, Union[str, int]]:
         return {"name": self.name, "description": "", "type": self.type}
 
-def command(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
-    """The slash commands wrapper 
+class MessageCommand(BaseCommand):
+    def __init__(self,
+        name: str = None,
+        guild_ids: Optional[List[int]] = [],
+        callback: Optional[Coroutine] = None
+    ):
+        self.type: int = 3
+        self.description = ""
+        self.cog = None
+        self.guild_ids: Optional[List[int]] = guild_ids
+        if callback:
+            if not asyncio.iscoroutinefunction(callback):
+                raise TypeError('Callback must be a coroutine.')
+            self.name = name or callback.__name__
+            self.callback = callback
+        elif (hasattr(self, 'callback') and self.callback is not MISSING):
+            if not callback:
+                callback = self.callback
+            if not asyncio.iscoroutinefunction(callback):
+                raise TypeError('Callback must be a coroutine.')
+            self.name = name or self.__class__.__name__
+        else:
+            if not name:
+                raise ValueError("You must specify name when callback is None")
+            self.name  = name
+
+    def to_dict(self):
+        return {"name": self.name, "description": self.description, "type": self.type}
+
+    def __repr__(self) -> str:
+        return "<MessageCommand name={0.name} guild_ids={0.guild_ids}>".format(self)
+
+    @missing
+    async def callback(self, ctx, msg):
+        raise NotImplementedError
+
+def command(cls: BaseCommand = MISSING, **kwargs) -> Callable[[Callable], BaseCommand]:
+    """The appcommands wrapper 
+    
+    Parameters
+    ------------
+    name: :class:`~str`
+        Name of the command, (required)
+    description: Optional[:class:`~str`]
+        Description of the command, Only for slashcommands
+    guild_ids: Optional[List[:class:`~int`]]
+        Id of the guild for which command is to be added, (optional)
+    options: Optional[List[:class:`~appcommands.models.Option`]]
+        Options for the command, detects automatically if not given, Only for slashcommands
+    cls: :class:`~appcommands.models.BaseCommand`
+        The custom command class, must be a subclass of :class:`~appcommands.models.BaseCommand`, (optional)
+
+    Example
+    ----------
+    
+    .. code-block:: python3
+    
+        from appcommands import command
+        
+        @command(name="hi", description="Hello!")
+        async def hi(ctx, user: discord.Member = None):
+            user = user or ctx.user
+            await ctx.reply(f"Hi {user.mention}")
+
+    Raises
+    --------
+    TypeError
+        The passed callback is not coroutine or it is already an AppCommand
+    """
+    if cls is MISSING:
+        cls = SlashCommand
+
+    def wrapper(func) -> BaseCommand:
+        if not asyncio.iscoroutinefunction(func):
+            raise TypeError('Callback must be a coroutine.')
+        if isinstance(func, BaseCommand):
+            raise TypeError('Callback is already a appcommand.')
+
+        result = cls(callback=func, **kwargs)
+        result.__func__ = func
+        return result
+
+    return wrapper
+
+def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+    """The slash command wrapper 
     
     Parameters
     ------------
@@ -577,7 +689,7 @@ def command(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], Slash
     guild_ids: Optional[List[:class:`~int`]]
         Id of the guild for which command is to be added, (optional)
     options: Optional[List[:class:`~appcommands.models.Option`]]
-        Options for the command, detects automatically if None given, (optional)
+        Options for the command, detects automatically if not given, (optional)
     cls: :class:`~appcommands.models.SlashCommand`
         The custom command class, must be a subclass of :class:`~appcommands.models.SlashCommand`, (optional)
 
@@ -586,9 +698,9 @@ def command(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], Slash
     
     .. code-block:: python3
     
-        from appcommands.models import command
+        from appcommands import slashcommand
         
-        @command(name="hi", description="Hello!")
+        @slashcommand(name="hi", description="Hello!")
         async def hi(ctx, user: discord.Member = None):
             user = user or ctx.user
             await ctx.reply(f"Hi {user.mention}")
@@ -596,22 +708,45 @@ def command(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], Slash
     Raises
     --------
     TypeError
-        The passed callback is not coroutine or it is already a SlashCommand
+        The passed callback is not coroutine or it is already an AppCommand
+    """
+   if cls is MISSING:
+       cls = SlashCommand
+
+    return command(cls=cls, **kwargs)
+
+def usercommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+    """The user command wrapper 
+    
+    Parameters
+    ------------
+    name: :class:`~str`
+        Name of the command, (required)
+    guild_ids: Optional[List[:class:`~int`]]
+        Id of the guild for which command is to be added, (optional)
+    cls: :class:`~appcommands.models.UserCommand`
+        The custom command class, must be a subclass of :class:`~appcommands.models.SlashCommand`, (optional)
+
+    Example
+    ----------
+    
+    .. code-block:: python3
+    
+        from appcommands import usercommand
+        
+        @usercommand(name="hi")
+        async def mention(ctx, user: discord.Member);
+            await ctx.send(f"{ctx.author.mention} mentioned {user.mention}")
+
+    Raises
+    --------
+    TypeError
+        The passed callback is not coroutine or it is already an AppCommand
     """
     if cls is MISSING:
-        cls = SlashCommand
+        cls = UserCommand
 
-    def wrapper(func) -> SlashCommand:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError('Callback must be a coroutine.')
-        if isinstance(func, cls):
-            raise TypeError('Callback is already a appcommand.')
+    return command(cls=cls, **kwargs)
 
-        result = cls(callback=func, **kwargs)
-        result.__func__ = func
-        return result
-
-    return wrapper
-
-def group(name: str, description: Optional[str] = "No description.", guild_ids: Optional[List[int]] = []) -> SubCommandGroup:
+def slashgroup(name: str, description: Optional[str] = "No description.", guild_ids: Optional[List[int]] = []) -> SubCommandGroup:
     return SubCommandGroup(name=name, description=description, guild_ids=guild_ids)
