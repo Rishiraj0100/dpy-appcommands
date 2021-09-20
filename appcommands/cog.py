@@ -21,13 +21,19 @@ class SlashCog(Cog):
 
     .. code-block:: python3
 
-        from appcommands import cog, command
+        from appcommands import cog, slashcommand, slashgroup
 
         class MyCog(cog.SlashCog):
             def __init__(self, bot):
                 self.bot = bot
 
-            @command(name="test")
+            g=slashgroup(name="dev")
+
+            @g.subcommand(name="test1")
+            async def test1(self, ctx):
+                await ctx.send("tested", ephemeral=True)
+
+            @slashcommand(name="test")
             async def test(self, ctx):
                 await ctx.send("tested!")
 
