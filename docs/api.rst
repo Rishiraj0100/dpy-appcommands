@@ -13,7 +13,7 @@ appcommands.client Module
 .. autoclass:: Bot
     :members:
     :inherited-members: appcommands.client.ApplicationMixin
-    :exclude-members: discord.ext.commands.Bot
+    :exclude-members: Bot.activity
 
 .. autoclass:: AutoShardedBot
     :members:
