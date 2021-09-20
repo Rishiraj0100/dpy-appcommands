@@ -537,6 +537,7 @@ class UserCommand(BaseCommand):
         callback: Optional[Coroutine] = None
     ) -> None:
         self.type: int = 2
+        self.description = ""
         self.guild_ids: Optional[List[int]] = guild_ids
         if callback:
             if not asyncio.iscoroutinefunction(callback):
