@@ -186,7 +186,7 @@ class InteractionContext:
 
             return await cmd.callback(**self.kwargs)
 
-        elif cmd.type == 2
+        elif cmd.type == 2:
             if "members" not in self.interaction.data["resolved"]:
                 _data = self.interaction.data["resolved"]["users"]
                 for i, v in _data.items():
