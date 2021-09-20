@@ -769,7 +769,7 @@ def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], 
     TypeError
         The passed callback is not coroutine or it is already an AppCommand
     """
-   if cls is MISSING:
+    if cls is MISSING:
        cls = SlashCommand
 
     return command(cls=cls, **kwargs)
