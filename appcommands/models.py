@@ -21,6 +21,7 @@ __all__ = (
     "InteractionContext",
     "InteractionData",
     "MessageCommand",
+    "messagecommand",
     "Option",
     "SlashCommand",
     "slashcommand",
@@ -135,15 +136,13 @@ class InteractionContext:
     
     Attributes
     ------------
-    bot: Union[:class:`~discord.ext.commands.Bot`, :class:`~discord.ext.commands.AutoShardedBot`]
-        The discord bot
-    client: :class:`~appcommands.client.AppClient`
-        The appclient on which this context is used 
+    bot: Union[:class:`~appcommands.client.Bot`, :class:`~appcommands.client.AutoShardedBot`]
+        The appcommands bot instance
     type: :class:`~int`
         Interaction type 
     guild: Union[:class:`~discord.Guild`, None]
         The guild in which command is fired, None if it is in DMs 
-    channel: Union[:class:`~discord.TextChannel`, :class:`~discord.DMChannel`]
+    channel: Union[:class:`~discord.abc.GuildChannel`, :class:`~discord.DMChannel`]
         The channel in which command is triggered
     id: :class:`~int`
         id of this interaction
@@ -266,26 +265,26 @@ class InteractionContext:
     author = user
 
     @property
-    def respond(self):
+    def respond(self) -> Coroutine:
         return self.interaction.response.send_message
 
     @property
-    def edit(self):
+    def edit(self) -> Coroutine:
         return self.interaction.edit_original_message
 
     @property
-    def send(self):
+    def send(self) -> Coroutine:
         if not self.response.is_done():
             return self.respond
 
         return self.channel.send
 
     @property
-    def defer(self):
+    def defer(self) -> Coroutine:
         return self.interaction.response.defer
 
     @property
-    def followup(self):
+    def followup(self) -> Coroutine:
         return self.interaction.followup
 
 
@@ -411,17 +410,15 @@ class Option:
         return f"<Option name={self.name} description={self.description} type={self.type} required={self.required} value={self.value} choices={self.choices}>"
 
 class SlashCommand(BaseCommand):
-    """SlashCmd base class 
+    """SlashCmd wrapper class 
     
     Parameters
     ------------
-    client: :class:`~appcommands.client.AppClient`
-       Your AppClient instance, (required)
     name: :class:`~str`
        Name of the cmd, (required)
     description: Optional[:class:`~str`]
        description of the cmd, (optional)
-    guild: Optional[:class:`~str`]
+    guild_ids: Optional[List[:class:`~int`]]
        id of the guild for which command is to be added, (optional)
     options: Optional[List[:class:`~appcommands.models.Option`]]
        options for your command, (optional)
@@ -433,8 +430,14 @@ class SlashCommand(BaseCommand):
     TypeError 
         Callback is not coroutine 
     ValueError 
-        Name not given when coroutine not given
+        Name not given when call not given
     """
+    def __new__(cls, *args, **kwargs) -> 'SlashCommand':
+        self = super().__new__(cls)
+
+        self.__original_kwargs__ = kwargs.copy()
+        return self
+
     def __init__(self,
                  name: str = None,
                  description: Optional[str] = "No description.",
@@ -502,14 +505,22 @@ class SlashCommand(BaseCommand):
         raise NotImplementedError
 
 class SubCommandGroup(BaseCommand):
+    """SubCommand wrapper class
+
+    Parameters
+    ------------
+    name: :class:`~str`
+        Name of the group
+    guild_ids: Optional[List[:class:`~int`]]
+        Guild ids for which cmd is to be added
+    """
     def __init__(self,
                  name: str = None,
-                 description: str = "No description.",
                  guild_ids: Optional[List[int]] = [],
                  parent = None) -> None:
         self.parent = parent
         self.name: str = name
-        self.description: str = description
+        self.description: str = ""
         self.guild_ids: List[int] = guild_ids
         self.type: int = 1
         self.subcommands: List[Union[SubCommandGroup, SlashCommand]] = []
@@ -529,7 +540,13 @@ class SubCommandGroup(BaseCommand):
     def __eq__(self, other: BaseCommand) -> bool:
         return self.name == other.name and self.description == other.description
 
-    def subcommandgroup(self, name: str, description: Optional[str] = "No description.") -> 'SubCommandGroup':
+    def subcommandgroup(self, name: str) -> 'SubCommandGroup':
+        """The group for which more subcommand is to be added
+
+        Parameters
+        ------------
+        name: :class:`~str`
+            Name of this group"""
         if self.parent is not None:
             raise TypeError("Subcommand groups can't have more groups")
 
@@ -551,6 +568,24 @@ class SubCommandGroup(BaseCommand):
         return "<SubCommandGroup name={0.name} description={1} subcommands={0.subcommands}>".format(self, self.description)
 
 class UserCommand(BaseCommand):
+    """Context-Menu user command wrapper class 
+    
+    Parameters
+    ------------
+    name: :class:`~str`
+       Name of the cmd, (required)
+    guild_ids: Optional[List[:class:`~int`]]
+       id of the guild for which command is to be added, (optional)
+    callback: Optional[Coroutine]
+       the callback which is to be called when a command fires, (optional)
+       
+    Raises 
+    --------
+    TypeError 
+        Callback is not coroutine
+    ValueError 
+        Name not given when call not given
+    """
     def __new__(cls, *args, **kwargs) -> 'UserCommand':
         self = super().__new__(cls)
 
@@ -594,11 +629,35 @@ class UserCommand(BaseCommand):
         return {"name": self.name, "description": "", "type": self.type}
 
 class MessageCommand(BaseCommand):
+    """Context-menu message wrapper class 
+    
+    Parameters
+    ------------
+    name: :class:`~str`
+       Name of the cmd, (required)
+    guild_ids: Optional[List[:class:`~int`]]
+       id of the guild for which command is to be added, (optional)
+    callback: Optional[Coroutine]
+       the callback which is to be called when a command fires, (optional)
+       
+    Raises 
+    --------
+    TypeError 
+        Callback is not coroutine
+    ValueError 
+        Name not given when call not given
+    """
+    def __new__(cls, *args, **kwargs) -> 'MessageCommand':
+        self = super().__new__(cls)
+
+        self.__original_kwargs__ = kwargs.copy()
+        return self
+
     def __init__(self,
         name: str = None,
         guild_ids: Optional[List[int]] = [],
         callback: Optional[Coroutine] = None
-    ):
+    ) -> None:
         self.type: int = 3
         self.description = ""
         self.cog = None
@@ -619,7 +678,7 @@ class MessageCommand(BaseCommand):
                 raise ValueError("You must specify name when callback is None")
             self.name  = name
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Union[str, int]]:
         return {"name": self.name, "description": self.description, "type": self.type}
 
     def __repr__(self) -> str:
@@ -655,7 +714,7 @@ def command(cls: BaseCommand = MISSING, **kwargs) -> Callable[[Callable], BaseCo
         @command(name="hi", description="Hello!")
         async def hi(ctx, user: discord.Member = None):
             user = user or ctx.user
-            await ctx.reply(f"Hi {user.mention}")
+            await ctx.send(f"Hi {user.mention}")
 
     Raises
     --------
@@ -703,7 +762,7 @@ def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], 
         @slashcommand(name="hi", description="Hello!")
         async def hi(ctx, user: discord.Member = None):
             user = user or ctx.user
-            await ctx.reply(f"Hi {user.mention}")
+            await ctx.send(f"Hi {user.mention}")
 
     Raises
     --------
@@ -715,7 +774,7 @@ def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], 
 
     return command(cls=cls, **kwargs)
 
-def usercommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+def usercommand(cls: UserCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
     """The user command wrapper 
     
     Parameters
@@ -748,5 +807,64 @@ def usercommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], S
 
     return command(cls=cls, **kwargs)
 
-def slashgroup(name: str, description: Optional[str] = "No description.", guild_ids: Optional[List[int]] = []) -> SubCommandGroup:
-    return SubCommandGroup(name=name, description=description, guild_ids=guild_ids)
+def messagecommand(cls: MessageCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+    """The message command wrapper 
+    
+    Parameters
+    ------------
+    name: :class:`~str`
+        Name of the command, (required)
+    guild_ids: Optional[List[:class:`~int`]]
+        Id of the guild for which command is to be added, (optional)
+    cls: :class:`~appcommands.models.MessageCommand`
+        The custom command class, must be a subclass of :class:`~appcommands.models.MessageCommand`, (optional)
+
+    Example
+    ----------
+    
+    .. code-block:: python3
+    
+        from appcommands import messagecommand
+        
+        @messagecommand(name="hi")
+        async def mention(ctx, message: discord.Message):
+            await ctx.send(f"{message.id}")
+
+    Raises
+    --------
+    TypeError
+        The passed callback is not coroutine or it is already an AppCommand
+    """
+    if cls is MISSING:
+        cls = MessageCommand
+
+    return command(cls=cls, **kwargs)
+
+def slashgroup(**kwargs) -> SubCommandGroup:
+    """The slash subcommand group wrapper
+
+    Parameters
+    ------------
+    name: :class:`~str`
+        Name of the command
+    guild_ids: Optional[List[:class:`~int`]]
+        List of the guilds for command, (optional)
+
+    Example
+    ---------
+
+    .. code-block:: python3
+
+        from appcommands import slashgroup
+
+        misc = slashgroup(name="misc", guild_ids=[...])
+        @misc.subcommand()
+        async def ping(ctx):
+            await ctx.send(bot.latency)
+
+    Returns
+    ---------
+    :class:`~appcommands.models.SubCommandGroup`
+        The SubCommandGroup which will be returned
+    """
+    return SubCommandGroup(**kwargs)
