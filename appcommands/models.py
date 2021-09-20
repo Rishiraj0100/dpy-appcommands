@@ -562,7 +562,7 @@ class UserCommand(BaseCommand):
         return "<UserCommand name={0.name} guilds={0.guild_ids}>".format(self)
 
     def to_dict(self) -> Dict[str, Union[str, int]]:
-        return {"name": self.name, "description": self.description, "type": self.type}
+        return {"name": self.name, "description": "", "type": self.type}
 
 def command(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
     """The slash commands wrapper 
