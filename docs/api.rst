@@ -35,7 +35,21 @@ appcommands.models Module
 .. autoclass:: SlashCommand
     :members:
 
+.. autoclass:: SubCommandGroup
+    :members:
+    :exclude-members: subcommand
+
+    .. automethod:: SubCommandGroup.subcommand()
+        :decorator:
+
 .. automethod:: appcommands.models.command()
+
+.. automethod:: appcommands.models.slashcommand()
+
+.. automethod:: appcommands.models.usercommand()
+
+.. automethod:: appcommands.models.messagecommand()
+
 
 appcommands.cog Module
 ----------------------------------
