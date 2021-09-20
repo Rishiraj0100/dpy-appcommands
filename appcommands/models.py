@@ -168,19 +168,44 @@ class InteractionContext:
             raise TypeError("This context has already been invoked, you can't invoke it again")
 
         self.command = cmd
-        params = copy.deepcopy(cmd.params)
-        if cmd.cog and str(list(params.keys())[0]) in ("cls", "self"): # cls/self only
-            params.pop(list(params.keys())[0])
-        self.kwargs[str(list(params.keys())[0])] = self
-        params.pop(str(list(params.keys())[0]))
-        self.kwargs = {**self.kwargs, **(await get_ctx_kw(self, params))}
         self.__invoked = True
-        if cmd.cog:
-            cog = self.bot.cogs.get(cmd.cog.qualified_name)
-            if cog:
-                return await (getattr(cog, cmd.callback.__name__))(**self.kwargs)
+        if cmd.type == 1:
+            params = copy.deepcopy(cmd.params)
+            if cmd.cog and str(list(params.keys())[0]) in ("cls", "self"): # cls/self only
+                params.pop(list(params.keys())[0])
+            self.kwargs[str(list(params.keys())[0])] = self
+            params.pop(str(list(params.keys())[0]))
+            self.kwargs = {**self.kwargs, **(await get_ctx_kw(self, params))}
+            if cmd.cog:
+                cog = self.bot.cogs.get(cmd.cog.qualified_name)
+                if cog:
+                    return await (getattr(cog, cmd.callback.__name__))(**self.kwargs)
 
-        await cmd.callback(**self.kwargs)
+            return await cmd.callback(**self.kwargs)
+
+        if "members" not in self.interaction.data["resolved"]:
+            _data = self.interaction.data["resolved"]["users"]
+            for i, v in _data.items():
+                v["id"] = int(i)
+                user = v
+            target = discord.User(state=self.interaction._state, data=user)
+        else:
+            _data = self.interaction.data["resolved"]["members"]
+            for i, v in _data.items():
+                v["id"] = int(i)
+                member = v
+            _data = self.interaction.data["resolved"]["users"]
+            for i, v in _data.items():
+                v["id"] = int(i)
+                user = v
+            member["user"] = user
+            target = discord.Member(
+                data=member,
+                guild=self.interaction._state._get_guild(ctx.interaction.guild_id),
+                state=self.interaction._state,
+            )
+        await cmd.callback(ctx, target)
+
 
     @cached_property
     def channel(self) -> Union[discord.abc.GuildChannel, discord.DMChannel, None]:
@@ -497,6 +522,46 @@ class SubCommandGroup(BaseCommand):
     def __repr__(self) -> str:
         return "<SubCommandGroup name={0.name} description={1} subcommands={0.subcommands}>".format(self, self.description)
 
+class UserCommand(BaseCommand):
+    def __new__(cls, *args, **kwargs) -> 'UserCommand':
+        self = super().__new__(cls)
+
+        self.__original_kwargs__ = kwargs.copy()
+        return self
+
+    def __init__(
+        self,
+        name: str = None,
+        guild_ids: Optional[List[int]] = [],
+        callback: Optional[Coroutine] = None
+    ) -> None:
+        self.type: int = 2
+        self.guild_ids: Optional[List[int]] = guild_ids
+        if callback:
+            if not asyncio.iscoroutinefunction(callback):
+                raise TypeError('Callback must be a coroutine.')
+            self.name = name or callback.__name__
+            self.callback = callback
+        elif (hasattr(self, 'callback') and self.callback is not MISSING):
+            if not callback:
+                callback = self.callback
+            if not asyncio.iscoroutinefunction(callback):
+                raise TypeError('Callback must be a coroutine.')
+            self.name = name or self.__class__.__name__
+        else:
+            if not name:
+                raise ValueError("You must specify name when callback is None")
+            self.name  = name
+
+    @missing
+    async def callback(self, ctx):
+        raise NotImplementedError
+
+    def __repr__(self) -> str:
+        return "<UserCommand name={0.name} guilds={0.guild_ids}>".format(self)
+
+    def to_dict(self) -> Dict[str, Union[str, int]]:
+        return {"name": self.name, "description": self.description, "type": self.type}
 
 def command(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
     """The slash commands wrapper 
