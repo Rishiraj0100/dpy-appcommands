@@ -5,11 +5,13 @@ import importlib
 
 from .utils import *
 from .models import (
-    InteractionContext,
-    SlashCommand,
+    BaseCommand,
     command as _cmd,
+    InteractionContext,
+    MessageCommand,
+    SlashCommand,
     SubCommandGroup,
-    BaseCommand
+    UserCommand
 )
 
 from discord import http, ui
@@ -26,7 +28,9 @@ class ApplicationMixin:
         self.to_register = []
         self.__appcommands = {}
         self.__subcommands = {}
+        self.__usercommands = {}
         self.__slashcommands = {}
+        self.__messagecommans = {}
         self.add_listener(self.interaction_handler, "on_interaction")
 
     def add_app_command(self, command: BaseCommand) -> None:
@@ -50,10 +54,12 @@ class ApplicationMixin:
         """
         self.__appcommands.pop(command.id)
         self.__subcommands.pop(command.id)
+        self.__usercommands.pop(command.id)
         self.__slashcommands.pop(command.id)
+        self.__messagecommands.pop(command.id)
 
-    def slash(self, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
-        """Adds a slash command to bot
+    def slashcommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+        r"""Adds a slash command to bot
         same as :meth:`~appcommands.models.slashcommand`
 
         Parameters
@@ -74,9 +80,9 @@ class ApplicationMixin:
 
         .. code-block:: python3
 
-            @bot.slash(name="Hi", description="Hello!")
+            @bot.slashcommand(name="Hi", description="Hello!")
             async def some_func(ctx):
-                await ctx.reply("Hello!")
+                await ctx.send("Hello!")
 
         Raises
         --------
@@ -125,7 +131,9 @@ class ApplicationMixin:
         return sub_command_group
 
     async def register_commands(self) -> None:
-        """The coro which registers slash commands"""
+        r"""|coro|
+
+        The coro which registers slash commands"""
         commands = []
         registered_commands = await self.http.get_global_commands(self.user.id)
         for command in [cmd for cmd in self.to_register if not cmd.guild_ids]:
@@ -179,6 +187,11 @@ class ApplicationMixin:
             setattr(cmd, "id", int(i['id']))
             if cmd.type == 1:
                 self.__slashcommands[int(i.get('id'))] = cmd
+            elif cmd.type == 2:
+                self.__usercommands[int(i.get('id'))] = cmd
+            else:
+                self.__messagecommands[int(i.get('id'))] = cmd
+
             if isinstance(cmd, SubCommandGroup):
                 self.__subcommands[int(i['id'])] = {}
                 for subcommand in cmd.subcommands:
@@ -224,8 +237,28 @@ class ApplicationMixin:
         """
         return types.MappingProxyType(self.__slashcommands)
 
+    @property
+    def usercommands(self) -> Mapping[str, UserCommand]:
+        """All usercommands with id
+
+        Returns
+        ---------
+        Mapping[:class:`~int`, :class:`~appcommands.models.UserCommand`]
+        """
+        return types.MappingProxyType(self.__usercommands)
+
+    @property
+    def messagecommands(self) -> Mapping[str, MessageCommand]:
+        """All messagecommands with id
+
+        Returns
+        ---------
+        Mapping[:class:`~int`, :class:`~appcommands.models.MessageCommand`]
+        """
+        return types.MappingProxyType(self.__messagecommands)
+
     def get_slash_commands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]]:
-        """Gets every slash command registered in the current running instance
+        """Gets every slash commands registered in the current running instance
 
         Returns
         ---------
@@ -239,7 +272,7 @@ class ApplicationMixin:
         return types.MappingProxyType(ret)
 
     def get_slash_command(self, name: str) -> Union[SlashCommand, SubCommandGroup]:
-        """Gives a command registered in this module
+        """Gives a slash command registered in this module
         
         Parameters
         -----------
@@ -250,8 +283,63 @@ class ApplicationMixin:
         ---------
         Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]
             The found thing"""
-        return (self.get_commands()).get(name)
+        return (self.get_slash_commands()).get(name)
 
+    def get_user_commands(self) -> Mapping[str, UserCommand]:
+        """Gets every user commands registered in the current running instance
+
+        Returns
+        ---------
+        Mapping[:class:`~str`, :class:`~appcommands.models.UserCommand`]
+        """
+        ret = {}
+
+        for id, cmd in self.usercommands:
+            ret[self.__usercommands[id].name] = cmd
+
+        return types.MappingProxyType(ret)
+
+    def get_user_command(self, name: str) -> UserCommand:
+        """Gives a user command registered in this module
+        
+        Parameters
+        -----------
+        name: :class:`~str`
+            the name from which the user command is to be found
+
+        Returns
+        ---------
+        :class:`~appcommands.models.UserCommand`
+            The found thing"""
+        return (self.get_user_commands()).get(name)
+
+    def get_message_commands(self) -> Mapping[str, MessageCommand]:
+        """Gets every user commands registered in the current running instance
+
+        Returns
+        ---------
+        Mapping[:class:`~str`, :class:`~appcommands.models.MessageCommand`]
+        """
+        ret = {}
+
+        for id, cmd in self.messagecommands:
+            ret[self.__messagecommands[id].name] = cmd
+
+        return types.MappingProxyType(ret)
+
+    def get_message_command(self, name: str) -> MessageCommand:
+        """Gives a message command registered in this module
+        
+        Parameters
+        -----------
+        name: :class:`~str`
+            the name from which the message command is to be found
+
+        Returns
+        ---------
+        :class:`~appcommands.models.MessageCommand`
+            The found thing"""
+        return (self.get_message_commands()).get(name)
 
     def get_interaction_context(self, interaction: discord.Interaction) -> InteractionContext:
         """The method usually implemented to use custom contexts
