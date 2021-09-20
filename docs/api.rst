@@ -12,11 +12,10 @@ appcommands.client Module
 
 .. autoclass:: Bot
     :members:
-    :inherited-members: appcommands.client.ApplicationMixin
+    :inherited-members-of: appcommands.client.ApplicationMixin
 
 .. autoclass:: AutoShardedBot
     :members:
-
 
 appcommands.models Module
 ----------------------------------
@@ -41,6 +40,12 @@ appcommands.models Module
 
     .. automethod:: SubCommandGroup.subcommand()
         :decorator:
+
+.. autoclass:: UserCommand
+    :members:
+
+.. autoclass:: MessageCommand
+    :members:
 
 .. automethod:: appcommands.models.command()
 
