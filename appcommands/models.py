@@ -22,7 +22,8 @@ __all__ = (
     "InteractionData",
     "Option",
     "SlashCommand",
-    "SubCommandGroup"
+    "SubCommandGroup",
+    "UserCommand"
 )
 
 async def get_ctx_kw(ctx, params) -> dict:
