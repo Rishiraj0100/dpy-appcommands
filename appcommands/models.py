@@ -11,8 +11,19 @@ from .enums import OptionType
 from discord import ui, http
 from aiohttp.client import ClientSession
 from discord.utils import cached_property
-from typing import Dict, List, Union, Optional, Coroutine, Callable, Any
+from typing import (
+    Any,
+    Dict,
+    List,
+    Union,
+    Optional,
+    Callable,
+    Coroutine,
+    TYPE_CHECKING
+)
 
+if TYPE_CHECKING:
+    from .client import Bot, AutoShardedBot
 
 __all__ = (
     "BaseCommand",
@@ -150,8 +161,8 @@ class InteractionContext:
         The user who fired this cmd 
     token: :class:`~str`
         token of this interaction, (valid for 15 mins)"""
-    def __init__(self, bot, interaction) -> None:
-        self.bot: commands.Bot = bot
+    def __init__(self, bot: Union[Bot, AutoShardedBot], interaction) -> None:
+        self.bot: Union[Bot, AutoShardedBot] = bot
         self._state = bot._connection
         self._session: ClientSession = self.bot.http._HTTPClient__session
         self.version: int = interaction.version
