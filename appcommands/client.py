@@ -45,6 +45,8 @@ class ApplicationMixin:
         """Adds a app command,
         usually used when subclassed
 
+        .. versionadded:: 2.0
+
         Parameters
         ------------
         command: :class:`~appcommands.models.BaseCommand`
@@ -54,6 +56,8 @@ class ApplicationMixin:
     def remove_app_command(self, command: BaseCommand) -> None:
         """Remove a :class:`~appcommands.models.BaseCommand` from the internal list
         of commands.
+
+        .. versionadded:: 2.0
 
         Parameters
         -----------
@@ -69,6 +73,8 @@ class ApplicationMixin:
     def slashcommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
         r"""Adds a slash command to bot
         same as :meth:`~appcommands.models.slashcommand`
+
+        .. versionadded:: 2.0
 
         Parameters
         -----------
@@ -113,6 +119,8 @@ class ApplicationMixin:
         r"""Adds a message command to bot
         same as :meth:`~appcommands.models.messagecommand`
 
+        .. versionadded:: 2.0
+
         Parameters
         -----------
         name: :class:`~str`
@@ -152,6 +160,8 @@ class ApplicationMixin:
         r"""Adds a message command to bot
         same as :meth:`~appcommands.models.usetcommand`
 
+        .. versionadded:: 2.0
+
         Parameters
         -----------
         name: :class:`~str`
@@ -190,6 +200,8 @@ class ApplicationMixin:
     def slashgroup(self, name: str, description: Optional[str] = "No description.") -> SubCommandGroup:
         """The group by which subcommands are to be derived for slash commands
 
+        .. versionadded:: 2.0
+
         Parameters
         -------------
         name: :class:`~str`
@@ -219,7 +231,10 @@ class ApplicationMixin:
     async def register_commands(self) -> None:
         r"""|coro|
 
-        The coro which registers slash commands"""
+        The coro which registers slash commands
+
+        .. versionadded:: 2.0
+        """
         commands = []
         registered_commands = await self.http.get_global_commands(self.user.id)
         for command in [cmd for cmd in self.to_register if not cmd.guild_ids]:
@@ -302,6 +317,8 @@ class ApplicationMixin:
     def appcommands(self) -> Mapping[int, Union[SlashCommand, SubCommandGroup]]:
         """The all application command the bot has
 
+        .. versionadded:: 2.0
+
         Returns
         --------
         Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
@@ -311,6 +328,8 @@ class ApplicationMixin:
     @property
     def subcommands(self) -> Mapping[int, Union[SlashCommand, SubCommandGroup]]:
         """The slashcommands' subcommands
+
+        .. versionadded:: 2.0
 
         Returns
         --------
@@ -322,6 +341,8 @@ class ApplicationMixin:
     def slashcommands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]]:
         """All slashcommands with id
 
+        .. versionadded:: 2.0
+
         Returns
         ---------
         Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
@@ -331,6 +352,8 @@ class ApplicationMixin:
     @property
     def usercommands(self) -> Mapping[str, UserCommand]:
         """All usercommands with id
+
+        .. versionadded:: 2.0
 
         Returns
         ---------
@@ -342,6 +365,8 @@ class ApplicationMixin:
     def messagecommands(self) -> Mapping[str, MessageCommand]:
         """All messagecommands with id
 
+        .. versionadded:: 2.0
+
         Returns
         ---------
         Mapping[:class:`~int`, :class:`~appcommands.models.MessageCommand`]
@@ -350,6 +375,8 @@ class ApplicationMixin:
 
     def get_slash_commands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]]:
         """Gets every slash commands registered in the current running instance
+
+        .. versionadded:: 2.0
 
         Returns
         ---------
@@ -365,6 +392,8 @@ class ApplicationMixin:
     def get_slash_command(self, name: str) -> Union[SlashCommand, SubCommandGroup]:
         """Gives a slash command registered in this module
         
+        .. versionadded:: 2.0
+
         Parameters
         -----------
         name: :class:`~str`
@@ -378,6 +407,8 @@ class ApplicationMixin:
 
     def get_user_commands(self) -> Mapping[str, UserCommand]:
         """Gets every user commands registered in the current running instance
+
+        .. versionadded:: 2.0
 
         Returns
         ---------
@@ -393,6 +424,8 @@ class ApplicationMixin:
     def get_user_command(self, name: str) -> UserCommand:
         """Gives a user command registered in this module
         
+        .. versionadded:: 2.0
+
         Parameters
         -----------
         name: :class:`~str`
@@ -406,6 +439,8 @@ class ApplicationMixin:
 
     def get_message_commands(self) -> Mapping[str, MessageCommand]:
         """Gets every user commands registered in the current running instance
+
+        .. versionadded:: 2.0
 
         Returns
         ---------
@@ -434,6 +469,8 @@ class ApplicationMixin:
 
     def get_interaction_context(self, interaction: discord.Interaction) -> InteractionContext:
         """The method usually implemented to use custom contexts
+
+        .. versionadded:: 2.0
 
         Parameters
         -----------
