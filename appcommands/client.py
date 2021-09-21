@@ -34,11 +34,11 @@ class ApplicationMixin:
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.to_register = []
-        self.__appcommands = {}
-        self.__subcommands = {}
-        self.__usercommands = {}
-        self.__slashcommands = {}
-        self.__messagecommans = {}
+        self.__appcommands: dict = {}
+        self.__subcommands: dict = {}
+        self.__usercommands: dict = {}
+        self.__slashcommands: dict = {}
+        self.__messagecommands: dict = {}
         self.add_listener(self.interaction_handler, "on_interaction")
 
     def add_app_command(self, command: BaseCommand) -> None:
@@ -260,6 +260,11 @@ class ApplicationMixin:
                     setattr(cmd, "id", int(i['id']))
                     if cmd.type == 1:
                         self.__slashcommands[int(i.get('id'))] = cmd
+                    elif cmd.type == 2:
+                        self.__usercommands[int(i.get('id'))] = cmd
+                    else:
+                        self.__messagecommands[int(i.get('id'))] = cmd
+
                     self.__appcommands[int(i["id"])] = cmd
 
         cmds = await self.http.bulk_upsert_global_commands(self.user.id, commands)
