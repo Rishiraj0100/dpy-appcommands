@@ -41,10 +41,16 @@ class SlashCog(Cog):
             bot.add_cog(MyCog(bot))
 
     """
+    __app_commands__: tuple
+    __user_commands__: tuple
     __slash_commands__: tuple
+    __message_commands__: tuple
     def __new__(cls, *args, **kwargs):
         self = super().__new__(cls, *args, **kwargs)
         slashcmds = {}
+        appcmds = {}
+        usercmds = {}
+        msgcmds = {}
         for base in reversed(self.__class__.__mro__):
             for elem, value in base.__dict__.items():
                 if elem in slashcmds:
@@ -52,10 +58,22 @@ class SlashCog(Cog):
     
                 if isinstance(value, SlashCommand):
                     slashcmds[elem] = value
+                    appcmds[elem] = value
                 elif isinstance(value, SubCommandGroup):
                     slashcmds[elem] = value
-                    
+                    appcmds[elem] = value
+                elif isinstance(value, MessageCommand):
+                    msgcmds[elem] = value
+                    appcmds[elem] = value
+                elif isinstance(value, UserCommand):
+                    usercmds[elem] = value
+                    appcmds[elem] = value
+
         self.__slash_commands__ = tuple(cmd for cmd in slashcmds.values())
+        self.__user_commands__ = tuple(cmd for cmd in usercmds.values())
+        self.__message_commands__ = tuple(cmd for cmd in msgcmds.values())
+        self.__app_commands__ = tuple(cmd for cmd in appcmds.values())
+
         return self
 
     def _inject(self, bot):
