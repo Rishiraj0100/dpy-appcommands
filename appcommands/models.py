@@ -175,6 +175,17 @@ class InteractionContext:
         self.__invoked = False
 
     async def invoke(self, cmd) -> None:
+        """|coro|
+
+        The Coroutine that invokes commands
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        cmd: :class:`~appcommands.models.BaseCommand`
+            The command which will be invoked
+        """
         if self.__invoked:
             raise TypeError("This context has already been invoked, you can't invoke it again")
 
@@ -516,6 +527,8 @@ class SlashCommand(BaseCommand):
 class SubCommandGroup(BaseCommand):
     """SubCommand wrapper class
 
+    .. versionadded:: 2.0
+
     Parameters
     ------------
     name: :class:`~str`
@@ -577,7 +590,9 @@ class SubCommandGroup(BaseCommand):
         return "<SubCommandGroup name={0.name} description={1} subcommands={0.subcommands}>".format(self, self.description)
 
 class UserCommand(BaseCommand):
-    """Context-Menu user command wrapper class 
+    """Context-Menu user command wrapper class
+
+    .. versionadded:: 2.0
     
     Parameters
     ------------
@@ -638,8 +653,10 @@ class UserCommand(BaseCommand):
         return {"name": self.name, "description": "", "type": self.type}
 
 class MessageCommand(BaseCommand):
-    """Context-menu message wrapper class 
-    
+    """Context-menu message wrapper class
+
+    .. versionadded:: 2.0
+
     Parameters
     ------------
     name: :class:`~str`
@@ -746,8 +763,10 @@ def command(cls: BaseCommand = MISSING, **kwargs) -> Callable[[Callable], BaseCo
     return wrapper
 
 def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
-    """The slash command wrapper 
-    
+    """The slash command wrapper
+
+    .. versionadded:: 2.0
+
     Parameters
     ------------
     name: :class:`~str`
@@ -784,8 +803,10 @@ def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], 
     return command(cls=cls, **kwargs)
 
 def usercommand(cls: UserCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
-    """The user command wrapper 
-    
+    """The user command wrapper
+
+    .. versionadded:: 2.0
+
     Parameters
     ------------
     name: :class:`~str`
@@ -818,7 +839,9 @@ def usercommand(cls: UserCommand = MISSING, **kwargs) -> Callable[[Callable], Sl
 
 def messagecommand(cls: MessageCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
     """The message command wrapper 
-    
+
+    .. versionadded:: 2.0
+
     Parameters
     ------------
     name: :class:`~str`
@@ -851,6 +874,8 @@ def messagecommand(cls: MessageCommand = MISSING, **kwargs) -> Callable[[Callabl
 
 def slashgroup(**kwargs) -> SubCommandGroup:
     """The slash subcommand group wrapper
+
+    .. versionadded:: 2.0
 
     Parameters
     ------------
