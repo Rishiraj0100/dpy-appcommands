@@ -17,6 +17,7 @@ from discord.ext import commands
 from discord.enums import InteractionType
 from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any, TYPE_CHECKING
 
+print(TYPE_CHECKING)
 
 if TYPE_CHECKING:
     from .models import (
