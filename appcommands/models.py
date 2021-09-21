@@ -21,7 +21,7 @@ from typing import (
     Coroutine,
     TYPE_CHECKING
 )
-
+print(TYPE_CHECKING)
 if TYPE_CHECKING:
     from .client import Bot, AutoShardedBot
 
