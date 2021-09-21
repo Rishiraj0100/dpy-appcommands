@@ -21,7 +21,7 @@ from typing import (
     Coroutine,
     TYPE_CHECKING
 )
-print(TYPE_CHECKING)
+
 if TYPE_CHECKING:
     from .client import Bot, AutoShardedBot
 
@@ -230,12 +230,10 @@ class InteractionContext:
             for i, v in _data.items():
                 v["id"] = int(i)
                 message = v
-            channel = self.interaction._state.get_channel(int(message["channel_id"]))
+            channel = self._state.get_channel(int(message["channel_id"]))
             if channel is None:
-                data = await self.interaction._state.http.start_private_message(
-                    int(message["author"]["id"])
-                )
-                channel = self.interaction._state.add_dm_channel(data)
+                u = discord.User(state=self._state, data=message['author'])
+                channel = await u._get_channel()
 
             target = Message(state=self.interaction._state, channel=channel, data=message)
             if cmd.cog:
