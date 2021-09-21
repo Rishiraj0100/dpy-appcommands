@@ -19,13 +19,13 @@ from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any, T
 
 print(TYPE_CHECKING)
 
-if TYPE_CHECKING:
-    from .models import (
+#if TYPE_CHECKING:
+from .models import (
         BaseCommand,
         MessageCommand,
         SlashCommand,
         UserCommand
-    )
+)
 
 __all__ = ("Bot", "AutoShardedBot")
 
