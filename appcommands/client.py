@@ -5,19 +5,26 @@ import importlib
 
 from .utils import *
 from .models import (
-    BaseCommand,
     command as _cmd,
     InteractionContext,
-    MessageCommand,
-    SlashCommand,
     SubCommandGroup,
-    UserCommand
+    messagecommand as _mcmd,
+    usercommand as _ucmd
 )
 
 from discord import http, ui
 from discord.ext import commands
 from discord.enums import InteractionType
-from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any
+from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any, TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from .models import (
+        BaseCommand,
+        MessageCommand,
+        SlashCommand,
+        UserCommand
+    )
 
 __all__ = ("Bot", "AutoShardedBot")
 
@@ -87,7 +94,7 @@ class ApplicationMixin:
         Raises
         --------
         TypeError
-           The passed callback is not coroutine or it is already a SlashCommand
+           The passed callback is not coroutine or it is already an AppCommand
 
         Returns
         --------
@@ -95,6 +102,84 @@ class ApplicationMixin:
             The slash command."""
         def decorator(func) -> SlashCommand:
             wrapped = _cmd(cls=cls, **kwargs)
+            cmd = wrapped(func)
+            self.add_app_command(cmd)
+            return cmd
+
+        return decorator
+
+    def messagecommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], MessageCommand]:
+        r"""Adds a message command to bot
+        same as :meth:`~appcommands.models.messagecommand`
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        guild_ids: Optional[List[:class:`~int`]]
+            list of ids of the guilds for which command is to be added, (optional)
+        cls: :class:`~appcommands.models.MessageCommand`
+            The custom command class, must be a subclass of :class:`~appcommands.models.MessageCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @bot.messagecommand(name="ID")
+            async def some_func(ctx, message: discord.Message):
+                await ctx.send(f"Id of that message is {message.id}")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already an AppCommand
+
+        Returns
+        --------
+        Callable[[Callable], :class:`~appcommands.models.MessageCommand`]
+            The slash command."""
+        def decorator(func) -> MessageCommand:
+            wrapped = _mcmd(cls=cls, **kwargs)
+            cmd = wrapped(func)
+            self.add_app_command(cmd)
+            return cmd
+
+        return decorator
+
+    def usercommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], UserCommand]:
+        r"""Adds a message command to bot
+        same as :meth:`~appcommands.models.usetcommand`
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        guild_ids: Optional[List[:class:`~int`]]
+            list of ids of the guilds for which command is to be added, (optional)
+        cls: :class:`~appcommands.models.UserCommand`
+            The custom command class, must be a subclass of :class:`~appcommands.models.UserCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @bot.usercommand(name="ID")
+            async def some_func(ctx, user: discord.Member):
+                await ctx.send(f"Id of that user is {user.id}")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already an AppCommand
+
+        Returns
+        --------
+        Callable[[Callable], :class:`~appcommands.models.UserCommand`]
+            The slash command."""
+        def decorator(func) -> UserCommand:
+            wrapped = _ucmd(cls=cls, **kwargs)
             cmd = wrapped(func)
             self.add_app_command(cmd)
             return cmd
