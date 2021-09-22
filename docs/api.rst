@@ -3,16 +3,17 @@
 API Reference
 =============
 
-SubModules
+The following section outlines the API of appcommands module
 
-appcommands.client Module
-----------------------------------
+Bots
+-----
 
-.. currentmodule:: appcommands.client
+Bot
+~~~~
 
-.. attributetable:: Bot
+.. attributetable:: appcommands.client.Bot
 
-.. autoclass:: Bot
+.. autoclass:: appcommands.client.Bot
     :members: add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands, slashgroup
 
     .. automethod:: Bot.slashcommand(**kwargs)
@@ -24,11 +25,61 @@ appcommands.client Module
     .. automethod:: Bot.usercommand(**kwargs)
         :decorator:
 
+AutoShardedBot
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: appcommands.client.AutoShardedBot
+
 .. autoclass:: AutoShardedBot
     :members:
 
-appcommands.models Module
-----------------------------------
+
+Commands
+----------
+
+Decorators
+~~~~~~~~~~~~
+
+.. autofunction:: appcommands.models.command
+    :decorator:
+
+.. autofunction:: appcommands.models.messagecommand
+    :decorator:
+
+.. autofunction:: appcommands.models.slashcommand
+    :decorator:
+
+.. autofunction:: appcommands.models.usercommand
+    :decorator:
+
+Commands
+~~~~~~~~~~~
+
+.. currentmodule:: appcommands.models
+
+.. attributetable:: SlashCommand
+
+.. autoclass:: SlashCommand
+    :members:
+
+.. autoclass:: SubCommandGroup
+    :members:
+    :exclude-members: subcommand
+
+    .. automethod:: SubCommandGroup.subcommand(**kwargs)
+        :decorator:
+
+.. autoclass:: MessageCommand
+    :members:
+
+.. autoclass:: UserCommand
+    :members:
+
+Module References
+------------------
+
+appcommands.models Module Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: appcommands.models
 
@@ -49,6 +100,7 @@ appcommands.models Module
     :exclude-members: subcommand
 
     .. automethod:: SubCommandGroup.subcommand()
+        :decorator:
 
 .. autoclass:: UserCommand
     :members:
@@ -56,24 +108,30 @@ appcommands.models Module
 .. autoclass:: MessageCommand
     :members:
 
-.. automethod:: appcommands.models.command()
+.. automethod:: appcommands.models.command(**kwargs)
+    :decorator:
 
-.. automethod:: appcommands.models.slashcommand()
+.. autofunction:: appcommmands.models.slashgroup
 
-.. automethod:: appcommands.models.usercommand()
+.. automethod:: appcommands.models.slashcommand(**kwargs)
+    :decorator:
+
+.. automethod:: appcommands.models.usercommand(**kwargs)
+    :decorator:
 
 .. automethod:: appcommands.models.messagecommand()
+    :decorator:
 
 
-appcommands.cog Module
-----------------------------------
+appcommands.cog Module Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: appcommands.cog
 
-.. autoclass:: SlashCog
+.. autoclass:: App
 
-appcommands.enums Module
-----------------------------------
+appcommands.enums Module Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: appcommands.enums
 
