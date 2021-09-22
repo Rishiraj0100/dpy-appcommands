@@ -13,11 +13,11 @@ appcommands.client Module
 .. autoclass:: Bot
     :members: add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands, slashgroup
 
-    .. automethod:: slashcommand
+    .. automethod:: @Bot.slashcommand()
 
-    .. automethod:: messagecommand
+    .. automethod:: @Bot.messagecommand()
 
-    .. automethod:: usercommand
+    .. automethod:: @Bot.usercommand()
 
 .. autoclass:: AutoShardedBot
     :members:
