@@ -11,8 +11,7 @@ appcommands.client Module
 .. currentmodule:: appcommands.client
 
 .. autoclass:: Bot
-    :members:
-    :inherited-members: ApplicationMixin
+    :members: ApplicationMixin
 
 .. autoclass:: AutoShardedBot
     :members:
