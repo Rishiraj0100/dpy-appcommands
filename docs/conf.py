@@ -23,6 +23,7 @@ extensions = [
     'sphinxcontrib.asyncio',
     'extensions.attributeable'
 ]
+branch = 'alpha' if version.endswith('a') else 'v' + version
 
 templates_path = ['_templates']
 master_doc = 'index'
