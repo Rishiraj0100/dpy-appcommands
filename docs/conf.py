@@ -21,6 +21,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinxcontrib.asyncio',
+    'attributeable'
 ]
 
 templates_path = ['_templates']
