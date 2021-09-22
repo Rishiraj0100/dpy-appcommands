@@ -10,7 +10,7 @@ appcommands.client Module
 
 .. currentmodule:: appcommands.client
 
-.. attributeable:: Bot
+.. attributetable:: Bot
 
 .. autoclass:: Bot
     :members: add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands, slashgroup
