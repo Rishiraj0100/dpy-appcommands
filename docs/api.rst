@@ -16,10 +16,13 @@ appcommands.client Module
     :members: add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands, slashgroup
 
     .. automethod:: Bot.slashcommand()
+        :decorator:
 
     .. automethod:: Bot.messagecommand()
+        :decorator:
 
     .. automethod:: Bot.usercommand()
+        :decorator:
 
 .. autoclass:: AutoShardedBot
     :members:
