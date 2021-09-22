@@ -27,9 +27,33 @@ extensions = [
 templates_path = ['_templates']
 master_doc = 'index'
 language = None
+autodoc_typehints = 'none'
+
+extlinks = {
+    'issue': ('https://github.com/Rishiraj0100/dpy-appcommands/issues/%s', 'GH-'),
+}
+
 exclude_patterns = ['_build']
-html_theme = 'sphinx_rtd_theme'
+pygments_style = 'friendly'
+
+html_experimental_html5_writer = True
+
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
+html_theme = 'basic'
 autodoc_member_order = "bysource"
+html_static_path = ['_static']
+html_context = {
+  'discord_invite': 'https://discord.gg/zdrSUu98BP'
+}
+
+resource_links = {
+  'discord': 'https://discord.gg/zdrSUu98BP',
+  'issues': 'https://github.com/Rishiraj0100/dpy-appcommands/issues',
+  'discussions': 'https://github.com/Rishiraj0100/dpy-appcommands/discussions',
+  'examples': f'https://github.com/Rishiraj0100/dpy-appcommands/tree/{branch}/examples',
+}
+
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'discord': ('https://discordpy.readthedocs.io/en/master', None)
@@ -40,3 +64,11 @@ rst_prolog = """
 .. |coroutine_link| replace:: *coroutine*
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
+html_search_scorer = '_static/scorer.js'
+
+html_js_files = [
+  'custom.js',
+  'settings.js',
+  'copy.js',
+  'sidebar.js'
+]
