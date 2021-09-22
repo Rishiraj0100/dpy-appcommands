@@ -116,17 +116,17 @@ class SlashCog(Cog):
 
         for cmd in updated_list:
             if isinstance(cmd, SlashCommand):
-                slashcmds.append(value)
-                appcmds.append(value)
+                slashcmds.append(cmd)
+                appcmds.append(cmd)
             elif isinstance(cmd, SubCommandGroup):
-                slashcmds.append(value)
-                appcmds.append(value)
+                slashcmds.append(cmd)
+                appcmds.append(cmd)
             elif isinstance(cmd, MessageCommand):
-                msgcmds.append(value)
-                appcmds.append(value)
+                msgcmds.append(cmd)
+                appcmds.append(cmd)
             elif isinstance(cmd, UserCommand):
-                usercmds.append(value)
-                appcmds.append(value)
+                usercmds.append(cmd)
+                appcmds.append(cmd)
 
         self.__app_commands__ = (i for i in appcmds)
         self.__user_commands__ = (i for i in usercmds)
