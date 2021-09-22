@@ -1,3 +1,6 @@
+import os
+import sys
+
 from appcommands import __version__
 
 project = 'dpy-appcommands'
@@ -9,7 +12,11 @@ version = __version__
 # The full version, including alpha/beta/rc tags
 release = version
 
+sys.path.insert(0, os.path.abspath('..'))
+sys.path.append(os.path.abspath('extensions'))
+
 extensions = [
+    'builder',
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.extlinks',
@@ -21,7 +28,12 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinxcontrib.asyncio',
-    'extensions.attributeable'
+    'sphinxcontrib_trio',
+    'details',
+    'exception_hierarchy',
+    'attributetable',
+    'resourcelinks',
+    'nitpick_file_ignorer',
 ]
 branch = 'alpha' if version.endswith('a') else 'v' + version
 
