@@ -9,23 +9,18 @@ from .models import (
     InteractionContext,
     SubCommandGroup,
     messagecommand as _mcmd,
-    usercommand as _ucmd
+    usercommand as _ucmd,
+    BaseCommand,
+    MessageCommand,
+    SlashCommand,
+    UserCommand
 )
 
 from discord import http, ui
 from discord.ext import commands
 from discord.enums import InteractionType
-from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any, TYPE_CHECKING
+from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any
 
-print(TYPE_CHECKING)
-
-#if TYPE_CHECKING:
-from .models import (
-        BaseCommand,
-        MessageCommand,
-        SlashCommand,
-        UserCommand
-)
 
 __all__ = ("Bot", "AutoShardedBot")
 
