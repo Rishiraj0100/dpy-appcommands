@@ -30,7 +30,6 @@ extensions = [
     'sphinxcontrib.asyncio',
     'sphinxcontrib_trio',
     'details',
-    'exception_hierarchy',
     'attributetable',
     'resourcelinks',
     'nitpick_file_ignorer',
