@@ -53,8 +53,11 @@ class SlashCog(Cog):
         msgcmds = {}
         for base in reversed(self.__class__.__mro__):
             for elem, value in base.__dict__.items():
-                if elem in slashcmds:
-                    del slashcmds[elem]
+                if elem in appcmds:
+                    del appcmds[elem]
+                    slashcmds.pop(elem)
+                    usercmds.pop(elem)
+                    msgcmds.pop(elem)
     
                 if isinstance(value, SlashCommand):
                     slashcmds[elem] = value
@@ -78,10 +81,10 @@ class SlashCog(Cog):
 
     def _inject(self, bot):
         new_list = [i for i in self.__app_commands__]
-        to_remove, updated_list = [], []
+        to_remove, updated_list, appcmds, msgcmds, slashcmds, usercmds = [], [], [], [], [], []
         for index, cmd in enumerate(new_list):
             cmd.cog = self
-            if isinstance(cmd, SlashCommand):
+            if isinstance(cmd, (SlashCommand, UserCommand, MessageCommand)):
                 setattr(self.__class__, cmd.callback.__name__, cmd.__func__)
 
             if isinstance(cmd, SubCommandGroup):
@@ -111,7 +114,24 @@ class SlashCog(Cog):
             if not cmd in to_remove:
                 updated_list.append(cmd)
 
-        self.__app_commands__ = (i for i in updated_list)
+        for cmd in updated_list:
+            if isinstance(cmd, SlashCommand):
+                slashcmds.append(value)
+                appcmds.append(value)
+            elif isinstance(cmd, SubCommandGroup):
+                slashcmds.append(value)
+                appcmds.append(value)
+            elif isinstance(cmd, MessageCommand):
+                msgcmds.append(value)
+                appcmds.append(value)
+            elif isinstance(cmd, UserCommand):
+                usercmds.append(value)
+                appcmds.append(value)
+
+        self.__app_commands__ = (i for i in appcmds)
+        self.__user_commands__ = (i for i in usercmds)
+        self.__message_commands__ = (i for i in msgcmds)
+        self.__slash_commands__ = (i for i in slashcmds)
         return super()._inject(bot)
         
     def _eject(self, bot):
