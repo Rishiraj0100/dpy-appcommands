@@ -246,7 +246,7 @@ class InteractionContext:
                 u = discord.User(state=self._state, data=message['author'])
                 channel = await u._get_channel()
 
-            target = Message(state=self.interaction._state, channel=channel, data=message)
+            target = discord.Message(state=self.interaction._state, channel=channel, data=message)
             if cmd.cog:
                 cog = self.bot.cogs.get(cmd.cog.qualified_name)
                 if cog:
