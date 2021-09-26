@@ -11,9 +11,9 @@ Bots
 Bot
 ~~~~
 
-.. attributetable:: appcommands.client.Bot
+.. attributetable:: appcommands.Bot
 
-.. autoclass:: appcommands.client.Bot
+.. autoclass:: appcommands.Bot
     :members: add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands, slashgroup
 
     .. automethod:: Bot.slashcommand(**kwargs)
@@ -28,9 +28,9 @@ Bot
 AutoShardedBot
 ~~~~~~~~~~~~~~~~
 
-.. attributetable:: appcommands.client.AutoShardedBot
+.. attributetable:: appcommands.AutoShardedBot
 
-.. autoclass:: AutoShardedBot
+.. autoclass:: appcommands.AutoShardedBot
     :members:
 
 
@@ -40,41 +40,40 @@ Commands
 Decorators
 ~~~~~~~~~~~~
 
-.. autofunction:: appcommands.models.command
+.. autofunction:: appcommands.command
     :decorator:
 
-.. autofunction:: appcommands.models.messagecommand
+.. autofunction:: appcommands.messagecommand
     :decorator:
 
-.. autofunction:: appcommands.models.slashcommand
+.. autofunction:: appcommands.slashcommand
     :decorator:
 
-.. autofunction:: appcommands.models.usercommand
+.. autofunction:: appcommands.usercommand
     :decorator:
 
 Commands
 ~~~~~~~~~~~
 
-.. currentmodule:: appcommands.models
 
-.. attributetable:: SlashCommand
+.. attributetable:: appcommands.SlashCommand
 
-.. autoclass:: SlashCommand
+.. autoclass:: appcommands.SlashCommand
     :members:
 
-.. attributetable:: SubCommandGroup
+.. attributetable:: appcommands.SubCommandGroup
 
-.. autoclass:: SubCommandGroup
+.. autoclass:: Sappcommands.ubCommandGroup
     :members:
     :exclude-members: subcommand
 
     .. automethod:: SubCommandGroup.subcommand(**kwargs)
         :decorator:
 
-.. autoclass:: MessageCommand
+.. autoclass:: appcommands.MessageCommand
     :members:
 
-.. autoclass:: UserCommand
+.. autoclass:: appcommands.UserCommand
     :members:
 
 Module References
@@ -83,36 +82,32 @@ Module References
 appcommands.models Module Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. currentmodule:: appcommands.models
+.. attributetable:: appcommands.InteractionContext
 
-.. attributetable:: InteractionContext
-
-.. autoclass:: InteractionContext
+.. autoclass:: appcommands.InteractionContext
     :members:
 
-.. attributetable:: Choice
+.. attributetable:: appcommands.Choice
 
-.. autoclass:: Choice
+.. autoclass:: appcommands.Choice
     :members:
 
-.. attributetable:: Option
+.. attributetable:: appcommands.Option
 
-.. autoclass:: Option
+.. autoclass:: appcommands.Option
     :members:
 
 
 appcommands.cog Module Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. currentmodule:: appcommands.cog
-
-.. autoclass:: Cog
+.. autoclass:: appcommands.Cog
 
 appcommands.enums Module Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. currentmodule:: appcommands.enums
+.. attributetable:: appcommands.OptionType
 
-.. autoclass:: OptionType
+.. autoclass:: appcommands.OptionType
     :members:
 
