@@ -63,7 +63,7 @@ Commands
 
 .. attributetable:: appcommands.SubCommandGroup
 
-.. autoclass:: Sappcommands.ubCommandGroup
+.. autoclass:: appcommands.SubCommandGroup
     :members:
     :exclude-members: subcommand
 
