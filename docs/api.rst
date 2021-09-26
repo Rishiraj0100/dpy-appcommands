@@ -55,7 +55,6 @@ Decorators
 Commands
 ~~~~~~~~~~~
 
-
 .. attributetable:: appcommands.SlashCommand
 
 .. autoclass:: appcommands.SlashCommand
