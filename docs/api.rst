@@ -62,6 +62,8 @@ Commands
 .. autoclass:: SlashCommand
     :members:
 
+.. attributetable:: SubCommandGroup
+
 .. autoclass:: SubCommandGroup
     :members:
     :exclude-members: subcommand
@@ -83,44 +85,20 @@ appcommands.models Module Reference
 
 .. currentmodule:: appcommands.models
 
+.. attributetable:: InteractionContext
+
 .. autoclass:: InteractionContext
     :members:
+
+.. attributetable:: Choice
 
 .. autoclass:: Choice
     :members:
 
+.. attributetable:: Option
+
 .. autoclass:: Option
     :members:
-
-.. autoclass:: SlashCommand
-    :members:
-
-.. autoclass:: SubCommandGroup
-    :members:
-    :exclude-members: subcommand
-
-    .. automethod:: SubCommandGroup.subcommand()
-        :decorator:
-
-.. autoclass:: UserCommand
-    :members:
-
-.. autoclass:: MessageCommand
-    :members:
-
-.. automethod:: appcommands.models.command(**kwargs)
-    :decorator:
-
-.. autofunction:: appcommmands.models.slashgroup
-
-.. automethod:: appcommands.models.slashcommand(**kwargs)
-    :decorator:
-
-.. automethod:: appcommands.models.usercommand(**kwargs)
-    :decorator:
-
-.. automethod:: appcommands.models.messagecommand()
-    :decorator:
 
 
 appcommands.cog Module Reference
@@ -128,7 +106,7 @@ appcommands.cog Module Reference
 
 .. currentmodule:: appcommands.cog
 
-.. autoclass:: App
+.. autoclass:: Cog
 
 appcommands.enums Module Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
