@@ -9,21 +9,21 @@ from .models import (
     MessageCommand
 )
 
-from discord.ext.commands import Cog
+from discord.ext import commands
 from typing import Optional, Union, List
 
 
-class SlashCog(Cog):
-    """The cog for extensions
+class Cog(commands.Cog):
+    """The cog for extension commands
 
     Example
     ----------
 
     .. code-block:: python3
 
-        from appcommands import cog, slashcommand, slashgroup
+        from appcommands import Cog, slashcommand, slashgroup
 
-        class MyCog(cog.SlashCog):
+        class MyCog(Cog):
             def __init__(self, bot):
                 self.bot = bot
 
