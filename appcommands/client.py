@@ -286,7 +286,7 @@ class ApplicationMixin:
 
         for guild_id, data in perms.items():
             
-            if not perm:
+            if not data:
                 continue
 
             print(data)
