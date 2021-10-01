@@ -272,7 +272,7 @@ class ApplicationMixin:
                 for i in cmds:
                     cmd = discord.utils.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
                     setattr(cmd, "id", int(i['id']))
-                    if cmd.__permissions__ != []:
+                    if cmd.__permissions__:
                         print(cmd.__permissions__)
                         perms[guild_id].extend(cmd.__permissions__)
 
