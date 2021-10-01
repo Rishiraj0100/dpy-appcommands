@@ -6,7 +6,7 @@ import inspect
 import functools
 
 from .utils import *
-from .enums import OptionType
+from .enums import OptionType, PermissionType
 
 from discord import ui, http
 from aiohttp.client import ClientSession
@@ -156,6 +156,33 @@ class BaseCommand:
 
     def create_permission(self, id: int, type: int, value: bool) -> None:
         self._update_perms({"id": id, "type": type, "value": value})
+
+    def generate_permissions(
+        allowed_roles: List[int] = [],
+        allowed_users: List[int] = [],
+        disallowed_roles: List[int] = [],
+        disallowed_users: List[int] = []
+    ) -> None:
+        permissions = []
+
+        if allowed_roles:
+            permissions.extend(
+                [self.create_permission(id, PermissionType.ROLE, True) for id in set(allowed_roles)]
+            )
+        if allowed_users:
+            permissions.extend(
+                [self.create_permission(id, PermissionType.USER, True) for id in set(allowed_users)]
+            )
+        if disallowed_roles:
+            permissions.extend(
+                [self.create_permission(id, PermissionType.ROLE, False) for id in set(disallowed_roles)]
+            )
+        if disallowed_users:
+            permissions.extend(
+                [self.create_permission(id, PermissionType.USER, False) for id in set(disallowed_users)]
+            )
+
+        self._update_perms(permissions)
 
 class InteractionContext:
     """The ctx param given in CMD callbacks
