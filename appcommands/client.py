@@ -66,8 +66,8 @@ class ApplicationMixin:
         self.__messagecommands.pop(command.id)
 
     def slashcommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
-        r"""Adds a slash command to bot
-        same as :meth:`~appcommands.models.slashcommand`
+        r"""A decorator which adds a slash command to bot
+        same as :meth:`appcommands.slashcommand`
 
         .. versionadded:: 2.0
 
@@ -111,8 +111,8 @@ class ApplicationMixin:
         return decorator
 
     def messagecommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], MessageCommand]:
-        r"""Adds a message command to bot
-        same as :meth:`~appcommands.models.messagecommand`
+        r"""A decorator which adds a message command to bot
+        same as :meth:`appcommands.messagecommand`
 
         .. versionadded:: 2.0
 
@@ -152,8 +152,8 @@ class ApplicationMixin:
         return decorator
 
     def usercommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], UserCommand]:
-        r"""Adds a message command to bot
-        same as :meth:`~appcommands.models.usetcommand`
+        r"""A decorator which adds a message command to bot
+        same as :meth:`appcommands.usercommand`
 
         .. versionadded:: 2.0
 
@@ -521,8 +521,8 @@ class ApplicationMixin:
             await context.invoke(self.__appcommands[id])
 
 class Bot(ApplicationMixin, commands.Bot):
-    """The Bot
-    This is fully same as :class:`~discord.ext.commands.Bot`
+    """The Bot class.
+    This is a subclass of :class:`discord.ext.commands.Bot`
 
     Example
     ---------
@@ -537,8 +537,9 @@ class Bot(ApplicationMixin, commands.Bot):
     pass
 
 class AutoShardedBot(ApplicationMixin, commands.AutoShardedBot):
-    """The AutoShardedBot class
-    This is fully same as :class:`~discord.ext.commands.AutoShardedBot`
+    """The AutoShardedBot class.
+    This is a subclass of :class:`discord.ext.commands.AutoShardedBot`
+    and is same as :class:`appcommands.Bot`
 
     Example
     ---------
