@@ -9,11 +9,11 @@ Firstly, we will begin from installing dpy-appcommands:
 Installing
 -----------
 
-.. code-block::
+.. code-block:: shell
 
-    pip install -U git+https://github.com/SilentJungle399/dpy-appcommands
+    pip install dpy-appcommands -U
 
-Then we will make a client for it
+Then we will make a ``Bot``
 
 Initialising
 -------------
@@ -25,14 +25,14 @@ Initialising
 
     bot = Bot(command_prefix="$")
 
-Then we will make a command
+Then we will make a  slashcommand
 
-Creating a command
--------------------
+Creating a slashcommand
+-----------------------
 
 .. code-block:: python3
 
-    @bot.slash(name="hi", description="Hello!")
+    @bot.slashcommand(name="hi", description="Hello!")
     async def hi(ctx):
         await ctx.reply("Hello")
 
