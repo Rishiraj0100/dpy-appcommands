@@ -136,11 +136,26 @@ def generate_options(function, description: str = "No description.") -> List['Op
     return options
 
 class BaseCommand:
+    __permissions__: tuple = ()
     def __repr__(self) -> str:
         return "<appcommands.models.{0.__class__.__name__} name={0.name} description={1}>".format(self, self.description)
 
     def __eq__(self, other: Any) -> bool:
         return self.name == other.name and self.description == other.description
+
+    def _update_perms(self, data: Union[list, dict, tuple]) -> None:
+        perms = list(perm for perm in self.__permissions__)
+        if isinstance(data, dict):
+            perms.append(data)
+        elif isinstance(data, list):
+            perms.extend(data)
+        elif isinstance(data, tuple):
+            perms.extend(list(i for i in data))
+
+        self.__permissions__ = tuple(perm for perm in perms)
+
+    def create_permission(self, id: int, type: int, value: bool) -> None:
+        self._update_perms({"id": id, "type": type, "value": value})
 
 class InteractionContext:
     """The ctx param given in CMD callbacks
