@@ -288,6 +288,7 @@ class ApplicationMixin:
             if not perm:
                 continue
 
+            print(perm)
             await self.http.bulk_edit_guild_application_command_permissions(
                 self.user.id,
                 guild_id,
