@@ -136,7 +136,7 @@ def generate_options(function, description: str = "No description.") -> List['Op
     return options
 
 class BaseCommand:
-    __permissions__: tuple = ()
+    __permissions__: list = []
     def __repr__(self) -> str:
         return "<appcommands.models.{0.__class__.__name__} name={0.name} description={1}>".format(self, self.description)
 
@@ -152,7 +152,7 @@ class BaseCommand:
         elif isinstance(data, tuple):
             perms.extend(list(i for i in data))
 
-        self.__permissions__ = tuple(perm for perm in perms)
+        self.__permissions__ = list(perm for perm in perms)
 
     def create_permission(self, id: int, type: int, value: bool) -> None:
         self._update_perms({"id": id, "type": type, "value": value})
