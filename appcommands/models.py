@@ -186,7 +186,6 @@ class BaseCommand:
                 [self.create_permission(id, PermissionType.USER.value, False) for id in set(disallowed_users)]
             )
 
-        print(permissions)
         self._update_perms(permissions)
 
 class InteractionContext:
