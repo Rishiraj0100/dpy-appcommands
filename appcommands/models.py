@@ -154,8 +154,10 @@ class BaseCommand:
 
         self.__permissions__ = list(perm for perm in perms)
 
-    def create_permission(self, id: int, type: int, permission: bool) -> None:
-        self._update_perms({"id": str(id), "type": type, "permission": permission})
+    def create_permission(self, id: int, type: int, permission: bool) -> dict:
+        d = {"id": str(id), "type": type, "permission": permission}
+        self._update_perms(d)
+        return d
 
     def generate_permissions(
         self,
