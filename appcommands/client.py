@@ -273,7 +273,7 @@ class ApplicationMixin:
                     cmd = discord.utils.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
                     setattr(cmd, "id", int(i['id']))
                     if cmd.__permissions__:
-                        perms[guild_id].extend({"id": str(cmd.id), "permissions": cmd.__permissions__})
+                        perms[guild_id].append({"id": str(cmd.id), "permissions": cmd.__permissions__})
 
                     if cmd.type == 1:
                         self.__slashcommands[int(i.get('id'))] = cmd
@@ -284,15 +284,16 @@ class ApplicationMixin:
 
                     self.__appcommands[int(i["id"])] = cmd
 
-        for guild_id, perm in perms.items():
+        for guild_id, data in perms.items():
+            
             if not perm:
                 continue
 
-            print(perm)
+            print(data)
             await self.http.bulk_edit_guild_application_command_permissions(
                 self.user.id,
                 guild_id,
-                perm
+                data
             )
 
         cmds = await self.http.bulk_upsert_global_commands(self.user.id, commands)
