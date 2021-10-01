@@ -231,6 +231,7 @@ class ApplicationMixin:
         .. versionadded:: 2.0
         """
         commands = []
+        perms = {}
         registered_commands = await self.http.get_global_commands(self.user.id)
         for command in [cmd for cmd in self.to_register if not cmd.guild_ids]:
             json = command.to_dict()
@@ -254,12 +255,14 @@ class ApplicationMixin:
                 to_update = guild_commands[guild_id]
                 guild_commands[guild_id] = to_update + [json]
 
+        
         for guild_id in guild_commands:
             if not guild_commands[guild_id]:
                 continue
 
             try:
                 cmds = await self.http.bulk_upsert_guild_commands(self.user.id, guild_id, guild_commands[guild_id])
+                
             except Exception as e:
                 print(f"Failed to add guild commands for guild {guild_id}")
                 traceback.print_exc()
@@ -268,6 +271,9 @@ class ApplicationMixin:
                 for i in cmds:
                     cmd = discord.utils.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
                     setattr(cmd, "id", int(i['id']))
+                    if cmd.__permissions__:
+                        perms[cmd.id] = cmd.__permissions__
+
                     if cmd.type == 1:
                         self.__slashcommands[int(i.get('id'))] = cmd
                     elif cmd.type == 2:
@@ -286,6 +292,9 @@ class ApplicationMixin:
                 type=i["type"],
             )
             setattr(cmd, "id", int(i['id']))
+            if cmd.__permissions__:
+                perms[cmd.id] = cmd.__permissions__
+
             if cmd.type == 1:
                 self.__slashcommands[int(i.get('id'))] = cmd
             elif cmd.type == 2:
@@ -293,6 +302,7 @@ class ApplicationMixin:
             else:
                 self.__messagecommands[int(i.get('id'))] = cmd
 
+            
             if isinstance(cmd, SubCommandGroup):
                 self.__subcommands[int(i['id'])] = {}
                 for subcommand in cmd.subcommands:
