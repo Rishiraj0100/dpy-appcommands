@@ -158,6 +158,8 @@ class BaseCommand:
         self._update_perms({"id": id, "type": type, "value": value})
 
     def generate_permissions(
+        self,
+        *,
         allowed_roles: List[int] = [],
         allowed_users: List[int] = [],
         disallowed_roles: List[int] = [],
