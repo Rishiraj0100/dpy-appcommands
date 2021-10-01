@@ -226,7 +226,7 @@ class ApplicationMixin:
     async def register_commands(self) -> None:
         r"""|coro|
 
-        The coro which registers slash commands
+        It registers app commands
 
         .. versionadded:: 2.0
         """
@@ -248,6 +248,7 @@ class ApplicationMixin:
         guild_commands = {}
         async for guild in self.fetch_guilds(limit=None):
             guild_commands[guild.id] = []
+            perms[guild.id] = []
 
         for command in [cmd for cmd in self.to_register if cmd.guild_ids]:
             json = command.to_dict()
@@ -272,7 +273,7 @@ class ApplicationMixin:
                     cmd = discord.utils.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
                     setattr(cmd, "id", int(i['id']))
                     if cmd.__permissions__:
-                        perms[cmd.id] = cmd.__permissions__
+                        perms[guild_id].append(cmd.__permissions__)
 
                     if cmd.type == 1:
                         self.__slashcommands[int(i.get('id'))] = cmd
@@ -283,6 +284,16 @@ class ApplicationMixin:
 
                     self.__appcommands[int(i["id"])] = cmd
 
+        for guild_id, perm in perms.items():
+            if not perm:
+                continue
+
+            await self.http.bulk_edit_guild_application_command_permissions(
+                self.user.id,
+                guild_id,
+                perm
+            )
+
         cmds = await self.http.bulk_upsert_global_commands(self.user.id, commands)
         for i in cmds:
             cmd = discord.utils.get(
@@ -292,8 +303,6 @@ class ApplicationMixin:
                 type=i["type"],
             )
             setattr(cmd, "id", int(i['id']))
-            if cmd.__permissions__:
-                perms[cmd.id] = cmd.__permissions__
 
             if cmd.type == 1:
                 self.__slashcommands[int(i.get('id'))] = cmd
