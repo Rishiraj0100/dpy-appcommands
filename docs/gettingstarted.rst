@@ -14,11 +14,11 @@ Making a slash command.
 The basics
 ------------
 
-Firstly we will know to make a simple command
+Firstly we will know to make a simple slash command
 
 .. code-block:: python3
 
-    @bot.slash(name="cmdname", description="my desc")
+    @bot.slashcommand(name="cmdname", description="my desc")
     async def some_command(ctx):
         await ctx.reply("My content here!")
 
@@ -27,7 +27,7 @@ Making a little bit complicated command
 
 .. code-block:: python3
 
-    @bot.slash(name="hello", description="says hello to you or other!")
+    @bot.slashcommand(name="hello", description="says hello to you or other!")
     async def some_command(ctx, user: discord.Member = None):
         user = user or ctx.author
         await ctx.reply(f"Hello! {user.mention}")
@@ -37,7 +37,7 @@ Sending a hidden message
 
 .. code-block:: python3
 
-    @bot.slash(name="secret", description="my desc")
+    @bot.slashcommand(name="secret", description="my desc")
     async def some_command(ctx):
         await ctx.reply("Shhhh! It's a secret", ephemeral=True)
 
@@ -54,7 +54,7 @@ Options are currently available in 2 forms
 +=======+================================+
 |  1.   |  As a parameter in callback    |
 +-------+--------------------------------+
-|  2.   |  In ``@bot.slash()``           |
+|  2.   |  In ``@bot.slashcommand()``    |
 +-------+--------------------------------+
 
 Options are a basic thing for commands,
@@ -195,7 +195,7 @@ Making a slashcommand with choices
 
     choices = [Choice(name="dog"),Choice(name="cat"),Choice(name="tiger")]
 
-    @bot.slash(name="animal", description="choose an animal")
+    @bot.slashcommand(name="animal", description="choose an animal")
     async def Animal(ctx, animal: Option(name="animal", description="Choose an animal", choices=choices)):
        await ctx.reply(f"You chose {animal}")
 
@@ -209,9 +209,11 @@ The cog commands are useful if you want to create
 command in category or extensions, this will save
 file size of main file.
 
-To work with SlashCommand cogs, the should must be derived
-from :class:`~appcommands.cog.SlashCog`
-let's begin with cogs
+.. note::
+    To work with AppCommand cogs, your cog must be derived
+    from :class:`~appcommands.cog.Cog`
+
+Now, let's begin with cogs
 
 Making a cog command
 -----------------------
@@ -219,13 +221,13 @@ Making a cog command
 .. code-block:: python3
 
     import discord
-    from appcommands import cog
+    from appcommands import Cog, slashcommand
 
-    class MyCog(cog.SlashCog):
+    class MyCog(Cog):
         def __init__(self, bot):
             self.bot = bot
 
-        @cog.command(name="hello", description="Hello World!")
+        @slashcommand(name="hello", description="Hello World!")
         async def hello(self, ctx, user: discord.Member = None):
             user = user or ctx.author
             await ctx.reply(f"Hello {user.mention}!")
