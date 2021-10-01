@@ -285,11 +285,9 @@ class ApplicationMixin:
                     self.__appcommands[int(i["id"])] = cmd
 
         for guild_id, data in perms.items():
-            
             if not data:
                 continue
 
-            print(data)
             await self.http.bulk_edit_guild_application_command_permissions(
                 self.user.id,
                 guild_id,
