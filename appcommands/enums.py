@@ -66,6 +66,6 @@ class OptionType(IntEnum):
         if issubclass(t, float):
             return cls.FLOAT
 
-
-class MessageFlags:
-    EPHEMERAL = 1 << 6
+class PermissionType(IntEnum):
+    ROLE = 1
+    USER = 2
