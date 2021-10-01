@@ -273,7 +273,7 @@ class ApplicationMixin:
                     cmd = discord.utils.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
                     setattr(cmd, "id", int(i['id']))
                     if cmd.__permissions__:
-                        perms[guild_id].append(cmd.__permissions__)
+                        perms[guild_id].extend(cmd.__permissions__)
 
                     if cmd.type == 1:
                         self.__slashcommands[int(i.get('id'))] = cmd
