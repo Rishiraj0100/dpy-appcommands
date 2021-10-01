@@ -19,6 +19,7 @@ How do i make a Bot?
 ~~~~~~~~~~~~~~~~~~~~~
 
 The simple answer is to use :class:`.Bot` class
+
 Quick example: ::
     import appcommands
 
