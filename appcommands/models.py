@@ -169,19 +169,19 @@ class BaseCommand:
 
         if allowed_roles:
             permissions.extend(
-                [self.create_permission(id, PermissionType.ROLE, True) for id in set(allowed_roles)]
+                [self.create_permission(id, PermissionType.ROLE.value, True) for id in set(allowed_roles)]
             )
         if allowed_users:
             permissions.extend(
-                [self.create_permission(id, PermissionType.USER, True) for id in set(allowed_users)]
+                [self.create_permission(id, PermissionType.USER.value, True) for id in set(allowed_users)]
             )
         if disallowed_roles:
             permissions.extend(
-                [self.create_permission(id, PermissionType.ROLE, False) for id in set(disallowed_roles)]
+                [self.create_permission(id, PermissionType.ROLE.value, False) for id in set(disallowed_roles)]
             )
         if disallowed_users:
             permissions.extend(
-                [self.create_permission(id, PermissionType.USER, False) for id in set(disallowed_users)]
+                [self.create_permission(id, PermissionType.USER.value, False) for id in set(disallowed_users)]
             )
 
         self._update_perms(permissions)
