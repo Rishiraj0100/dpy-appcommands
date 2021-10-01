@@ -8,4 +8,3 @@ Welcome to dpy-appcommands documentation
    gettingstarted
    api
    faq
-
