@@ -796,6 +796,20 @@ class MessageCommand(BaseCommand):
     async def callback(self, ctx, msg):
         raise NotImplementedError
 
+def whitelist_roles(*roles):
+    def wrapper(func):
+        if isinstance(func, BaseCommand):
+            func.generate_options(allowed_roles=roles)
+        return func
+     return wrapper
+
+def blacklist_roles(*roles):
+    def wrapper(func):
+        if isinstance(func, BaseCommand):
+            func.generate_options(disallowed_roles=roles)
+        return func
+     return wrapper
+
 def command(cls: BaseCommand = MISSING, **kwargs) -> Callable[[Callable], BaseCommand]:
     """A decorator for application commands wrapper 
     
