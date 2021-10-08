@@ -24,7 +24,7 @@ class _MissingSentinel:
 
         return _self().__await__()
 
-MISSING = _MissingSentiel()
+MISSING = _MissingSentinel()
 
 def missing(*args, **kwargs) -> MISSING:
   return MISSING
