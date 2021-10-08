@@ -597,9 +597,42 @@ class SubCommandGroup(BaseCommand):
         self.subcommands: List[Union[SubCommandGroup, SlashCommand]] = []
 
     def subcommand(self, *args, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+        r"""A decorator which adds subcommands in the group commands
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        description: Optional[:class:`~str`]
+            description of the command, required
+        guild_ids: Optional[List[:class:`~int`]]
+            list of ids of the guilds for which command is to be added, (optional)
+        options: Optional[List[:class:`appcommands.Option`]]
+            the options for command, can be empty
+        cls: :class:`appcommands.SlashCommand`
+            The custom command class, must be a subclass of :class:`appcommands.SlashCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @group.subcommand(name="Hi", description="Hello!")
+            async def some_func(ctx):
+                await ctx.send("Hello!")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine
+        """
         if cls is MISSING:
             cls = SlashCommand
         def wrap(func) -> SlashCommand:
+            if not asyncio.iscoroutinefunction(func):
+                raise TypeError('Callback must be a coroutine.')
             command = cls(*args, callback=func, **kwargs)
             command.is_subcommand = True
             command.__func__ = func
@@ -612,7 +645,7 @@ class SubCommandGroup(BaseCommand):
         return self.name == other.name and self.description == other.description
 
     def subcommandgroup(self, name: str) -> 'SubCommandGroup':
-        """The group for which more subcommand is to be added
+        """The slashgroup for which more subcommand is to be added
 
         Parameters
         ------------
@@ -764,7 +797,7 @@ class MessageCommand(BaseCommand):
         raise NotImplementedError
 
 def command(cls: BaseCommand = MISSING, **kwargs) -> Callable[[Callable], BaseCommand]:
-    """The appcommands wrapper 
+    """A decorator for application commands wrapper 
     
     Parameters
     ------------
@@ -812,7 +845,7 @@ def command(cls: BaseCommand = MISSING, **kwargs) -> Callable[[Callable], BaseCo
     return wrapper
 
 def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
-    """The slash command wrapper
+    """A decorator for slash commands wrapper
 
     .. versionadded:: 2.0
 
@@ -852,7 +885,7 @@ def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], 
     return command(cls=cls, **kwargs)
 
 def usercommand(cls: UserCommand = MISSING, **kwargs) -> Callable[[Callable], UserCommand]:
-    """The user command wrapper
+    """A decorator for Context-Menu user commands wrapper
 
     .. versionadded:: 2.0
 
@@ -887,7 +920,7 @@ def usercommand(cls: UserCommand = MISSING, **kwargs) -> Callable[[Callable], Us
     return command(cls=cls, **kwargs)
 
 def messagecommand(cls: MessageCommand = MISSING, **kwargs) -> Callable[[Callable], MessageCommand]:
-    """The message command wrapper 
+    """A decorator for Context-Menu message commands wrapper 
 
     .. versionadded:: 2.0
 
