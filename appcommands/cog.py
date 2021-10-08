@@ -1,19 +1,75 @@
-import discord
 import asyncio
+import discord
+import inspect
 
 from .utils import *
 from .core import (
+    BaseCommand,
+    MessageCommand,
     SlashCommand,
     SubCommandGroup,
-    UserCommand,
-    MessageCommand
+    UserCommand
 )
 
 from discord.ext import commands
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Type, Tuple
 
+class CogMeta(commands.CogMeta):
+    __app_commands__: Tuple[BaseCommand]
+    __user_commands__: Tuple[UserCommand]
+    __slash_commands__: Tuple[Union[SlashCommand, SubCommandGroup]]
+    __message_commands__: Tuple[MessageCommand]
+    def __new__(cls: Type[commands.CogMeta], *args, **kwargs):
+        name, bases, attrs = args
+        attrs['__cog_name__'] = kwargs.pop('name', name)
 
-class Cog(commands.Cog):
+        description = kwargs.pop('description', None)
+        if description is None:
+            description = inspect.cleandoc(attrs.get('__doc__', ''))
+        attrs['__cog_description__'] = description
+
+        slashcmds = {}
+        appcmds = {}
+        usercmds = {}
+        msgcmds = {}
+        no_bot_cog = 'Commands or listeners must not start with cog_ or bot_ (in method {0.__name__}.{1})'
+
+        new_cls = super().__new__(cls, name, bases, attrs, **kwargs)
+        for base in reversed(new_cls.__mro__):
+            for elem, value in base.__dict__.items():
+                if elem in appcmds:
+                    del appcmds[elem]
+                    slashcmds.pop(elem)
+                    usercmds.pop(elem)
+                    msgcmds.pop(elem)
+
+                is_static_method = isinstance(value, staticmethod)
+                if is_static_method:
+                    value = value.__func__
+                if isinstance(value, BaseCommand):
+                    if is_static_method:
+                        raise TypeError(f'Command in method {base}.{elem!r} must not be staticmethod.')
+                    if elem.startswith(('cog_', 'bot_')):
+                        raise TypeError(no_bot_cog.format(base, elem))
+                    appcmds[elem] = value
+
+                if isinstance(value, SlashCommand):
+                    slashcmds[elem] = value
+                elif isinstance(value, SubCommandGroup):
+                    slashcmds[elem] = value
+                elif isinstance(value, MessageCommand):
+                    msgcmds[elem] = value
+                elif isinstance(value, UserCommand):
+                    usercmds[elem] = value
+
+        new_cls.__slash_commands__ = tuple(cmd for cmd in slashcmds.values())
+        new_cls.__user_commands__ = tuple(cmd for cmd in usercmds.values())
+        new_cls.__message_commands__ = tuple(cmd for cmd in msgcmds.values())
+        new_cls.__app_commands__ = tuple(cmd for cmd in appcmds.values())
+
+        return new_cls
+
+class Cog(commands.Cog, metaclass=CogMeta):
     """The cog for extension commands
 
     Example
@@ -41,10 +97,7 @@ class Cog(commands.Cog):
             bot.add_cog(MyCog(bot))
 
     """
-    __app_commands__: tuple
-    __user_commands__: tuple
-    __slash_commands__: tuple
-    __message_commands__: tuple
+    '''
     def __new__(cls, *args, **kwargs):
         self = super().__new__(cls, *args, **kwargs)
         slashcmds = {}
@@ -77,7 +130,7 @@ class Cog(commands.Cog):
         self.__message_commands__ = tuple(cmd for cmd in msgcmds.values())
         self.__app_commands__ = tuple(cmd for cmd in appcmds.values())
 
-        return self
+        return self'''
 
     def _inject(self, bot):
         new_list = [i for i in self.__app_commands__]
