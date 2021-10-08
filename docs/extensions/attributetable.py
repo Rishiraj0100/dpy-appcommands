@@ -197,6 +197,7 @@ def get_class_results(lookup, modulename, name, fullname):
                 This is invoked when a command is called.
 
                 This is usually used when command is subclassed"""
+                setattr(value, '__doc__', doc)
             if inspect.iscoroutinefunction(value) or doc.startswith('|coro|') or label == "callback":
                 key = _('Methods')
                 badge = attributetablebadge('async', 'async')
