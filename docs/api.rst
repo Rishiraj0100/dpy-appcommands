@@ -25,7 +25,7 @@ Bot
     .. automethod:: Bot.usercommand(**kwargs)
         :decorator:
 
-    .. automethod:: Bot.slashgroup()
+    .. automethod:: Bot.slashgroup
 
 AutoShardedBot
 ~~~~~~~~~~~~~~~~
@@ -61,7 +61,8 @@ Commands
 .. attributetable:: appcommands.SlashCommand
 
 .. autoclass:: appcommands.SlashCommand
-    :special-members: callback
+
+    .. automethod:: SlashCommand.callback
 
 .. attributetable:: appcommands.SubCommandGroup
 
@@ -75,12 +76,25 @@ Commands
 .. attributetable:: appcommands.MessageCommand
 
 .. autoclass:: appcommands.MessageCommand
-    :special-members: callback
+
+    .. automethod:: MessageCommand.callback
 
 .. attributetable:: appcommands.UserCommand
 
 .. autoclass:: appcommands.UserCommand
-    :special-members: callback
+
+    .. automethod:: UserCommand.callback
+
+Checks
+~~~~~~~
+
+.. automethod:: appcommands.blacklist_roles()
+
+.. automethod:: appcommands.blacklist_users()
+
+.. automethod:: appcommands.whitelist_roles()
+
+.. automethod:: appcommands.whitelist_users()
 
 More References
 ----------------
