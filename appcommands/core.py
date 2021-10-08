@@ -138,7 +138,7 @@ def generate_options(function, description: str = "No description.") -> List['Op
 class BaseCommand:
     __permissions__: list = []
     def __repr__(self) -> str:
-        return "<appcommands.models.{0.__class__.__name__} name={0.name} description={1}>".format(self, self.description)
+        return "<appcommands.core.{0.__class__.__name__} name={0.name} description={1}>".format(self, self.description)
 
     def __eq__(self, other: Any) -> bool:
         return self.name == other.name and self.description == other.description
@@ -154,8 +154,8 @@ class BaseCommand:
 
         self.__permissions__ = list(perm for perm in perms)
 
-    def create_permission(self, id: int, type: int, permission: bool) -> dict:
-        d = {"id": str(id), "type": type, "permission": permission}
+    def create_permission(self, id: int, type: PermissionType, permission: bool) -> dict:
+        d = {"id": str(id), "type": int(type), "permission": permission}
         self._update_perms(d)
         return d
 
@@ -193,20 +193,21 @@ class InteractionContext:
     
     Attributes
     ------------
-    bot: Union[:class:`~appcommands.client.Bot`, :class:`~appcommands.client.AutoShardedBot`]
+    bot: Union[:class:`appcommands.Bot`, :class:`appcommands.AutoShardedBot`]
         The appcommands bot instance
     type: :class:`~int`
         Interaction type 
-    guild: Union[:class:`~discord.Guild`, None]
+    guild: Union[:class:`discord.Guild`, None]
         The guild in which command is fired, None if it is in DMs 
-    channel: Union[:class:`~discord.abc.GuildChannel`, :class:`~discord.DMChannel`]
+    channel: Union[:class:`discord.abc.GuildChannel`, :class:`discord.DMChannel`]
         The channel in which command is triggered
     id: :class:`~int`
         id of this interaction
-    user: Union[:class:`~discord.User`, :class:`~discord.Member`]
+    user: Union[:class:`discord.User`, :class:`discord.Member`]
         The user who fired this cmd 
     token: :class:`~str`
-        token of this interaction, (valid for 15 mins)"""
+        token of this interaction, (valid for 15 mins)
+    """
     def __init__(self, bot: Union['Bot', 'AutoShardedBot'], interaction) -> None:
         self.bot: Union[Bot, AutoShardedBot] = bot
         self._state = bot._connection
@@ -223,7 +224,7 @@ class InteractionContext:
     async def invoke(self, cmd) -> None:
         """|coro|
 
-        The Coroutine that invokes commands
+        This function invokes commands
 
         .. versionadded:: 2.0
 
@@ -365,7 +366,7 @@ class InteractionData:
         Name of the command
     id: :class:`~int`
         Id of the command
-    options: List[:class:`~appcommands.models.Option`]
+    options: List[:class:`appcommands.Option`]
         Options passed in command
     """
     def __init__(self, type: int, name: str, id: int, options: Optional[List['Option']] = None) -> None:
@@ -431,16 +432,18 @@ class Option:
         the type of option, (optional)
     required: Optional[:class:`~bool`]
         whether the option is required
-    choices: Optional[List[:class:`~appcommands.models.Choice`]]
+    choices: Optional[List[:class:`appcommands.Choice`]]
         The choices for this option
     """
-    def __init__(self,
-                 name: str,
-                 description: Optional[str] = "No description.",
-                 type: Optional[int] = 3,
-                 required: Optional[bool] = True,
-                 value: str = None,
-                 choices: Optional[List[Choice]] = []) -> None:
+    def __init__(
+        self,
+        name: str,
+        description: Optional[str] = "No description.",
+        type: Optional[int] = 3,
+        required: Optional[bool] = True,
+        value: str = None,
+        choices: Optional[List[Choice]] = []
+    ) -> None:
         self.name = name
         self.description = description
         self.type = type
@@ -486,7 +489,7 @@ class SlashCommand(BaseCommand):
        description of the cmd, (optional)
     guild_ids: Optional[List[:class:`~int`]]
        id of the guild for which command is to be added, (optional)
-    options: Optional[List[:class:`~appcommands.models.Option`]]
+    options: Optional[List[:class:`appcommands.Option`]]
        options for your command, (optional)
     callback: Optional[Coroutine]
        the callback which is to be called when a command fires, (optional)
@@ -771,10 +774,10 @@ def command(cls: BaseCommand = MISSING, **kwargs) -> Callable[[Callable], BaseCo
         Description of the command, Only for slashcommands
     guild_ids: Optional[List[:class:`~int`]]
         Id of the guild for which command is to be added, (optional)
-    options: Optional[List[:class:`~appcommands.models.Option`]]
+    options: Optional[List[:class:`appcommands.Option`]]
         Options for the command, detects automatically if not given, Only for slashcommands
-    cls: :class:`~appcommands.models.BaseCommand`
-        The custom command class, must be a subclass of :class:`~appcommands.models.BaseCommand`, (optional)
+    cls: :class:`appcommands.BaseCommand`
+        The custom command class, must be a subclass of :class:`appcommands.BaseCommand`, (optional)
 
     Example
     ----------
@@ -821,10 +824,10 @@ def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], 
         Description of the command, (optional)
     guild_ids: Optional[List[:class:`~int`]]
         Id of the guild for which command is to be added, (optional)
-    options: Optional[List[:class:`~appcommands.models.Option`]]
+    options: Optional[List[:class:`appcommands.Option`]]
         Options for the command, detects automatically if not given, (optional)
-    cls: :class:`~appcommands.models.SlashCommand`
-        The custom command class, must be a subclass of :class:`~appcommands.models.SlashCommand`, (optional)
+    cls: :class:`appcommands.SlashCommand`
+        The custom command class, must be a subclass of :class:`appcommands.SlashCommand`, (optional)
 
     Example
     ----------
@@ -848,7 +851,7 @@ def slashcommand(cls: SlashCommand = MISSING, **kwargs) -> Callable[[Callable], 
 
     return command(cls=cls, **kwargs)
 
-def usercommand(cls: UserCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+def usercommand(cls: UserCommand = MISSING, **kwargs) -> Callable[[Callable], UserCommand]:
     """The user command wrapper
 
     .. versionadded:: 2.0
@@ -859,8 +862,8 @@ def usercommand(cls: UserCommand = MISSING, **kwargs) -> Callable[[Callable], Sl
         Name of the command, (required)
     guild_ids: Optional[List[:class:`~int`]]
         Id of the guild for which command is to be added, (optional)
-    cls: :class:`~appcommands.models.UserCommand`
-        The custom command class, must be a subclass of :class:`~appcommands.models.SlashCommand`, (optional)
+    cls: :class:`appcommands.UserCommand`
+        The custom command class, must be a subclass of :class:`appcommands.UserCommand`, (optional)
 
     Example
     ----------
@@ -883,7 +886,7 @@ def usercommand(cls: UserCommand = MISSING, **kwargs) -> Callable[[Callable], Sl
 
     return command(cls=cls, **kwargs)
 
-def messagecommand(cls: MessageCommand = MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+def messagecommand(cls: MessageCommand = MISSING, **kwargs) -> Callable[[Callable], MessageCommand]:
     """The message command wrapper 
 
     .. versionadded:: 2.0
@@ -894,8 +897,8 @@ def messagecommand(cls: MessageCommand = MISSING, **kwargs) -> Callable[[Callabl
         Name of the command, (required)
     guild_ids: Optional[List[:class:`~int`]]
         Id of the guild for which command is to be added, (optional)
-    cls: :class:`~appcommands.models.MessageCommand`
-        The custom command class, must be a subclass of :class:`~appcommands.models.MessageCommand`, (optional)
+    cls: Optional[:class:`appcommands.MessageCommand`]
+        The custom command class, must be a subclass of :class:`appcommands.MessageCommand`, (optional)
 
     Example
     ----------
@@ -944,7 +947,7 @@ def slashgroup(**kwargs) -> SubCommandGroup:
 
     Returns
     ---------
-    :class:`~appcommands.models.SubCommandGroup`
+    :class:`appcommands.SubCommandGroup`
         The SubCommandGroup which will be returned
     """
     return SubCommandGroup(**kwargs)
