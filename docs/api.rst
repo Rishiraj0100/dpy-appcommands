@@ -62,7 +62,7 @@ Commands
 
 .. autoclass:: appcommands.SlashCommand
 
-    .. automethod:: SlashCommand.callback
+    .. autofunction:: SlashCommand.callback
         :async:
 
 .. attributetable:: appcommands.SubCommandGroup
@@ -78,14 +78,14 @@ Commands
 
 .. autoclass:: appcommands.MessageCommand
 
-    .. automethod:: MessageCommand.callback
+    .. autofunction:: MessageCommand.callback
         :async:
 
 .. attributetable:: appcommands.UserCommand
 
 .. autoclass:: appcommands.UserCommand
 
-    .. automethod:: UserCommand.callback
+    .. autofunction:: UserCommand.callback
         :async:
 
 Checks
