@@ -62,7 +62,7 @@ Commands
 
 .. autoclass:: appcommands.SlashCommand
 
-    .. autofunction:: appcommands.SlashCommand.callback
+    .. automethod:: SlashCommand.callback(ctx)
         :async:
 
 .. attributetable:: appcommands.SubCommandGroup
@@ -78,14 +78,14 @@ Commands
 
 .. autoclass:: appcommands.MessageCommand
 
-    .. autofunction:: appcommands.MessageCommand.callback
+    .. automethod:: MessageCommand.callback(ctx, message)
         :async:
 
 .. attributetable:: appcommands.UserCommand
 
 .. autoclass:: appcommands.UserCommand
 
-    .. autofunction:: appcommands.UserCommand.callback
+    .. automethod:: UserCommand.callback(ctx, user)
         :async:
 
 Checks
