@@ -88,13 +88,17 @@ Commands
 Checks
 ~~~~~~~
 
-.. automethod:: blacklist_roles()
+.. autofunction:: appcommands.blacklist_roles
+    :decorator:
 
-.. automethod:: blacklist_users()
+.. autofunction:: appcommands.blacklist_users
+    :decorator:
 
-.. automethod:: whitelist_roles()
+.. autofunction:: appcommands.whitelist_roles
+    :decorator:
 
-.. automethod:: whitelist_users()
+.. autofunction:: appcommands.whitelist_users
+    :decorator:
 
 More References
 ----------------
