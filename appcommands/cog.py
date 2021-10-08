@@ -2,7 +2,7 @@ import discord
 import asyncio
 
 from .utils import *
-from .models import (
+from .core import (
     SlashCommand,
     SubCommandGroup,
     UserCommand,
