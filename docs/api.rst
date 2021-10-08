@@ -14,7 +14,7 @@ Bot
 .. attributetable:: appcommands.Bot
 
 .. autoclass:: appcommands.Bot
-    :members: add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands, slashgroup
+    :members: add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands
 
     .. automethod:: Bot.slashcommand(**kwargs)
         :decorator:
@@ -24,6 +24,8 @@ Bot
 
     .. automethod:: Bot.usercommand(**kwargs)
         :decorator:
+
+    .. automethod:: Bot.slashgroup()
 
 AutoShardedBot
 ~~~~~~~~~~~~~~~~
@@ -52,6 +54,7 @@ Decorators
 .. autofunction:: appcommands.usercommand
     :decorator:
 
+
 Commands
 ~~~~~~~~~~~
 
@@ -63,29 +66,35 @@ Commands
 .. attributetable:: appcommands.SubCommandGroup
 
 .. autoclass:: appcommands.SubCommandGroup
-    :members:
+    :members: callback
     :exclude-members: subcommand
 
     .. automethod:: SubCommandGroup.subcommand(**kwargs)
         :decorator:
 
+.. attributetable:: appcommands.MessageCommand
+
 .. autoclass:: appcommands.MessageCommand
-    :members:
+    :members: callback
+
+.. attributetable:: appcommands.UserCommand
 
 .. autoclass:: appcommands.UserCommand
-    :members:
+    :members: callback
 
-Module References
-------------------
+More References
+----------------
 
-appcommands.models Module Reference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Contexts
+~~~~~~~~~~
 
 .. attributetable:: appcommands.InteractionContext
 
 .. autoclass:: appcommands.InteractionContext
     :members:
 
+Options
+~~~~~~~~
 .. attributetable:: appcommands.Choice
 
 .. autoclass:: appcommands.Choice
@@ -96,17 +105,10 @@ appcommands.models Module Reference
 .. autoclass:: appcommands.Option
     :members:
 
-
-appcommands.cog Module Reference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Cogs
+~~~~~
 
 .. autoclass:: appcommands.Cog
 
-appcommands.enums Module Reference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: appcommands.OptionType
-
-.. autoclass:: appcommands.OptionType
-    :members:
+.. autoclass:: appcommands.CogMeta
 
