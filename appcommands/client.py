@@ -4,7 +4,7 @@ import discord
 import importlib
 
 from .utils import *
-from .models import (
+from .core import (
     command as _cmd,
     InteractionContext,
     SubCommandGroup,
@@ -22,7 +22,12 @@ from discord.enums import InteractionType
 from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any
 
 
-__all__ = ("Bot", "AutoShardedBot")
+__all__ = (
+    "AutoShardedBot",
+    "AutoShardedClient",
+    "Bot",
+    "Client"
+)
 
 class ApplicationMixin:
     """The mixin for appcommands module"""
@@ -534,6 +539,22 @@ class Bot(ApplicationMixin, commands.Bot):
     """
     pass
 
+class Client(ApplicationMixin, discord.Client):
+    """The Client class.
+    This is a subclass of :class:`discord.Client`
+
+    Example
+    ---------
+
+    .. code-block:: python3
+
+        import appcommands
+
+        client = appcommands.Client()
+
+    """
+    pass
+
 class AutoShardedBot(ApplicationMixin, commands.AutoShardedBot):
     """The AutoShardedBot class.
     This is a subclass of :class:`discord.ext.commands.AutoShardedBot`
@@ -547,6 +568,22 @@ class AutoShardedBot(ApplicationMixin, commands.AutoShardedBot):
         import appcommands
 
         bot = appcommands.AutoShardedBot(command_prefix="$")
+
+    """
+    pass
+
+class AutoShardedClient(ApplicationMixin, discord.AutoShardedClient):
+    """The ShardedClient class.
+    This is a subclass of :class:`discord.AutoShardedClient`
+
+    Example
+    ---------
+
+    .. code-block:: python3
+
+        import appcommands
+
+        client = appcommands.AutoShardedClient()
 
     """
     pass
