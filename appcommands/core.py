@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 __all__ = (
     "BaseCommand",
     "blacklist_roles",
+    "blacklist_users",
     "Choice",
     "command",
     "InteractionContext",
@@ -40,7 +41,8 @@ __all__ = (
     "SubCommandGroup",
     "UserCommand",
     "usercommand",
-    "whitelist_roles"
+    "whitelist_roles",
+    "whitelist_users"
 )
 
 async def get_ctx_kw(ctx, params) -> dict:
@@ -810,17 +812,111 @@ class MessageCommand(BaseCommand):
         """
         raise NotImplementedError
 
-def whitelist_roles(*roles):
-    def wrapper(func):
+def blacklist_roles(*roles) -> Callable[[Callable], Callable]:
+    r"""A decorator which blacklists some roles from
+    the command
+
+    Parameters
+    -----------
+    \*roles
+      The id of roles which can't use the command
+
+    Example
+    --------
+
+    .. code-block:: python3
+
+        r1, r2 = "Id of 1st role", "Id of 2nd role"
+
+        @bot.slashcommand()
+        @appcommands.blacklist_roles(r1, r2)
+        async def hi(ctx):
+            await ctx.send('tested')
+    """
+    def wrapper(func) -> Callable:
+        if isinstance(func, BaseCommand):
+            func.generate_options(disallowed_roles=roles)
+        return func
+    return wrapper
+
+def whitelist_roles(*roles) -> Callable[[Callable], Callable]:
+    r"""A decorator which whitelists some roles only
+    to use the command
+
+    Parameters
+    -----------
+    \*roles
+      The id of roles which can use the command
+
+    Example
+    --------
+
+    .. code-block:: python3
+
+        r1, r2 = "Id of 1st role", "Id of 2nd role"
+
+        @bot.slashcommand()
+        @appcommands.whitelist_roles(r1, r2)
+        async def hi(ctx):
+            await ctx.send('tested')
+    """
+    def wrapper(func) -> Callable:
         if isinstance(func, BaseCommand):
             func.generate_options(allowed_roles=roles)
         return func
     return wrapper
 
-def blacklist_roles(*roles):
-    def wrapper(func):
+def blacklist_users(*roles) -> Callable[[Callable], Callable]:
+    r"""A decorator which blacklists some users
+    from the command
+
+    Parameters
+    -----------
+    \*users
+      The id of users which can't use the command
+
+    Example
+    --------
+
+    .. code-block:: python3
+
+        u1, u2 = "Id of 1st user", "Id of 2nd user"
+
+        @bot.slashcommand()
+        @appcommands.blacklist_users(u1, u2)
+        async def hi(ctx):
+            await ctx.send('tested')
+    """
+    def wrapper(func) -> Callable:
         if isinstance(func, BaseCommand):
-            func.generate_options(disallowed_roles=roles)
+            func.generate_options(disallowed_users=roles)
+        return func
+    return wrapper
+
+def whitelist_users(*users) -> Callable[[Callable], Callable]:
+    r"""A decorator which whitelists some users only
+    to use the command
+
+    Parameters
+    -----------
+    \*users
+      The id of users which can use the command
+
+    Example
+    --------
+
+    .. code-block:: python3
+
+        u1, u2 = "Id of 1st user", "Id of 2nd user"
+
+        @bot.slashcommand()
+        @appcommands.whitelist_users(u1, u2)
+        async def hi(ctx):
+            await ctx.send('tested')
+    """
+    def wrapper(func) -> Callable:
+        if isinstance(func, BaseCommand):
+            func.generate_options(allowed_users=users)
         return func
     return wrapper
 
