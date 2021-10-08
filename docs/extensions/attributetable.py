@@ -191,7 +191,7 @@ def get_class_results(lookup, modulename, name, fullname):
 
         if value is not None:
             doc = value.__doc__ or ''
-            if inspect.iscoroutinefunction(value) or doc.startswith('|coro|'):
+            if inspect.iscoroutinefunction(value) or doc.startswith('|coro|') or label == "callback":
                 key = _('Methods')
                 badge = attributetablebadge('async', 'async')
                 badge['badge-type'] = _('coroutine')
