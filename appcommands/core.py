@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "BaseCommand",
+    "blacklist_roles",
     "Choice",
     "command",
     "InteractionContext",
@@ -39,6 +40,7 @@ __all__ = (
     "SubCommandGroup",
     "UserCommand",
     "usercommand"
+    "whitelist_roles"
 )
 
 async def get_ctx_kw(ctx, params) -> dict:
