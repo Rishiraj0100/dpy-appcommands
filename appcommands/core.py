@@ -39,7 +39,7 @@ __all__ = (
     "slashcommand",
     "SubCommandGroup",
     "UserCommand",
-    "usercommand"
+    "usercommand",
     "whitelist_roles"
 )
 
