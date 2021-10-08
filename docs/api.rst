@@ -88,13 +88,13 @@ Commands
 Checks
 ~~~~~~~
 
-.. automethod:: appcommands.blacklist_roles()
+.. automethod:: blacklist_roles()
 
-.. automethod:: appcommands.blacklist_users()
+.. automethod:: blacklist_users()
 
-.. automethod:: appcommands.whitelist_roles()
+.. automethod:: whitelist_roles()
 
-.. automethod:: appcommands.whitelist_users()
+.. automethod:: whitelist_users()
 
 More References
 ----------------
