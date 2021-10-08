@@ -866,7 +866,7 @@ def whitelist_roles(*roles) -> Callable[[Callable], Callable]:
         return func
     return wrapper
 
-def blacklist_users(*roles) -> Callable[[Callable], Callable]:
+def blacklist_users(*users) -> Callable[[Callable], Callable]:
     r"""A decorator which blacklists some users
     from the command
 
@@ -889,7 +889,7 @@ def blacklist_users(*roles) -> Callable[[Callable], Callable]:
     """
     def wrapper(func) -> Callable:
         if isinstance(func, BaseCommand):
-            func.generate_options(disallowed_users=roles)
+            func.generate_options(disallowed_users=users)
         return func
     return wrapper
 
