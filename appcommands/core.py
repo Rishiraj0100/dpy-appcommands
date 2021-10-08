@@ -571,6 +571,10 @@ class SlashCommand(BaseCommand):
 
     @missing
     async def callback(self, ctx: InteractionContext) -> Any:
+        """This function should be a Coroutine.
+
+        This is invoked when a command is called.
+        """
         raise NotImplementedError
 
 class SubCommandGroup(BaseCommand):
@@ -725,7 +729,11 @@ class UserCommand(BaseCommand):
             self.name  = name
 
     @missing
-    async def callback(self, ctx, usr):
+    async def callback(self, ctx, user):
+        """This function should be a Coroutine.
+
+        This is invoked when a command is called.
+        """
         raise NotImplementedError
 
     def __repr__(self) -> str:
@@ -793,7 +801,11 @@ class MessageCommand(BaseCommand):
         return "<MessageCommand name={0.name} guild_ids={0.guild_ids}>".format(self)
 
     @missing
-    async def callback(self, ctx, msg):
+    async def callback(self, ctx, message):
+        """This function should be a Coroutine.
+
+        This is invoked when a command is called.
+        """
         raise NotImplementedError
 
 def whitelist_roles(*roles):
@@ -801,14 +813,14 @@ def whitelist_roles(*roles):
         if isinstance(func, BaseCommand):
             func.generate_options(allowed_roles=roles)
         return func
-     return wrapper
+    return wrapper
 
 def blacklist_roles(*roles):
     def wrapper(func):
         if isinstance(func, BaseCommand):
             func.generate_options(disallowed_roles=roles)
         return func
-     return wrapper
+    return wrapper
 
 def command(cls: BaseCommand = MISSING, **kwargs) -> Callable[[Callable], BaseCommand]:
     """A decorator for application commands wrapper 
