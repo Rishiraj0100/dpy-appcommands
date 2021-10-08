@@ -188,9 +188,6 @@ def get_class_results(lookup, modulename, name, fullname):
             value = base.__dict__.get(attr)
             if value is not None:
                 break
-
-        if value is not None:
-            doc = value.__doc__ or ''
             if label == "callback":
                 doc = r"""This function should must be a |coroutine_link|_
 
@@ -198,6 +195,10 @@ def get_class_results(lookup, modulename, name, fullname):
 
                 This is usually used when command is subclassed"""
                 setattr(value, '__doc__', doc)
+                setattr(base, value.__name__, value)
+
+        if value is not None:
+            doc = value.__doc__ or ''
             if inspect.iscoroutinefunction(value) or doc.startswith('|coro|') or label == "callback":
                 key = _('Methods')
                 badge = attributetablebadge('async', 'async')
