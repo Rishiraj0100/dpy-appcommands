@@ -54,14 +54,14 @@ class ApplicationMixin:
         self.to_register.append(command)
 
     def remove_app_command(self, command: BaseCommand) -> None:
-        """Remove a :class:`~appcommands.models.BaseCommand` from the internal list
-        of commands.
+        """Remove an application command from the internal list
+        of appcommands.
 
         .. versionadded:: 2.0
 
         Parameters
         -----------
-        command: :class:`~appcommands.models.BaseCommand`
+        command: :class:`appcommands.BaseCommand`
             The command to remove.
         """
         self.__appcommands.pop(command.id)
@@ -84,10 +84,10 @@ class ApplicationMixin:
             description of the command, required
         guild_ids: Optional[List[:class:`~int`]]
             list of ids of the guilds for which command is to be added, (optional)
-        options: Optional[List[:class:`~appcommands.models.Option`]]
+        options: Optional[List[:class:`~appcommands.Option`]]
             the options for command, can be empty
-        cls: :class:`~appcommands.models.SlashCommand`
-            The custom command class, must be a subclass of :class:`~appcommands.models.SlashCommand`, (optional)
+        cls: :class:`~appcommands.SlashCommand`
+            The custom command class, must be a subclass of :class:`appcommands.SlashCommand`, (optional)
 
         Example
         ---------
@@ -105,8 +105,8 @@ class ApplicationMixin:
 
         Returns
         --------
-        Callable[[Callable], :class:`~appcommands.models.SlashCommand`]
-            The slash command."""
+        Callable[..., :class:`~appcommands.SlashCommand`]
+            The command."""
         def decorator(func) -> SlashCommand:
             wrapped = _cmd(cls=cls, **kwargs)
             cmd = wrapped(func)
@@ -116,7 +116,7 @@ class ApplicationMixin:
         return decorator
 
     def messagecommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], MessageCommand]:
-        r"""A decorator which adds a message command to bot
+        r"""A shortcut decorator that adds a Context-Menu message commands to bot
         same as :meth:`appcommands.messagecommand`
 
         .. versionadded:: 2.0
@@ -127,8 +127,8 @@ class ApplicationMixin:
             name of the command, defaults to function name, (required)
         guild_ids: Optional[List[:class:`~int`]]
             list of ids of the guilds for which command is to be added, (optional)
-        cls: :class:`~appcommands.models.MessageCommand`
-            The custom command class, must be a subclass of :class:`~appcommands.models.MessageCommand`, (optional)
+        cls: :class:`~appcommands.MessageCommand`
+            The custom command class, must be a subclass of :class:`appcommands.MessageCommand`, (optional)
 
         Example
         ---------
@@ -146,8 +146,8 @@ class ApplicationMixin:
 
         Returns
         --------
-        Callable[[Callable], :class:`~appcommands.models.MessageCommand`]
-            The slash command."""
+        Callable[..., :class:`~appcommands.MessageCommand`]
+            The command."""
         def decorator(func) -> MessageCommand:
             wrapped = _mcmd(cls=cls, **kwargs)
             cmd = wrapped(func)
@@ -168,8 +168,8 @@ class ApplicationMixin:
             name of the command, defaults to function name, (required)
         guild_ids: Optional[List[:class:`~int`]]
             list of ids of the guilds for which command is to be added, (optional)
-        cls: :class:`~appcommands.models.UserCommand`
-            The custom command class, must be a subclass of :class:`~appcommands.models.UserCommand`, (optional)
+        cls: :class:`~appcommands.UserCommand`
+            The custom command class, must be a subclass of :class:`appcommands.UserCommand`, (optional)
 
         Example
         ---------
@@ -187,8 +187,8 @@ class ApplicationMixin:
 
         Returns
         --------
-        Callable[[Callable], :class:`~appcommands.models.UserCommand`]
-            The slash command."""
+        Callable[..., :class:`~appcommands.UserCommand`]
+            The command."""
         def decorator(func) -> UserCommand:
             wrapped = _ucmd(cls=cls, **kwargs)
             cmd = wrapped(func)
@@ -222,7 +222,7 @@ class ApplicationMixin:
 
         Returns
         ---------
-        :class:`~appcommands.models.SubCommandGroup`
+        :class:`~ppcommands.SubCommandGroup`
             The group by which commands will be made"""
         sub_command_group = SubCommandGroup(name, description)
         self.add_slash_command(sub_command_group)
@@ -231,7 +231,7 @@ class ApplicationMixin:
     async def register_commands(self) -> None:
         r"""|coro|
 
-        It registers app commands
+        This function registers app commands
 
         .. versionadded:: 2.0
         """
