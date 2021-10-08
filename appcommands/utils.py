@@ -18,6 +18,12 @@ class _MissingSentinel:
     def __call__(self):
         return self
 
+    def __await__(self):
+        async def _self():
+            return self
+
+        return _self().__await__()
+
 MISSING = _MissingSentiel()
 
 def missing(*args, **kwargs) -> MISSING:
