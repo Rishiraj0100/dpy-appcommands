@@ -6,6 +6,10 @@ __all__ = (
 )
 
 class _MissingSentinel:
+    """This function should must be a |coroutine_link|_
+
+    This is invoked when a command is called.
+    """
     def __eq__(self, other):
         return False
 
@@ -15,7 +19,7 @@ class _MissingSentinel:
     def __repr__(self):
         return '...'
 
-    def __call__(self):
+    async def __call__(self):
         return self
 
     def __await__(self):
