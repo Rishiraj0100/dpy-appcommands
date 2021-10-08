@@ -15,6 +15,49 @@ from discord.ext import commands
 from typing import Optional, Union, List, Type, Tuple
 
 class CogMeta(commands.CogMeta):
+    """A metaclass for defining a cog.
+
+    This is a subclass of :class:`discord.ext.commands.CogMeta`
+
+    .. versionadded:: 2.0
+
+    Note that you should probably not use this directly. It is exposed
+    purely for documentation purposes along with making custom metaclasses to intermix
+    with other metaclasses such as the :class:`abc.ABCMeta` metaclass.
+
+    For example, to create an abstract cog mixin class, the following would be done.
+
+    .. code-block:: python3
+
+        import abc
+
+        class CogABCMeta(appcommands.CogMeta, abc.ABCMeta):
+            pass
+
+        class SomeMixin(metaclass=abc.ABCMeta):
+            pass
+
+        class SomeCogMixin(SomeMixin, appcommands.Cog, metaclass=CogABCMeta):
+            pass
+
+    .. note::
+
+        When passing an attribute of a metaclass that is documented below, note
+        that you must pass it as a keyword-only argument to the class creation
+        like the following example:
+
+        .. code-block:: python3
+
+            class MyCog(appcommands.Cog, name='My Cog'):
+                pass
+
+    Attributes
+    -----------
+    name: :class:`str`
+        The cog name. By default, it is the name of the class with no modification.
+    description: :class:`str`
+        The cog description. By default, it is the cleaned docstring of the class.
+    """
     __app_commands__: Tuple[BaseCommand]
     __user_commands__: Tuple[UserCommand]
     __slash_commands__: Tuple[Union[SlashCommand, SubCommandGroup]]
@@ -97,40 +140,6 @@ class Cog(commands.Cog, metaclass=CogMeta):
             bot.add_cog(MyCog(bot))
 
     """
-    '''
-    def __new__(cls, *args, **kwargs):
-        self = super().__new__(cls, *args, **kwargs)
-        slashcmds = {}
-        appcmds = {}
-        usercmds = {}
-        msgcmds = {}
-        for base in reversed(self.__class__.__mro__):
-            for elem, value in base.__dict__.items():
-                if elem in appcmds:
-                    del appcmds[elem]
-                    slashcmds.pop(elem)
-                    usercmds.pop(elem)
-                    msgcmds.pop(elem)
-    
-                if isinstance(value, SlashCommand):
-                    slashcmds[elem] = value
-                    appcmds[elem] = value
-                elif isinstance(value, SubCommandGroup):
-                    slashcmds[elem] = value
-                    appcmds[elem] = value
-                elif isinstance(value, MessageCommand):
-                    msgcmds[elem] = value
-                    appcmds[elem] = value
-                elif isinstance(value, UserCommand):
-                    usercmds[elem] = value
-                    appcmds[elem] = value
-
-        self.__slash_commands__ = tuple(cmd for cmd in slashcmds.values())
-        self.__user_commands__ = tuple(cmd for cmd in usercmds.values())
-        self.__message_commands__ = tuple(cmd for cmd in msgcmds.values())
-        self.__app_commands__ = tuple(cmd for cmd in appcmds.values())
-
-        return self'''
 
     def _inject(self, bot):
         new_list = [i for i in self.__app_commands__]
