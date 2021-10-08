@@ -61,12 +61,12 @@ Commands
 .. attributetable:: appcommands.SlashCommand
 
 .. autoclass:: appcommands.SlashCommand
-    :members:
+    :special-members: callback
 
 .. attributetable:: appcommands.SubCommandGroup
 
 .. autoclass:: appcommands.SubCommandGroup
-    :members: callback
+    :members:
     :exclude-members: subcommand
 
     .. automethod:: SubCommandGroup.subcommand(**kwargs)
@@ -75,12 +75,12 @@ Commands
 .. attributetable:: appcommands.MessageCommand
 
 .. autoclass:: appcommands.MessageCommand
-    :members: callback
+    :special-members: callback
 
 .. attributetable:: appcommands.UserCommand
 
 .. autoclass:: appcommands.UserCommand
-    :members: callback
+    :special-members: callback
 
 More References
 ----------------
