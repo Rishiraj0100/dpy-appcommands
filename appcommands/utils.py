@@ -2,14 +2,10 @@ import discord
 
 __all__ = (
     "MISSING",
-   "missing"
+    "missing"
 )
 
 class _MissingSentinel:
-    """This function should must be a |coroutine_link|_
-
-    This is invoked when a command is called.
-    """
     def __eq__(self, other):
         return False
 
@@ -19,7 +15,7 @@ class _MissingSentinel:
     def __repr__(self):
         return '...'
 
-    async def __call__(self):
+    def __call__(self):
         return self
 
     def __await__(self):
