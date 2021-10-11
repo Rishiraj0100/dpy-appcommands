@@ -38,6 +38,7 @@ __all__ = (
     "Option",
     "SlashCommand",
     "slashcommand",
+    "slashgroup",
     "SubCommandGroup",
     "UserCommand",
     "usercommand",
