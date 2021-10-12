@@ -140,14 +140,6 @@ class Cog(commands.Cog, metaclass=CogMeta):
             bot.add_cog(MyCog(bot))
 
     """
-    def __new__(cls, *args, **kwargs):
-        self = super().__new__(cls)
-        for command in self.__app_commands__:
-            if not isinstance(command, SubCommandGroup):
-                setattr(self, command.callback.__name__, command.callback)
-
-        return self
-
     def _inject(self, bot):
         new_list = [i for i in self.__app_commands__]
         to_remove, updated_list, appcmds, msgcmds, slashcmds, usercmds = [], [], [], [], [], []
