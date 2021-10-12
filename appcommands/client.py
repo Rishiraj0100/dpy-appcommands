@@ -24,9 +24,7 @@ from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any
 
 __all__ = (
     "AutoShardedBot",
-    "AutoShardedClient",
-    "Bot",
-    "Client"
+    "Bot"
 )
 
 class ApplicationMixin:
@@ -39,6 +37,7 @@ class ApplicationMixin:
         self.__usercommands: dict = {}
         self.__slashcommands: dict = {}
         self.__messagecommands: dict = {}
+        self.add_listener(self.__connectlistener, "on_connect")
         self.add_listener(self.interaction_handler, "on_interaction")
 
     def add_app_command(self, command: BaseCommand) -> None:
@@ -329,7 +328,7 @@ class ApplicationMixin:
             self.__appcommands[int(i["id"])] = cmd
         self.to_register = []
 
-    async def on_connect(self):
+    async def __connectlistener(self):
         await self.register_commands()
 
     @property
@@ -539,21 +538,6 @@ class Bot(ApplicationMixin, commands.Bot):
     """
     pass
 
-class Client(ApplicationMixin, discord.Client):
-    """The Client class.
-    This is a subclass of :class:`discord.Client`
-
-    Example
-    ---------
-
-    .. code-block:: python3
-
-        import appcommands
-
-        client = appcommands.Client()
-
-    """
-    pass
 
 class AutoShardedBot(ApplicationMixin, commands.AutoShardedBot):
     """The AutoShardedBot class.
@@ -568,22 +552,6 @@ class AutoShardedBot(ApplicationMixin, commands.AutoShardedBot):
         import appcommands
 
         bot = appcommands.AutoShardedBot(command_prefix="$")
-
-    """
-    pass
-
-class AutoShardedClient(ApplicationMixin, discord.AutoShardedClient):
-    """The ShardedClient class.
-    This is a subclass of :class:`discord.AutoShardedClient`
-
-    Example
-    ---------
-
-    .. code-block:: python3
-
-        import appcommands
-
-        client = appcommands.AutoShardedClient()
 
     """
     pass
