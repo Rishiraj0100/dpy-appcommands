@@ -582,6 +582,9 @@ class SlashCommand(BaseCommand):
         """
         raise NotImplementedError
 
+    def __repr__(self) -> str:
+        return "<SlashCommand name={0.name} description={0.description} options={0.options}>".format(self)
+
 class SubCommandGroup(BaseCommand):
     """SubCommand wrapper class
 
@@ -603,7 +606,7 @@ class SubCommandGroup(BaseCommand):
     ) -> None:
         self.parent = parent
         self.name: str = name
-        self.description: str = ""
+        self.description: str = description
         self.guild_ids: List[int] = guild_ids
         self.type: int = 1
         self.subcommands: List[Union[SubCommandGroup, SlashCommand]] = []
