@@ -292,8 +292,8 @@ class ApplicationMixin:
                             if isinstance(subcommand, SubCommandGroup):
                                 for _subcmd in subcommand.subcommands:
                                     self.__subcommands[int(i['id'])][_subcmd.name] = _subcmd
-                    else:
-                        self.__subcommands[int(i['id'])][subcommand.name] = subcommand
+                            else:
+                                self.__subcommands[int(i['id'])][subcommand.name] = subcommand
 
                     self.__appcommands[int(i["id"])] = cmd
 
