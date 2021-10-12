@@ -286,6 +286,15 @@ class ApplicationMixin:
                     else:
                         self.__messagecommands[int(i.get('id'))] = cmd
 
+                    if isinstance(cmd, SubCommandGroup):
+                        self.__subcommands[int(i['id'])] = {}
+                        for subcommand in cmd.subcommands:
+                            if isinstance(subcommand, SubCommandGroup):
+                                for _subcmd in subcommand.subcommands:
+                                    self.__subcommands[int(i['id'])][_subcmd.name] = _subcmd
+                    else:
+                        self.__subcommands[int(i['id'])][subcommand.name] = subcommand
+
                     self.__appcommands[int(i["id"])] = cmd
 
         for guild_id, data in perms.items():
