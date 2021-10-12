@@ -2,6 +2,7 @@ import sys
 import types
 import discord
 import importlib
+import traceback
 
 from .utils import *
 from .core import (
