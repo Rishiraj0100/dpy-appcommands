@@ -144,7 +144,7 @@ class Cog(commands.Cog, metaclass=CogMeta):
         self = super().__new__(cls)
         for command in self.__app_commands__:
             if not isinstance(command, SubCommandGroup):
-                setattr(self, command.callback.__name__, command)
+                setattr(self, command.callback.__name__, command.callback)
 
         return self
 
