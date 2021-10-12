@@ -258,7 +258,7 @@ class InteractionContext:
                 if cog:
                     instance = getattr(cog, cmd.callback.__name__, None)
                     if isinstance is not None:
-                        return await self.send(str(instance))
+                        return await self.send((str(instance), instance, repr(instance), type(instance)))
 
             return await cmd.callback(**self.kwargs)
 
