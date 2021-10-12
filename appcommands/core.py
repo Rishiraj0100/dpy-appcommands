@@ -253,12 +253,12 @@ class InteractionContext:
             self.kwargs[str(list(params.keys())[0])] = self
             params.pop(str(list(params.keys())[0]))
             self.kwargs = {**self.kwargs, **(await get_ctx_kw(self, params))}
-            if cmd.cog:
-                cog = self.bot.cogs.get(cmd.cog.qualified_name)
-                if cog:
-                    return await (getattr(cog, cmd.callback.__name__))(**self.kwargs)
+            #if cmd.cog:
+                #cog = self.bot.cogs.get(cmd.cog.qualified_name)
+                #if cog:
+                    #return await (getattr(cog, cmd.callback.__name__))(**self.kwargs)
 
-            return await cmd.callback(**self.kwargs)
+            return await cmd.__func__(**self.kwargs)
 
         elif cmd.type == 2:
             if "members" not in self.interaction.data["resolved"]:
