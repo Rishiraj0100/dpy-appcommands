@@ -594,10 +594,13 @@ class SubCommandGroup(BaseCommand):
     guild_ids: Optional[List[:class:`~int`]]
         Guild ids for which cmd is to be added
     """
-    def __init__(self,
-                 name: str = None,
-                 guild_ids: Optional[List[int]] = [],
-                 parent = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        description: str = "No Description given.",
+        guild_ids: Optional[List[int]] = [],
+        parent = None
+    ) -> None:
         self.parent = parent
         self.name: str = name
         self.description: str = ""
