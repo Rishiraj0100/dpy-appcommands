@@ -257,7 +257,7 @@ class InteractionContext:
                 cog = self.bot.cogs.get(cmd.cog.qualified_name)
                 if cog:
                     instance = getattr(cog, cmd.callback.__name__, None)
-                    if isinstance:
+                    if isinstance is not None:
                         return await instance(**self.kwargs)
 
             return await cmd.callback(**self.kwargs)
@@ -288,7 +288,7 @@ class InteractionContext:
                 cog = self.bot.cogs.get(cmd.cog.qualified_name)
                 if cog:
                     instance = getattr(cog, cmd.callback.__name__, None)
-                    if isinstance:
+                    if isinstance is not None:
                         return await instance(self, target)
 
             return await cmd.callback(self, target)
@@ -308,7 +308,7 @@ class InteractionContext:
                 cog = self.bot.cogs.get(cmd.cog.qualified_name)
                 if cog:
                     instance = getattr(cog, cmd.callback.__name__, None)
-                    if isinstance:
+                    if isinstance is not None:
                         return await instance(self, target)
 
             return await cmd.callback(self, target)
