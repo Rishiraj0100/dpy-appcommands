@@ -15,12 +15,43 @@ new question or submit one via pull requests.
 General
 --------
 
-How do i make a Bot?
+How do I make a Bot?
 ~~~~~~~~~~~~~~~~~~~~~
 
-The simple answer is to use :class:`.Bot` class
+The simple answer is to use :class:`.Bot`
 
-Quick example: ::
+For Example:
+
+.. code-block:: python3
+
     import appcommands
 
     bot = appcommands.Bot(command_prefix="$")
+
+How do I make a ShardedBot?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Simple answer is to use :class:`.AutoShardedBot`
+
+For Example:
+
+.. code-block:: python3
+
+    import appcommands
+
+    bot = appcommands.AutoShardedBot(command_prefix="$")
+
+How to make bot to not work with prefix commands?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To not add prefix command, Simply don't give `command_prefix`
+parameter in :class:`.Bot` or :class:`.AutoShardedBot`
+
+For example:
+
+.. code-block:: python3
+
+    import appcommands
+
+    bot = appcommands.Bot() # No command_prefix parameter
+
