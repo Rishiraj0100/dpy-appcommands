@@ -1,6 +1,7 @@
 import sys
 import types
 import discord
+import secrets
 import importlib
 import traceback
 
@@ -31,7 +32,21 @@ __all__ = (
 class ApplicationMixin:
     """The mixin for appcommands module"""
     def __init__(self, *args, **kwargs) -> None:
+        if not kwargs.get('command_prefix'):
+            kwargs["command_prefix"] = " ".join(secrets.token_urlsafe(5000).split('_'))
+
+        def _do_nothing(*args, **kwargs):
+            pass
+
         super().__init__(*args, **kwargs)
+
+        if not kwargs.get('command_prefix'):
+            self.remove_command('help')
+            self.__command = self.command
+            self.command = self.__disabled_command
+            self.add_command = _do_nothing
+            self.remove_command = _do_nothing
+
         self.to_register = []
         self.__appcommands: dict = {}
         self.__subcommands: dict = {}
@@ -52,6 +67,10 @@ class ApplicationMixin:
         command: :class:`~appcommands.models.BaseCommand`
             The command which is to be added"""
         self.to_register.append(command)
+
+    def __disabled_command(self, **kwargs):
+        kwargs["disabled"] = True
+        return self.__command(**kwargs)
 
     def remove_app_command(self, command: BaseCommand) -> None:
         """Remove an application command from the internal list
