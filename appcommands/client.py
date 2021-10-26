@@ -35,15 +35,20 @@ class ApplicationMixin:
         if not kwargs.get('command_prefix'):
             kwargs["command_prefix"] = " ".join(secrets.token_urlsafe(5000).split('_'))
 
-        def _do_nothing(*args, **kwargs):
+        def _do_nothing(*args, **kwargs) -> None:
             pass
+
+        def None_wrap(*args, **kwargs) -> Callable[[Callable[[Any, ...], Any]], Callable]:
+            def wrap(func: Callable[[Any, ...], Any]) -> Callable[[Any, ...], Any]:
+                return func
+            return wrap
 
         super().__init__(*args, **kwargs)
 
         if not kwargs.get('command_prefix'):
             self.remove_command('help')
             self.__command = self.command
-            self.command = self.__disabled_command
+            self.command = None_wrap
             self.add_command = _do_nothing
             self.remove_command = _do_nothing
 
@@ -67,10 +72,6 @@ class ApplicationMixin:
         command: :class:`~appcommands.models.BaseCommand`
             The command which is to be added"""
         self.to_register.append(command)
-
-    def __disabled_command(self, **kwargs):
-        kwargs["disabled"] = True
-        return self.__command(**kwargs)
 
     def remove_app_command(self, command: BaseCommand) -> None:
         """Remove an application command from the internal list
