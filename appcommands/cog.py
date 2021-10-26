@@ -189,10 +189,10 @@ class Cog(commands.Cog, metaclass=CogMeta):
                 usercmds.append(cmd)
                 appcmds.append(cmd)
 
-        self.__app_commands__ = (i for i in appcmds)
-        self.__user_commands__ = (i for i in usercmds)
-        self.__message_commands__ = (i for i in msgcmds)
-        self.__slash_commands__ = (i for i in slashcmds)
+        self.__app_commands__ = tuple(i for i in appcmds)
+        self.__user_commands__ = tuple(i for i in usercmds)
+        self.__message_commands__ = tuple(i for i in msgcmds)
+        self.__slash_commands__ = tuple(i for i in slashcmds)
         return super()._inject(bot)
         
     def _eject(self, bot):
