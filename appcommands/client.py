@@ -31,7 +31,9 @@ __all__ = (
 
 class ApplicationMixin:
     """The mixin for appcommands module"""
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **oldkwargs) -> None:
+        kwargs = oldkwargs.copy()
+
         if not kwargs.get('command_prefix'):
             kwargs["command_prefix"] = " ".join(secrets.token_urlsafe(5000).split('_'))
 
@@ -45,19 +47,22 @@ class ApplicationMixin:
 
         super().__init__(*args, **kwargs)
 
-        if not kwargs.get('command_prefix'):
+        if not oldkwargs.get('command_prefix'):
             self.remove_command('help')
             self.__command = self.command
             self.command = None_wrap
             self.add_command = _do_nothing
             self.remove_command = _do_nothing
 
-        self.to_register = []
-        self.__appcommands: dict = {}
-        self.__subcommands: dict = {}
-        self.__usercommands: dict = {}
-        self.__slashcommands: dict = {}
-        self.__messagecommands: dict = {}
+        self.__connected: bool = False
+
+        self.to_register: List[BaseCommand]                                   = []
+        self.__appcommands: Dict[int, BaseCommand]                            = {}
+        self.__usercommands: Dict[int, UserCommand]                           = {}
+        self.__messagecommands: Dict[int, MessageCommand]                     = {}
+        self.__subcommands: Dict[int, Dict[str, SlashCommand]]                = {}
+        self.__slashcommands: Dict[int, Union[SlashCommand, SubCommandGroup]] = {}
+
         self.add_listener(self.__connectlistener, "on_connect")
         self.add_listener(self.interaction_handler, "on_interaction")
 
@@ -242,7 +247,7 @@ class ApplicationMixin:
 
         Returns
         ---------
-        :class:`~ppcommands.SubCommandGroup`
+        :class:`appcommands.SubCommandGroup`
             The group by which commands will be made"""
         sub_command_group = SubCommandGroup(name, description)
         self.add_slash_command(sub_command_group)
@@ -359,7 +364,10 @@ class ApplicationMixin:
         self.to_register = []
 
     async def __connectlistener(self):
-        await self.register_commands()
+        if not self.__connected:
+            self.__connected = True
+            await self.register_commands()
+            self.remove_listener(self.__connectlistener, 'on_connect')
 
     @property
     def appcommands(self) -> Mapping[int, Union[SlashCommand, SubCommandGroup]]:
