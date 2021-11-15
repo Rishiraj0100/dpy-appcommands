@@ -28,10 +28,7 @@ class _MissingSentinel:
 
 MISSING = _MissingSentinel()
 
-def missing(*args, **kwargs):
-  def wrap(f):
+def missing(f):
     nm = _MissingSentinel()
     nm.__doc__ = f.__doc__
     return nm
-
-  return wrap
