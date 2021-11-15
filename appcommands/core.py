@@ -353,28 +353,125 @@ class InteractionContext:
 
     author = user
 
-    @property
-    def respond(self) -> Coroutine:
-        return self.interaction.response.send_message
+    def respond(self, *args, **kwargs) -> Coroutine:
+        """|coro|
 
-    @property
-    def edit(self) -> Coroutine:
-        return self.interaction.edit_original_message
+        Responds to this interaction by sending a message.
 
-    @property
-    def send(self) -> Coroutine:
+        Parameters
+        -----------
+        content: Optional[:class:`str`]
+            The content of the message to send.
+        embeds: List[:class:`discord.Embed`]
+            A list of embeds to send with the content. Maximum of 10. This cannot
+            be mixed with the ``embed`` parameter.
+        embed: :class:`discord.Embed`
+            The rich embed for the content to send. This cannot be mixed with
+            ``embeds`` parameter.
+        tts: :class:`bool`
+            Indicates if the message should be sent using text-to-speech.
+        view: :class:`discord.ui.View`
+            The view to send with the message.
+        ephemeral: :class:`bool`
+            Indicates if the message should only be visible to the user who started the interaction.
+            If a view is sent with an ephemeral message and it has no timeout set then the timeout
+            is set to 15 minutes.
+
+        Raises
+        -------
+        discord.HTTPException
+            Sending the message failed.
+        TypeError
+            You specified both ``embed`` and ``embeds``.
+        ValueError
+            The length of ``embeds`` was invalid.
+        discord.InteractionResponded
+            This interaction has already been responded to before.
+        """
+        return self.interaction.response.send_message(*args, **kwargs)
+
+    def edit(self, *args, **kwargs):
+         """|coro|
+
+        Edits the original interaction response message.
+
+        Parameters
+        ------------
+        content: Optional[:class:`str`]
+            The content to edit the message with or ``None`` to clear it.
+        embeds: List[:class:`discord.Embed`]
+            A list of embeds to edit the message with.
+        embed: Optional[:class:`discord.Embed`]
+            The embed to edit the message with. ``None`` suppresses the embeds.
+            This should not be mixed with the ``embeds`` parameter.
+        file: :class:`File`
+            The file to upload. This cannot be mixed with ``files`` parameter.
+        files: List[:class:`discord.File`]
+            A list of files to send with the content. This cannot be mixed with the
+            ``file`` parameter.
+        allowed_mentions: :class:`discord.AllowedMentions`
+            Controls the mentions being processed in this message.
+            See :meth:`discord.abc.Messageable.send` for more information.
+        view: Optional[:class:`~discord.ui.View`]
+            The updated view to update this message with. If ``None`` is passed then
+            the view is removed.
+
+        Raises
+        -------
+        discord.HTTPException
+            Editing the message failed.
+        discord.Forbidden
+            Edited a message that is not yours.
+        TypeError
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+        ValueError
+            The length of ``embeds`` was invalid.
+
+        Returns
+        --------
+        :class:`discord.InteractionMessage`
+            The newly edited message.
+        """
+        return self.interaction.edit_original_message(*args, **kwargs)
+
+    def send(self, *args, **kwargs):
+        """|coro|
+
+        If interaction is not responded, then this function responds it,
+        or if it is already responded then it sends a message to current channel
+        """
         if not self.response.is_done():
-            return self.respond
+            return self.respond(*args, **kwargs)
 
-        return self.channel.send
+        return self.channel.send(*args, **kwargs)
 
-    @property
-    def defer(self) -> Coroutine:
-        return self.interaction.response.defer
+    def defer(self, *args, **kwargs):
+        """|coro|
 
-    @property
-    def followup(self) -> Coroutine:
-        return self.interaction.followup
+        Defers the interaction response.
+
+        This is typically used when the interaction is acknowledged
+        and a secondary action will be done later.
+
+        Parameters
+        -----------
+        ephemeral: :class:`bool`
+            Indicates whether the deferred message will eventually be ephemeral.
+            This only applies for interactions of type `discord.InteractionType.application_command`.
+
+        Raises
+        -------
+        discord.HTTPException
+            Deferring the interaction failed.
+        discord.InteractionResponded
+            This interaction has already been responded to before.
+        """
+        return self.interaction.response.defer(*args, **kwargs)
+
+
+    def followup(self, *args, **kwargs) -> Coroutine:
+        """:class:`discord.Webhook`: Returns the follow up webhook for follow up interactions."""
+        return self.interaction.followup(*args, **kwargs)
 
 
 class InteractionData:
