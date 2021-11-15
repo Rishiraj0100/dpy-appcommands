@@ -24,10 +24,8 @@ bot = appcommands.Bot(command_prefix=commands.when_mentioned_or('?'))
 class Blep(SlashCommand):
     def __init__(self):
         super().__init__(
-            bot.appclient,
             name="blep",
             description = "Some blep description",
-            callback = self.callback
         )
 
     async def callback(self, ctx: InteractionContext, pleb: str = None):
@@ -35,20 +33,20 @@ class Blep(SlashCommand):
 
 # or
 
-@bot.slash(name="test", description="test")
+@bot.slashcommand(name="test", description="test")
 async def test(ctx):
-    await ctx.reply("tested")
+    await ctx.senx("tested")
 
 # or
 
-@bot.appclient.command(name="test2", description="test")
+@bot.slashcommand(name="test2", description="test")
 async def test(ctx):
-    await ctx.reply(f"tested {ctx.author}")
+    await ctx.respond(f"tested {ctx.author}")
 
 @bot.event
 async def on_ready():
     print(f'Logged on as {bot.user} (ID: {bot.user.id})')
-    await bot.appclient.add_command(Blep())
+    await bot.add_slash_command(Blep())
 
 bot.run("TOKEN")
 ```
