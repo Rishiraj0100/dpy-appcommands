@@ -391,7 +391,7 @@ class InteractionContext:
         return self.interaction.response.send_message(*args, **kwargs)
 
     def edit(self, *args, **kwargs):
-         """|coro|
+        """|coro|
 
         Edits the original interaction response message.
 
