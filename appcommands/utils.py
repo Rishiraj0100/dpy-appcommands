@@ -6,7 +6,13 @@ __all__ = (
 )
 
 class _MissingSentinel:
+    def __init__(self, **attrs: dict={}):
+        for k, v in attrs.items():
+          setattr(self, k, v)
+
     def __eq__(self, other):
+        if isinstance(self, other):
+            return True
         return False
 
     def __bool__(self):
@@ -26,5 +32,8 @@ class _MissingSentinel:
 
 MISSING = _MissingSentinel()
 
-def missing(*args, **kwargs) -> MISSING:
-  return MISSING
+def missing(*args, **kwargs):
+  def wrap(f):
+    return _MissingSentinel(__doc__=f.__doc__)
+
+  return wrap
