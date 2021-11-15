@@ -8,3 +8,8 @@ Welcome to dpy-appcommands documentation
    gettingstarted
    api
    faq
+
+Support
+--------
+For any queries (support) join my `Discord Server <https://discord.gg/zdrSUu98BP>`_
+now
