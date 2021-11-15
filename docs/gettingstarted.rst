@@ -62,7 +62,7 @@ when it is used in parameters and type of parameter is not defined,
 then it takes the value as ``string``,
 and when value is not defined then it makes option ``required``
 
-When Option is added in both forms then it takes ``@bot.slash()`` one,
+When Option is added in both forms then it takes ``@bot.slashcommand()`` one,
 not ``async def hi(ctx, text: str):``
 
 
@@ -75,7 +75,7 @@ This will add ``required`` option
 
 .. code-block:: python3
 
-    @bot.slash(name="say", description="Repeats your text")
+    @bot.slashcommand(name="say", description="Repeats your text")
     async def say(ctx, text: str):
         await ctx.reply(text)
 
@@ -87,7 +87,7 @@ This will add optional options
 
 .. code-block:: python3
 
-    @bot.slash(name="say", description="Repeats your text")
+    @bot.slashcommand(name="say", description="Repeats your text")
     async def say(ctx, text: str = "Please enter a text!"):
         await ctx.reply(text)
 
@@ -103,7 +103,7 @@ Custom Options
 
     from appcommands import Option, OptionType
 
-    @bot.slash(name="number", description="Your favourite number", options=[Option(name="number", description="your favourite number", type=OptionType.NUMBER, required=True)])
+    @bot.slashcommand(name="number", description="Your favourite number", options=[Option(name="number", description="your favourite number", type=OptionType.NUMBER, required=True)])
     async def say(ctx, number):
         await ctx.reply('your favourite number is ' + str(number), ephemeral=True)
 
@@ -117,7 +117,7 @@ A sample is given here
 
     for appcommands import Option, Choice, OptionType
 
-    @bot.slash(
+    @bot.slashcommand(
         name = "embed",
         description = "creates an Embed",
         options = [
@@ -211,7 +211,7 @@ file size of main file.
 
 .. note::
     To work with AppCommand cogs, your cog must be derived
-    from :class:`~appcommands.cog.Cog`
+    from :class:`appcommands.Cog`
 
 Now, let's begin with cogs
 
@@ -229,5 +229,9 @@ Making a cog command
 
         @slashcommand(name="hello", description="Hello World!")
         async def hello(self, ctx, user: discord.Member = None):
+            if not user:
+                hidden=True
+            else:
+                hidden=False
             user = user or ctx.author
-            await ctx.reply(f"Hello {user.mention}!")
+            await ctx.reply(f"Hello {user.mention}!", ephemeral=hidden)
