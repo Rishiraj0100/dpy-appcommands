@@ -161,7 +161,7 @@ as it is same as ↓
 
     for appcommands import Option, Choice, OptionType
 
-    @bot.slash(name="embed", description = "creates an Embed")
+    @bot.slashcommand(name="embed", description = "creates an Embed")
     async def embed(ctx, title: str, description: str, footer: str = None, timestamp: bool = False):
         embed = discord.Embed(title, description)
         if footer is not None:
