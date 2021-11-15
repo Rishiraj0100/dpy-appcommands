@@ -652,7 +652,7 @@ class SlashCommand(BaseCommand):
             if not options or options == []:
                 self.options = generate_options(callback, description)
             self.callback = callback
-        elif (hasattr(self, 'callback') and self.callback is not MISSING):
+        elif (hasattr(self, 'callback') and ( not (self.callback == MISSING))):
             if not callback:
                 callback = self.callback
             if not asyncio.iscoroutinefunction(callback):
@@ -842,7 +842,7 @@ class UserCommand(BaseCommand):
                 raise TypeError('Callback must be a coroutine.')
             self.name = name or callback.__name__
             self.callback = callback
-        elif (hasattr(self, 'callback') and self.callback is not MISSING):
+        elif (hasattr(self, 'callback') and ( not (self.callback == MISSING))):
             if not callback:
                 callback = self.callback
             if not asyncio.iscoroutinefunction(callback):
@@ -908,7 +908,7 @@ class MessageCommand(BaseCommand):
                 raise TypeError('Callback must be a coroutine.')
             self.name = name or callback.__name__
             self.callback = callback
-        elif (hasattr(self, 'callback') and self.callback is not MISSING):
+        elif (hasattr(self, 'callback') and ( not (self.callback == MISSING))):
             if not callback:
                 callback = self.callback
             if not asyncio.iscoroutinefunction(callback):
