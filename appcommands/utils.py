@@ -6,10 +6,6 @@ __all__ = (
 )
 
 class _MissingSentinel:
-    def __init__(self, **attrs):
-        for k, v in attrs.items():
-          setattr(self, k, v)
-
     def __eq__(self, other):
         if isinstance(self, other):
             return True
@@ -34,6 +30,8 @@ MISSING = _MissingSentinel()
 
 def missing(*args, **kwargs):
   def wrap(f):
-    return _MissingSentinel(__doc__=f.__doc__)
+    nm = _MissingSentinel()
+    nm.__doc__ = f.__doc__
+    return nm
 
   return wrap
