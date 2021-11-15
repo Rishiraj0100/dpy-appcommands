@@ -1,7 +1,9 @@
 # dpy-appcommands
 [![PyPi](https://shields.io/pypi/v/dpy-appcommands.svg)](https://pypi.org/project/dpy-appcommands/)
 [![PyPi](https://shields.io/pypi/pyversions/dpy-appcommands.svg)](https://pypi.org/project/dpy-appcommands/)
-## Installation and Usage
+## Support
+If you want any support then join my [`discord server`](https://discord.gg/zdrSUu98BP)
+## Installation
 
 To install this module, run
 
@@ -9,7 +11,7 @@ To install this module, run
 pip install -U dpy-appcommands
 ```
 
-### Usage
+## Usage
 
 For a headstart, here's an example
 but if you want to view full
