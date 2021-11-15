@@ -40,8 +40,8 @@ class ApplicationMixin:
         def _do_nothing(*args, **kwargs) -> None:
             pass
 
-        def None_wrap(*args, **kwargs) -> Callable[[Callable[[Any, ...], Any]], Callable]:
-            def wrap(func: Callable[[Any, ...], Any]) -> Callable[[Any, ...], Any]:
+        def None_wrap(*args, **kwargs) -> Callable[[Callable[[Any, Any], Any]], Callable]:
+            def wrap(func: Callable[[Any, Any], Any]) -> Callable[[Any, Any], Any]:
                 return func
             return wrap
 
