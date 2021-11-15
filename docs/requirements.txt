@@ -4,3 +4,4 @@ git+https://github.com/Rapptz/discord.py@master
 import_expression>=1.0.0,<2.0.0
 sphinx>=3.5.4
 sphinxcontrib-asyncio
+sphinxcontrib_trio==1.1.2

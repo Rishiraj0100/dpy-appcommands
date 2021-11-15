@@ -1,7 +1,9 @@
 # dpy-appcommands
 [![PyPi](https://shields.io/pypi/v/dpy-appcommands.svg)](https://pypi.org/project/dpy-appcommands/)
 [![PyPi](https://shields.io/pypi/pyversions/dpy-appcommands.svg)](https://pypi.org/project/dpy-appcommands/)
-## Installation and Usage
+## Support
+If you want any support then join my [`discord server`](https://discord.gg/zdrSUu98BP)
+## Installation
 
 To install this module, run
 
@@ -9,7 +11,7 @@ To install this module, run
 pip install -U dpy-appcommands
 ```
 
-### Usage
+## Usage
 
 For a headstart, here's an example
 but if you want to view full
@@ -24,10 +26,8 @@ bot = appcommands.Bot(command_prefix=commands.when_mentioned_or('?'))
 class Blep(SlashCommand):
     def __init__(self):
         super().__init__(
-            bot.appclient,
             name="blep",
             description = "Some blep description",
-            callback = self.callback
         )
 
     async def callback(self, ctx: InteractionContext, pleb: str = None):
@@ -35,20 +35,20 @@ class Blep(SlashCommand):
 
 # or
 
-@bot.slash(name="test", description="test")
+@bot.slashcommand(name="test", description="test")
 async def test(ctx):
-    await ctx.reply("tested")
+    await ctx.senx("tested")
 
 # or
 
-@bot.appclient.command(name="test2", description="test")
+@bot.slashcommand(name="test2", description="test")
 async def test(ctx):
-    await ctx.reply(f"tested {ctx.author}")
+    await ctx.respond(f"tested {ctx.author}")
 
 @bot.event
 async def on_ready():
     print(f'Logged on as {bot.user} (ID: {bot.user.id})')
-    await bot.appclient.add_command(Blep())
+    await bot.add_slash_command(Blep())
 
 bot.run("TOKEN")
 ```

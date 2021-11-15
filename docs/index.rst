@@ -1,5 +1,5 @@
 Welcome to dpy-appcommands documentation
-==============================
+==========================================
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -7,5 +7,9 @@ Welcome to dpy-appcommands documentation
    quickstart
    gettingstarted
    api
-   genindex
+   faq
 
+Support
+--------
+For any queries (support) join my `Discord Server <https://discord.gg/zdrSUu98BP>`_
+now

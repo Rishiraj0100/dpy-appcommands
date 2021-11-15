@@ -3,88 +3,133 @@
 API Reference
 =============
 
-SubModules
+The following section outlines the API of appcommands module
 
-appcommands.client Module
-----------------------------------
+Bots
+-----
 
-.. currentmodule:: appcommands.client
+Bot
+~~~~
 
-.. autoclass:: Bot
+.. attributetable:: appcommands.Bot
+
+.. autoclass:: appcommands.Bot
+    :members: add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands
+
+    .. automethod:: Bot.slashcommand(**kwargs)
+        :decorator:
+
+    .. automethod:: Bot.messagecommand(**kwargs)
+        :decorator:
+
+    .. automethod:: Bot.usercommand(**kwargs)
+        :decorator:
+
+    .. automethod:: Bot.slashgroup
+
+AutoShardedBot
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: appcommands.AutoShardedBot
+
+.. autoclass:: appcommands.AutoShardedBot
     :members:
 
-.. autoclass:: AutoShardedBot
+
+Commands
+----------
+
+Decorators
+~~~~~~~~~~~~
+
+.. autofunction:: appcommands.command
+    :decorator:
+
+.. autofunction:: appcommands.messagecommand
+    :decorator:
+
+.. autofunction:: appcommands.slashcommand
+    :decorator:
+
+.. autofunction:: appcommands.usercommand
+    :decorator:
+
+
+Commands
+~~~~~~~~~~~
+
+.. attributetable:: appcommands.SlashCommand
+
+.. autoclass:: appcommands.SlashCommand
+
+    .. automethod:: SlashCommand.callback(ctx)
+        :async:
+
+.. attributetable:: appcommands.SubCommandGroup
+
+.. autoclass:: appcommands.SubCommandGroup
+    :members:
+    :exclude-members: subcommand
+
+    .. automethod:: SubCommandGroup.subcommand(**kwargs)
+        :decorator:
+
+.. attributetable:: appcommands.MessageCommand
+
+.. autoclass:: appcommands.MessageCommand
+
+    .. automethod:: MessageCommand.callback(ctx, message)
+        :async:
+
+.. attributetable:: appcommands.UserCommand
+
+.. autoclass:: appcommands.UserCommand
+
+    .. automethod:: UserCommand.callback(ctx, user)
+        :async:
+
+Checks
+~~~~~~~
+
+.. autofunction:: appcommands.blacklist_roles
+    :decorator:
+
+.. autofunction:: appcommands.blacklist_users
+    :decorator:
+
+.. autofunction:: appcommands.whitelist_roles
+    :decorator:
+
+.. autofunction:: appcommands.whitelist_users
+    :decorator:
+
+More References
+----------------
+
+Contexts
+~~~~~~~~~~
+
+.. attributetable:: appcommands.InteractionContext
+
+.. autoclass:: appcommands.InteractionContext
     :members:
 
-.. autoclass:: AppClient
+Options
+~~~~~~~~
+.. attributetable:: appcommands.Choice
+
+.. autoclass:: appcommands.Choice
     :members:
 
-appcommands.models Module
-----------------------------------
+.. attributetable:: appcommands.Option
 
-.. currentmodule:: appcommands.models
-
-.. autoclass:: InteractionContext
+.. autoclass:: appcommands.Option
     :members:
 
-.. autoclass:: Choice
-    :members:
+Cogs
+~~~~~
 
-.. autoclass:: Option
-    :members:
+.. autoclass:: appcommands.Cog
 
-.. autoclass:: SlashCommand
-    :members:
+.. autoclass:: appcommands.CogMeta
 
-.. autofunction:: command
-
-appcommands.cog Module
-----------------------------------
-
-.. currentmodule:: appcommands.cog
-
-.. autofunction:: command
-
-.. autoclass:: SlashCog
-
-appcommands.enums Module
-----------------------------------
-
-.. currentmodule:: appcommands.enums
-
-.. autoclass:: OptionType
-    :members:
-
-appcommands.types Module
----------------------------------
-
-.. currentmodule:: appcommands.types
-
-.. autoclass:: StoredCommand
-    :members:
-
-appcommands.exceptions Module
-----------------------------------
-
-.. currentmodule:: appcommands.exceptions
-
-.. autoclass:: Error
-    :members:
-    
-.. autoclass:: CommandExixts
-    :members:
-
-.. autoclass:: CommandDoesNotExists
-    :members:
-
-.. autoclass:: CommandNotRegistered
-    :members:
-
-.. autoclass:: ExtensionNotFound
-    :members:
-
-.. autoclass:: LoadFailed
-    :members:
-
-.. autoclass:: ExtensionNotLoaded
-    :members:

@@ -1,22 +1,568 @@
 import sys
 import types
 import discord
+import secrets
 import importlib
+import traceback
 
 from .utils import *
-from .exceptions import *
-from .types import StoredCommand
-from .models import InteractionContext, SlashCommand, command as _cmd
+from .core import (
+    command as _cmd,
+    InteractionContext,
+    SubCommandGroup,
+    messagecommand as _mcmd,
+    usercommand as _ucmd,
+    BaseCommand,
+    MessageCommand,
+    SlashCommand,
+    UserCommand
+)
 
 from discord import http, ui
 from discord.ext import commands
 from discord.enums import InteractionType
-from typing import List, Optional, Tuple, Union, Dict, Mapping
+from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any
 
 
-class Bot(commands.Bot):
-    """The Bot
-    This is fully same as :class:`~discord.ext.commands.Bot`
+__all__ = (
+    "AutoShardedBot",
+    "Bot"
+)
+
+class ApplicationMixin:
+    """The mixin for appcommands module"""
+    def __init__(self, *args, **oldkwargs) -> None:
+        kwargs = oldkwargs.copy()
+
+        if not kwargs.get('command_prefix'):
+            kwargs["command_prefix"] = " ".join(secrets.token_urlsafe(5000).split('_'))
+
+        def _do_nothing(*args, **kwargs) -> None:
+            pass
+
+        def None_wrap(*args, **kwargs) -> Callable[[Callable[[Any, Any], Any]], Callable]:
+            def wrap(func: Callable[[Any, Any], Any]) -> Callable[[Any, Any], Any]:
+                return func
+            return wrap
+
+        super().__init__(*args, **kwargs)
+
+        if not oldkwargs.get('command_prefix'):
+            self.remove_command('help')
+            self.__command = self.command
+            self.command = None_wrap
+            self.add_command = _do_nothing
+            self.remove_command = _do_nothing
+
+        self.__connected: bool = False
+
+        self.to_register: List[BaseCommand]                                   = []
+        self.__appcommands: Dict[int, BaseCommand]                            = {}
+        self.__usercommands: Dict[int, UserCommand]                           = {}
+        self.__messagecommands: Dict[int, MessageCommand]                     = {}
+        self.__subcommands: Dict[int, Dict[str, SlashCommand]]                = {}
+        self.__slashcommands: Dict[int, Union[SlashCommand, SubCommandGroup]] = {}
+
+        self.add_listener(self.__connectlistener, "on_connect")
+        self.add_listener(self.interaction_handler, "on_interaction")
+
+    def add_app_command(self, command: BaseCommand) -> None:
+        """Adds a app command,
+        usually used when subclassed
+
+        .. versionadded:: 2.0
+
+        Parameters
+        ------------
+        command: :class:`~appcommands.models.BaseCommand`
+            The command which is to be added"""
+        self.to_register.append(command)
+
+    def remove_app_command(self, command: BaseCommand) -> None:
+        """Remove an application command from the internal list
+        of appcommands.
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        command: :class:`appcommands.BaseCommand`
+            The command to remove.
+        """
+        self.__appcommands.pop(command.id)
+        self.__subcommands.pop(command.id)
+        self.__usercommands.pop(command.id)
+        self.__slashcommands.pop(command.id)
+        self.__messagecommands.pop(command.id)
+
+    def slashcommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
+        r"""A decorator which adds a slash command to bot
+        same as :meth:`appcommands.slashcommand`
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        description: Optional[:class:`~str`]
+            description of the command, required
+        guild_ids: Optional[List[:class:`~int`]]
+            list of ids of the guilds for which command is to be added, (optional)
+        options: Optional[List[:class:`~appcommands.Option`]]
+            the options for command, can be empty
+        cls: :class:`~appcommands.SlashCommand`
+            The custom command class, must be a subclass of :class:`appcommands.SlashCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @bot.slashcommand(name="Hi", description="Hello!")
+            async def some_func(ctx):
+                await ctx.send("Hello!")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already an AppCommand
+
+        Returns
+        --------
+        Callable[..., :class:`~appcommands.SlashCommand`]
+            The command."""
+        def decorator(func) -> SlashCommand:
+            wrapped = _cmd(cls=cls, **kwargs)
+            cmd = wrapped(func)
+            self.add_app_command(cmd)
+            return cmd
+
+        return decorator
+
+    def messagecommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], MessageCommand]:
+        r"""A shortcut decorator that adds a Context-Menu message commands to bot
+        same as :meth:`appcommands.messagecommand`
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        guild_ids: Optional[List[:class:`~int`]]
+            list of ids of the guilds for which command is to be added, (optional)
+        cls: :class:`~appcommands.MessageCommand`
+            The custom command class, must be a subclass of :class:`appcommands.MessageCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @bot.messagecommand(name="ID")
+            async def some_func(ctx, message: discord.Message):
+                await ctx.send(f"Id of that message is {message.id}")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already an AppCommand
+
+        Returns
+        --------
+        Callable[..., :class:`~appcommands.MessageCommand`]
+            The command."""
+        def decorator(func) -> MessageCommand:
+            wrapped = _mcmd(cls=cls, **kwargs)
+            cmd = wrapped(func)
+            self.add_app_command(cmd)
+            return cmd
+
+        return decorator
+
+    def usercommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], UserCommand]:
+        r"""A decorator which adds a message command to bot
+        same as :meth:`appcommands.usercommand`
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        guild_ids: Optional[List[:class:`~int`]]
+            list of ids of the guilds for which command is to be added, (optional)
+        cls: :class:`~appcommands.UserCommand`
+            The custom command class, must be a subclass of :class:`appcommands.UserCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @bot.usercommand(name="ID")
+            async def some_func(ctx, user: discord.Member):
+                await ctx.send(f"Id of that user is {user.id}")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already an AppCommand
+
+        Returns
+        --------
+        Callable[..., :class:`~appcommands.UserCommand`]
+            The command."""
+        def decorator(func) -> UserCommand:
+            wrapped = _ucmd(cls=cls, **kwargs)
+            cmd = wrapped(func)
+            self.add_app_command(cmd)
+            return cmd
+
+        return decorator
+
+    def slashgroup(self, name: str, description: Optional[str] = "No description.") -> SubCommandGroup:
+        """The group by which subcommands are to be derived for slash commands
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -------------
+        name: :class:`~str`
+            Name of the group, (required)
+        description: Optional[:class:`~str`]
+            Description of the group, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            mygrp = bot.slashgroup(name='test', description='test group')
+
+            @mygrp.command(description="test cmd of test grp")
+            async def test1(ctx):
+                await ctx.send("tested")
+
+        Returns
+        ---------
+        :class:`appcommands.SubCommandGroup`
+            The group by which commands will be made"""
+        sub_command_group = SubCommandGroup(name, description)
+        self.add_slash_command(sub_command_group)
+        return sub_command_group
+
+    async def register_commands(self) -> None:
+        r"""|coro|
+
+        This function registers app commands
+
+        .. versionadded:: 2.0
+        """
+        commands = []
+        perms = {}
+        registered_commands = await self.http.get_global_commands(self.user.id)
+        for command in [cmd for cmd in self.to_register if not cmd.guild_ids]:
+            json = command.to_dict()
+            if len(registered_commands) > 0:
+                matches = [
+                    x
+                    for x in registered_commands
+                    if x["name"] == command.name and x["type"] == command.type
+                ]
+                if matches:
+                    json["id"] = matches[0]["id"]
+            commands.append(json)
+
+        guild_commands = {}
+        async for guild in self.fetch_guilds(limit=None):
+            guild_commands[guild.id] = []
+            perms[guild.id] = []
+
+        for command in [cmd for cmd in self.to_register if cmd.guild_ids]:
+            json = command.to_dict()
+            for guild_id in command.guild_ids:
+                to_update = guild_commands[guild_id]
+                guild_commands[guild_id] = to_update + [json]
+
+        
+        for guild_id in guild_commands:
+            if not guild_commands[guild_id]:
+                continue
+
+            try:
+                cmds = await self.http.bulk_upsert_guild_commands(self.user.id, guild_id, guild_commands[guild_id])
+                
+            except Exception as e:
+                print(f"Failed to add guild commands for guild {guild_id}")
+                traceback.print_exc()
+                self.dispatch("on_guild_command_register_fail", guild_id, guild_commands[guild_id])
+            else:
+                for i in cmds:
+                    cmd = discord.utils.get(self.to_register, name=i["name"], description=i["description"], type=i['type'])
+                    setattr(cmd, "id", int(i['id']))
+                    if cmd.__permissions__:
+                        perms[guild_id].append({"id": str(cmd.id), "permissions": cmd.__permissions__})
+
+                    if cmd.type == 1:
+                        self.__slashcommands[int(i.get('id'))] = cmd
+                    elif cmd.type == 2:
+                        self.__usercommands[int(i.get('id'))] = cmd
+                    else:
+                        self.__messagecommands[int(i.get('id'))] = cmd
+
+                    if isinstance(cmd, SubCommandGroup):
+                        self.__subcommands[int(i['id'])] = {}
+                        for subcommand in cmd.subcommands:
+                            if isinstance(subcommand, SubCommandGroup):
+                                for _subcmd in subcommand.subcommands:
+                                    self.__subcommands[int(i['id'])][_subcmd.name] = _subcmd
+                            else:
+                                self.__subcommands[int(i['id'])][subcommand.name] = subcommand
+
+                    self.__appcommands[int(i["id"])] = cmd
+
+        for guild_id, data in perms.items():
+            if not data:
+                continue
+
+            await self.http.bulk_edit_guild_application_command_permissions(
+                self.user.id,
+                guild_id,
+                data
+            )
+
+        cmds = await self.http.bulk_upsert_global_commands(self.user.id, commands)
+        for i in cmds:
+            cmd = discord.utils.get(
+                self.to_register,
+                name=i["name"],
+                description=i["description"],
+                type=i["type"],
+            )
+            setattr(cmd, "id", int(i['id']))
+
+            if cmd.type == 1:
+                self.__slashcommands[int(i.get('id'))] = cmd
+            elif cmd.type == 2:
+                self.__usercommands[int(i.get('id'))] = cmd
+            else:
+                self.__messagecommands[int(i.get('id'))] = cmd
+
+            
+            if isinstance(cmd, SubCommandGroup):
+                self.__subcommands[int(i['id'])] = {}
+                for subcommand in cmd.subcommands:
+                    if isinstance(subcommand, SubCommandGroup):
+                        for _subcmd in subcommand.subcommands:
+                            self.__subcommands[int(i['id'])][_subcmd.name] = _subcmd
+                    else:
+                        self.__subcommands[int(i['id'])][subcommand.name] = subcommand
+
+            self.__appcommands[int(i["id"])] = cmd
+        self.to_register = []
+
+    async def __connectlistener(self):
+        if not self.__connected:
+            self.__connected = True
+            await self.register_commands()
+            self.remove_listener(self.__connectlistener, 'on_connect')
+
+    @property
+    def appcommands(self) -> Mapping[int, Union[SlashCommand, SubCommandGroup]]:
+        """The all application command the bot has
+
+        .. versionadded:: 2.0
+
+        Returns
+        --------
+        Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        """
+        return types.MappingProxyType(self.__appcommands)
+
+    @property
+    def subcommands(self) -> Mapping[int, Union[SlashCommand, SubCommandGroup]]:
+        """The slashcommands' subcommands
+
+        .. versionadded:: 2.0
+
+        Returns
+        --------
+        Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        """
+        return types.MappingProxyType(self.__subcommands)
+
+    @property
+    def slashcommands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]]:
+        """All slashcommands with id
+
+        .. versionadded:: 2.0
+
+        Returns
+        ---------
+        Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        """
+        return types.MappingProxyType(self.__slashcommands)
+
+    @property
+    def usercommands(self) -> Mapping[str, UserCommand]:
+        """All usercommands with id
+
+        .. versionadded:: 2.0
+
+        Returns
+        ---------
+        Mapping[:class:`~int`, :class:`~appcommands.models.UserCommand`]
+        """
+        return types.MappingProxyType(self.__usercommands)
+
+    @property
+    def messagecommands(self) -> Mapping[str, MessageCommand]:
+        """All messagecommands with id
+
+        .. versionadded:: 2.0
+
+        Returns
+        ---------
+        Mapping[:class:`~int`, :class:`~appcommands.models.MessageCommand`]
+        """
+        return types.MappingProxyType(self.__messagecommands)
+
+    def get_slash_commands(self) -> Mapping[str, Union[SlashCommand, SubCommandGroup]]:
+        """Gets every slash commands registered in the current running instance
+
+        .. versionadded:: 2.0
+
+        Returns
+        ---------
+        Mapping[:class:`~str`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        """
+        ret = {}
+
+        for id, cmd in self.__slashcommands:
+            ret[self.__slashcommands[id]] = cmd
+
+        return types.MappingProxyType(ret)
+
+    def get_slash_command(self, name: str) -> Union[SlashCommand, SubCommandGroup]:
+        """Gives a slash command registered in this module
+        
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            the name from which the slash command is to be found
+
+        Returns
+        ---------
+        Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]
+            The found thing"""
+        return (self.get_slash_commands()).get(name)
+
+    def get_user_commands(self) -> Mapping[str, UserCommand]:
+        """Gets every user commands registered in the current running instance
+
+        .. versionadded:: 2.0
+
+        Returns
+        ---------
+        Mapping[:class:`~str`, :class:`~appcommands.models.UserCommand`]
+        """
+        ret = {}
+
+        for id, cmd in self.usercommands:
+            ret[self.__usercommands[id].name] = cmd
+
+        return types.MappingProxyType(ret)
+
+    def get_user_command(self, name: str) -> UserCommand:
+        """Gives a user command registered in this module
+        
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            the name from which the user command is to be found
+
+        Returns
+        ---------
+        :class:`~appcommands.models.UserCommand`
+            The found thing"""
+        return (self.get_user_commands()).get(name)
+
+    def get_message_commands(self) -> Mapping[str, MessageCommand]:
+        """Gets every user commands registered in the current running instance
+
+        .. versionadded:: 2.0
+
+        Returns
+        ---------
+        Mapping[:class:`~str`, :class:`~appcommands.models.MessageCommand`]
+        """
+        ret = {}
+
+        for id, cmd in self.messagecommands:
+            ret[self.__messagecommands[id].name] = cmd
+
+        return types.MappingProxyType(ret)
+
+    def get_message_command(self, name: str) -> MessageCommand:
+        """Gives a message command registered in this module
+        
+        Parameters
+        -----------
+        name: :class:`~str`
+            the name from which the message command is to be found
+
+        Returns
+        ---------
+        :class:`~appcommands.models.MessageCommand`
+            The found thing"""
+        return (self.get_message_commands()).get(name)
+
+    def get_interaction_context(self, interaction: discord.Interaction) -> InteractionContext:
+        """The method usually implemented to use custom contexts
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        interaction: :class:`~discord.Intetaction`
+
+        Returns
+        ---------
+        :class:`~appcommands.models.InteractionContext`
+            The context that will be used for handling interactions"""
+        return InteractionContext(self, interaction)
+
+    async def interaction_handler(self, interaction):
+        if interaction.type != InteractionType.application_command:
+            return
+
+        id = int(interaction.data['id'])
+        _data = interaction.data.copy()
+        context = self.get_interaction_context(interaction)
+        if id in self.__subcommands:
+            _data = _data['options'][0]
+            while 'options' in _data and _data['type'] == 2:
+                if _data.get('options'):
+                    _data = _data.get('options')[0]
+                else:
+                    break
+
+            if (_data['name'] in self.__subcommands[id]):
+                return await context.invoke(self.__subcommands[id][_data['name']])
+
+        if int(interaction.data['id']) in self.__appcommands:
+            context = self.get_interaction_context(interaction)
+            await context.invoke(self.__appcommands[id])
+
+class Bot(ApplicationMixin, commands.Bot):
+    """The Bot class.
+    This is a subclass of :class:`discord.ext.commands.Bot`
 
     Example
     ---------
@@ -28,56 +574,13 @@ class Bot(commands.Bot):
         bot = appcommands.Bot(command_prefix="$")
 
     """
-    def __init__(self, **options):
-        """Constructor"""
-        super().__init__(**options)
-        self.appclient = self.get_app_client()
+    pass
 
-    def slash(self, *args, **kwargs) -> SlashCommand:
-        """Adds a command to bot
-        same as :func:`~appcommands.client.AppClient.command`
 
-        Parameters
-        -----------
-        name: :class:`~str`
-            name of the command, defaults to function name, (required)
-        description: Optional[:class:`~str`]
-            description of the command, required
-        guild: Optional[:class:`~str`]
-            id of the guild for which command is to be added, (optional)
-        options: Optional[List[:class:`~appcommands.models.Option`]]
-            the options for command, can be empty
-        cls: :class:`~appcommands.models.SlashCommand`
-            The custom command class, must be a subclass of :class:`~appcommands.models.SlashCommand`, (optional)
-
-        Example
-        ---------
-
-        .. code-block:: python3
-
-            @bot.slash(name="Hi", description="Hello!")
-            async def some_func(ctx):
-                await ctx.reply("Hello!")
-
-        Raises
-        --------
-        TypeError
-           The passed callback is not coroutine or it is already a SlashCommand
-
-        Returns
-        --------
-        :class:`~appcommands.models.SlashCommand`
-            The slash command.
-        """
-        return self.appclient.command(*args, **kwargs)
-
-    def get_app_client(self):
-        """The method usually implemented to use custom appclient"""
-        return AppClient(self)
-
-class AutoShardedBot(commands.AutoShardedBot):
-    """The AutoShardedBot class
-    This is fully same as :class:`~discord.ext.commands.AutoShardedBot`
+class AutoShardedBot(ApplicationMixin, commands.AutoShardedBot):
+    """The AutoShardedBot class.
+    This is a subclass of :class:`discord.ext.commands.AutoShardedBot`
+    and is same as :class:`appcommands.Bot`
 
     Example
     ---------
@@ -89,370 +592,4 @@ class AutoShardedBot(commands.AutoShardedBot):
         bot = appcommands.AutoShardedBot(command_prefix="$")
 
     """
-    def __init__(self, **options):
-        """Constructor"""
-        super().__init__(**options)
-        self.appclient = self.get_app_client()
-
-    def slash(self, *args, **kwargs) -> SlashCommand:
-        """Adds a command to bot
-        same as :func:`~appcommands.client.AppClient.command`
-
-        Parameters
-        -----------
-        name: :class:`~str`
-            name of the command, defaults to function name, (required)
-        description: Optional[:class:`~str`]
-            description of the command, required
-        guild: Optional[:class:`~str`]
-            id of the guild for which command is to be added, (optional)
-        options: Optional[List[:class:`~appcommands.models.Option`]]
-            the options for command, can be empty
-        cls: :class:`~appcommands.models.SlashCommand`
-            The custom command class, must be a subclass of :class:`~appcommands.models.SlashCommand`, (optional)
-
-        Example
-        ---------
-
-        .. code-block:: python3
-
-            @bot.slash(name="Hi", description="Hello!")
-            async def some_func(ctx):
-                await ctx.reply("Hello!")
-
-        Raises
-        --------
-        TypeError
-           The passed callback is not coroutine or it is already a SlashCommand
-
-        Returns
-        --------
-        :class:`~appcommands.models.SlashCommand`
-            The slash command.
-        """
-        return self.appclient.command(*args, **kwargs)
-
-    def get_app_client(self):
-        """The method usually implemented to use custom appclient"""
-        return AppClient(self)
-
-class AppClient:
-    """Slash Client handler class for bot
-    
-    Parameters
-    -----------
-    bot: Union[:class:`~discord.ext.commands.Bot`, :class:`~discord.ext.commands.AutoShardedBot`]
-        Your dpy bot
-    logging: :class:`~bool`
-        prints all the logs of this module, defaults to False
-    
-    Raises
-    -------
-    ValueError
-        The bot has already a appclient registered with this module
-    """
-    def __init__(self,
-                 bot: Union[commands.Bot, commands.AutoShardedBot],
-                 logging: bool = False):
-        self.bot: commands.Bot = bot
-        if hasattr(bot, "appclient"):
-            raise ValueError(
-                "Bot has already a appclient registered with this module")
-        self.bot.appclient = self
-        self.logging: bool = logging
-        self._views: Dict[str, Tuple[ui.View, ui.Item]] = {}
-        self.__commands = {}
-        self.bot.add_listener(self.socket_resp, "on_interaction")
-
-    @property
-    def commands(self) -> Mapping[int, StoredCommand]:
-        """Returns all the command listeners added to the instance.
-
-        Returns
-        ---------
-        Mapping[:class:`~int`, :class:`~appcommands.types.StoredCommand`]
-          The json of commands."""
-        return types.MappingProxyType(self.__commands)
-
-    def command(self, *args, cls=MISSING, **kwargs) -> SlashCommand:
-        """Adds a command to bot
-
-        Parameters
-        -----------
-        name: :class:`~str`
-            name of the command, defaults to function name, (required)
-        description: Optional[:class:`~str`]
-            description of the command, required
-        options: Optional[List[:class:`~appcommands.models.Option`]]
-            the options for command, can be empty
-        cls: :class:`~appcommands.models.SlashCommand`
-            The custom command class, must be a subclass of :class:`~appcommands.models.SlashCommand`, (optional)
-
-        Example
-        ---------
-
-        .. code-block:: python3
-
-            from slash import AppClient
-            
-            slash = AppClient(bot, logging=True)
-            @bot.appclient.command(name="Hi", description="Hello!")
-            async def some_func(ctx):
-                await ctx.reply("Hello!")
-                
-            # and 
-            
-            @slash.command(name="Hello", description="Hello")
-            async def hello(ctx):
-                await ctx.reply("Hello")
-
-        Raises
-        --------
-        TypeError
-           The passed callback is not coroutine or it is already a SlashCommand
-
-        Returns
-        --------
-        :class:`~appcommands.models.SlashCommand`
-            The slash command.
-        """
-        def decorator(func):
-            wrapped = _cmd(self, *args, cls=cls, **kwargs)
-            resp = wrapped(func)
-            return resp
-
-        return decorator
-
-    def log(self, message: str):
-        """Logs the works
-        
-        Parameters
-        -----------
-        message: :class:`~str`
-            The message which is to be logged"""
-        if self.logging:
-            print(message)
-
-    def get_interaction_context(self):
-        """The method usually implemented to use custom contexts"""
-        return InteractionContext(self.bot, self)
-
-    async def socket_resp(self, interaction):
-        if interaction.type == InteractionType.application_command:
-            if int(interaction.data['id']) in self.__commands:
-                command = self.__commands[int(interaction.data['id'])]
-                context = await (self.get_interaction_context()).from_interaction(interaction)
-
-                cmd = (command['command'])
-                if cmd.cog:
-                    cog = self.bot.cogs.get(cmd.cog.qualified_name)
-                    if cog:
-                        return await (getattr(cog, cmd.callback.__name__))(**context.kwargs)
-                await cmd.callback(**context.kwargs)
-
-        elif interaction.type == InteractionType.component:
-            interactctx = interaction
-            custom_id = interactctx.data['custom_id']
-
-            try:
-                view, item = self._views[custom_id]
-            except:
-                return
-
-            item.refresh_state(interactctx)
-            view._dispatch_item(item, interactctx)
-
-    async def fetch_commands(self, guild_id: Optional[int] = None) -> List[SlashCommand]:
-        """fetch a list of slash command currently the bot has
-
-        Parameters
-        -------------
-        guild_id: Optional[:class:`~int`]
-            Should be given to fetch guild commands. (optional)
-        """
-        while not self.bot.is_ready():
-            await self.bot.wait_until_ready()
-        add = ""
-        if guild_id:
-            add = f"/guilds/{guild_id}"
-
-        data = await self.bot.http.request(route=http.Route(
-            "GET", f"/applications/{self.bot.user.id}{add}/commands"))
-        ret = []
-        for i in data:
-            if i["type"] == 1:
-                ret.append(SlashCommand.from_dict(self, i))
-
-        return ret
-
-    def get_commands(self) -> Dict[str, SlashCommand]:
-        """Gets every command registered in the current running instance"""
-        ret = {}
-
-        for i in self.__commands:
-            ret[self.__commands[i]['command'].name] = self.__commands[i]['command']
-
-        return ret
-
-    def get_command(self, name: str) -> SlashCommand:
-        """Gives a command registered in this module
-        
-        Parameters
-        -----------
-        name: :class:`~str`
-            the name from which command is to be found"""
-
-        return (self.get_commands()).get(name)
-
-    async def add_command(self, command: SlashCommand):
-        """Adds a slash command to bot
-
-        Parameters
-        -----------
-        command: :class:`~appcommands.models.SlashCommand`
-            The command to be added
-        
-        Raises
-        -------
-        .CommandExists
-            That slash cmd is already registered in bot with this module"""
-        slashcmds = await self.fetch_commands(None)
-
-        if command.guild:
-            slashcmds = await self.fetch_commands(command.guild)
-
-        if command.name in self.get_commands():
-            raise CommandExists(
-                f"Command '{command.name}' has already been registered!")
-        else:
-            if command in slashcmds:
-                await self.remove_command(command.name)
-
-            add = ""
-            l_add = ""
-            if command.guild:
-                add = f"/guilds/{command.guild}"
-                l_add = f"Guild command for '{command.guild}'"
-
-            resp = await self.bot.http.request(route=http.Route(
-                "POST", f"/applications/{self.bot.user.id}{add}/commands"),
-                                        json=command.ret_dict())
-
-            self.log(f"Slash command '{command.name}' (ID: {resp['id']}) registered! {l_add}")
-
-            self.__commands[int(resp['id'])] = {
-                "guild": None if 'guild_id' not in resp else int(resp['guild_id']),
-                "command": command
-            }
-
-    def reload_command(self, command: SlashCommand):
-        """Reloads a slash command
-
-        Parameters
-        -----------
-        command: :class:`~appcommands.models.SlashCommand`
-            The command which is to be reloaded
-
-        Raises
-        --------
-        .CommandNotRegistered
-            That command is not registered"""
-        a = self.__commands
-        listenerlist = {self.__commands[i]['command'].name: i for i in self.__commands}
-        _id = listenerlist.get(command.name)
-
-        if not _id:
-            raise CommandNotRegistered(
-                f"Command '{command.name}' has not been registered.")
-        else:
-            self.__commands.pop(_id)
-            self.__commands[_id] = {
-                "guild": command.guild,
-                "command": command
-            }
-
-            self.log(f"Slash command '{command.name}' reloaded!")
-
-    async def remove_command(self, name: str):
-        """Removes command from the name given
-
-        Parameters
-        ------------
-        name: :class:`~str`
-            Name of the command"""
-        listenerlist = {self.__commands[i]['command'].name: i for i in self.__commands}
-        _id = listenerlist.get(name)
-
-        if not _id:
-            raise CommandDoesNotExists(f"Command '{name}' does not exist!")
-        else:
-            await self.bot.http.request(route=http.Route(
-                "DELETE", f"/applications/{self.bot.user.id}/commands/{_id}"))
-
-            self.__commands.pop(_id)
-
-    def load_extension(self, name: str):
-        """Load a command from an external file.
-
-        Parameters
-        -----------
-        name: :class:`~str`
-            Name of the file.
-            eg: `client.load_extension('commands.ping')` loads command from `commands/ping.py`
-
-        Raises
-        -------
-        .LoadFailed
-            When extension could not be loaded or does not have a `setup()` method.
-        """
-        spec = importlib.util.find_spec(name)
-        lib = importlib.util.module_from_spec(spec)
-
-        try:
-            spec.loader.exec_module(lib)
-        except Exception as e:
-            del sys.modules[name]
-            raise LoadFailed(f"Extension '{name}' could not be loaded!")
-
-        try:
-            setup = getattr(lib, 'setup')
-        except AttributeError:
-            raise LoadFailed(f"Extension '{name}' has no method 'setup'!")
-
-        try:
-            self.bot.loop.create_task(self.add_command(setup(self.bot)))
-        except Exception as e:
-            raise e
-
-    def reload_extension(self, name: str):
-        """Reload a command from an external file.
-
-        Parameters
-        -----------
-        name: :class:`~str`
-            Name of the file.
-            eg: `client.reload_extension('commands.ping')` reloads command from `commands/ping.py`
-
-        Raises
-        -------
-        .LoadFailed
-            When extension could not be reloaded or does not have a `setup()` method.
-        """
-        spec = importlib.util.find_spec(name)
-        lib = importlib.util.module_from_spec(spec)
-
-        try:
-            spec.loader.exec_module(lib)
-        except Exception as e:
-            del sys.modules[name]
-            raise LoadFailed(f"Extension '{name}' could not be loaded!")
-
-        try:
-            setup = getattr(lib, 'setup')
-        except AttributeError:
-            raise LoadFailed(f"Extension '{name}' has no method 'setup'!")
-
-        try:
-            self.reload_command(setup(self.bot))
-        except Exception as e:
-            raise e
+    pass
