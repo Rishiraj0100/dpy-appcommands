@@ -6,7 +6,7 @@ __all__ = (
 )
 
 class _MissingSentinel:
-    def __init__(self, **attrs: dict={}):
+    def __init__(self, **attrs):
         for k, v in attrs.items():
           setattr(self, k, v)
 
