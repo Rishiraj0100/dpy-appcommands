@@ -37,7 +37,7 @@ class Blep(SlashCommand):
 
 @bot.slashcommand(name="test", description="test")
 async def test(ctx):
-    await ctx.senx("tested")
+    await ctx.send("tested")
 
 # or
 
@@ -48,7 +48,7 @@ async def test(ctx):
 @bot.event
 async def on_ready():
     print(f'Logged on as {bot.user} (ID: {bot.user.id})')
-    await bot.add_slash_command(Blep())
+    await bot.add_app_command(Blep())
 
 bot.run("TOKEN")
 ```
