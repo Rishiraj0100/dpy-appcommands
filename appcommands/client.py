@@ -370,14 +370,14 @@ class ApplicationMixin:
             self.remove_listener(self.__connectlistener, 'on_connect')
 
     @property
-    def appcommands(self) -> Mapping[int, Union[SlashCommand, SubCommandGroup]]:
+    def appcommands(self) -> Mapping[int, BaseCommand]:
         """The all application command the bot has
 
         .. versionadded:: 2.0
 
         Returns
         --------
-        Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        Mapping[:class:`~int`, :class:`appcommands.BaseCommand`]
         """
         return types.MappingProxyType(self.__appcommands)
 
@@ -389,7 +389,7 @@ class ApplicationMixin:
 
         Returns
         --------
-        Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        Mapping[:class:`~int`, Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.SubCommandGroup`]]
         """
         return types.MappingProxyType(self.__subcommands)
 
@@ -401,7 +401,7 @@ class ApplicationMixin:
 
         Returns
         ---------
-        Mapping[:class:`~int`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        Mapping[:class:`~int`, Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.SubCommandGroup`]]
         """
         return types.MappingProxyType(self.__slashcommands)
 
@@ -413,7 +413,7 @@ class ApplicationMixin:
 
         Returns
         ---------
-        Mapping[:class:`~int`, :class:`~appcommands.models.UserCommand`]
+        Mapping[:class:`~int`, :class:`~appcommands.UserCommand`]
         """
         return types.MappingProxyType(self.__usercommands)
 
@@ -425,7 +425,7 @@ class ApplicationMixin:
 
         Returns
         ---------
-        Mapping[:class:`~int`, :class:`~appcommands.models.MessageCommand`]
+        Mapping[:class:`~int`, :class:`~appcommands.MessageCommand`]
         """
         return types.MappingProxyType(self.__messagecommands)
 
@@ -436,11 +436,11 @@ class ApplicationMixin:
 
         Returns
         ---------
-        Mapping[:class:`~str`, Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
+        Mapping[:class:`~str`, Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
         """
         ret = {}
 
-        for id, cmd in self.__slashcommands:
+        for id, cmd in self.__slashcommands.items():
             ret[self.__slashcommands[id]] = cmd
 
         return types.MappingProxyType(ret)
@@ -457,7 +457,7 @@ class ApplicationMixin:
 
         Returns
         ---------
-        Union[:class:`~appcommands.models.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]
+        Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.SubCommandGroup`]
             The found thing"""
         return (self.get_slash_commands()).get(name)
 
@@ -468,11 +468,11 @@ class ApplicationMixin:
 
         Returns
         ---------
-        Mapping[:class:`~str`, :class:`~appcommands.models.UserCommand`]
+        Mapping[:class:`~str`, :class:`~appcommands.UserCommand`]
         """
         ret = {}
 
-        for id, cmd in self.usercommands:
+        for id, cmd in self.usercommands.items():
             ret[self.__usercommands[id].name] = cmd
 
         return types.MappingProxyType(ret)
@@ -489,7 +489,7 @@ class ApplicationMixin:
 
         Returns
         ---------
-        :class:`~appcommands.models.UserCommand`
+        :class:`~appcommands.UserCommand`
             The found thing"""
         return (self.get_user_commands()).get(name)
 
@@ -500,11 +500,11 @@ class ApplicationMixin:
 
         Returns
         ---------
-        Mapping[:class:`~str`, :class:`~appcommands.models.MessageCommand`]
+        Mapping[:class:`~str`, :class:`~appcommands.MessageCommand`]
         """
         ret = {}
 
-        for id, cmd in self.messagecommands:
+        for id, cmd in self.messagecommands.items():
             ret[self.__messagecommands[id].name] = cmd
 
         return types.MappingProxyType(ret)
@@ -519,7 +519,7 @@ class ApplicationMixin:
 
         Returns
         ---------
-        :class:`~appcommands.models.MessageCommand`
+        :class:`~appcommands.MessageCommand`
             The found thing"""
         return (self.get_message_commands()).get(name)
 
@@ -534,7 +534,7 @@ class ApplicationMixin:
 
         Returns
         ---------
-        :class:`~appcommands.models.InteractionContext`
+        :class:`~appcommands.InteractionContext`
             The context that will be used for handling interactions"""
         return InteractionContext(self, interaction)
 
