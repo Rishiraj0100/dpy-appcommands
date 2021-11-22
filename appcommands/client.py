@@ -250,7 +250,7 @@ class ApplicationMixin:
         :class:`appcommands.SubCommandGroup`
             The group by which commands will be made"""
         sub_command_group = SubCommandGroup(name, description)
-        self.add_slash_command(sub_command_group)
+        self.add_app_command(sub_command_group)
         return sub_command_group
 
     async def register_commands(self) -> None:
