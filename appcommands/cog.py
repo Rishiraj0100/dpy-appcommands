@@ -196,7 +196,7 @@ class Cog(commands.Cog, metaclass=CogMeta):
         return super()._inject(bot)
         
     def _eject(self, bot):
-        for cmd in self.__slash_commands__:
+        for cmd in self.__app_commands__:
             bot.remove_app_command(cmd)
 
         super()._eject(bot)
