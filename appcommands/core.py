@@ -48,7 +48,7 @@ __all__ = (
 
 def copy_doc(attr_name: str, cls_name: str = None):
     def decorator(func):
-        if cls_name is None
+        if cls_name is None:
             return discord.utils.copy_doc(attr_name)(func)
 
         if cls_name not in globals():
