@@ -46,6 +46,19 @@ __all__ = (
     "whitelist_users"
 )
 
+def copy_doc(attr_name: str, cls_name: str = None):
+    def decorator(func):
+        if cls_name is None
+            return discord.utils.copy_doc(attr_name)(func)
+
+        if cls_name not in globals():
+            raise NameError(f"name {cls_name} is not defined")
+
+        func.__doc__ = getattr(globals()[cls_name], attr_name).__doc__
+        return func
+
+    return decorator
+
 async def get_ctx_kw(ctx, params) -> dict:
     bot, cmd, kwargs = ctx.bot, ctx.command, {}
     if cmd is not None and len(ctx.data.options) > 0:
@@ -444,6 +457,10 @@ class InteractionContext:
             return self.respond(*args, **kwargs)
 
         return self.channel.send(*args, **kwargs)
+
+    @copy_doc("respond", "InteractionContext")
+    def reply(self, *args, **kwargs):
+        return self.respond(*args, **kwargs)
 
     def defer(self, *args, **kwargs):
         """|coro|
