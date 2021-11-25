@@ -89,11 +89,16 @@ class ApplicationMixin:
         command: :class:`appcommands.BaseCommand`
             The command to remove.
         """
-        self.__appcommands.pop(command.id)
-        self.__subcommands.pop(command.id)
-        self.__usercommands.pop(command.id)
-        self.__slashcommands.pop(command.id)
-        self.__messagecommands.pop(command.id)
+        if command.id in self.__appcommands:
+            self.__appcommands.pop(command.id)
+        if command.id in self.__subcommands:
+            self.__subcommands.pop(command.id)
+        if command.id in self.__usercommands:
+            self.__usercommands.pop(command.id)
+        if command.id in self.__slashcommands:
+            self.__slashcommands.pop(command.id)
+        if command.id in self.__messagecommands:
+            self.__messagecommands.pop(command.id)
 
     def slashcommand(self, cls=MISSING, **kwargs) -> Callable[[Callable], SlashCommand]:
         r"""A decorator which adds a slash command to bot
