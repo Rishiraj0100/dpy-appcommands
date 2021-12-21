@@ -48,7 +48,7 @@ async def test(ctx):
 @bot.event
 async def on_ready():
     print(f'Logged on as {bot.user} (ID: {bot.user.id})')
-    await bot.add_app_command(Blep())
+    await bot.add_app_command(Blep(), on_discord=True) # awaited
 
 bot.run("TOKEN")
 ```
