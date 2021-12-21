@@ -2,8 +2,16 @@ import discord
 
 __all__ = (
     "MISSING",
-    "missing"
+    "missing",
+    "ALL_GUILDS"
 )
+
+class _All(object):
+    def __repr__(self):
+        return "appcommands.ALL_GUILDS"
+
+    def __str__(self):
+        return repr(self)
 
 class _MissingSentinel:
     def __eq__(self, other):
@@ -27,6 +35,7 @@ class _MissingSentinel:
         return _self().__await__()
 
 MISSING = _MissingSentinel()
+ALL_GUILDS = _All()
 
 def missing(f):
     nm = _MissingSentinel()
