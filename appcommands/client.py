@@ -21,7 +21,7 @@ from .core import (
 from discord import http, ui
 from discord.ext import commands
 from discord.enums import InteractionType
-from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any
+from typing import List, Optional, Tuple, Union, Dict, Mapping, Callable, Any, Awaitable
 
 
 __all__ = (
@@ -66,7 +66,7 @@ class ApplicationMixin:
         self.add_listener(self.__connectlistener, "on_connect")
         self.add_listener(self.interaction_handler, "on_interaction")
 
-    def add_app_command(self, command: BaseCommand) -> None:
+    def add_app_command(self, command: BaseCommand, *, on_discord: bool = False) -> Union[None, Awaitable]:
         """Adds a app command,
         usually used when subclassed
 
@@ -74,9 +74,14 @@ class ApplicationMixin:
 
         Parameters
         ------------
-        command: :class:`~appcommands.models.BaseCommand`
-            The command which is to be added"""
+        command: :class:`~appcommands.core.BaseCommand`
+            The command which is to be added
+        on_discord: :class:`~bool`
+            Whether to register all pending commands on discord
+            needs to be awaited when passed ``True`` (default: ``False``)"""
         self.to_register.append(command)
+        if on_discord:
+            return self.to_register()
 
     def remove_app_command(self, command: BaseCommand) -> None:
         """Remove an application command from the internal list
@@ -268,6 +273,8 @@ class ApplicationMixin:
         commands = []
         perms = {}
         registered_commands = await self.http.get_global_commands(self.user.id)
+        self.to_register.extend([self.appcommands.values()])
+
         for command in [cmd for cmd in self.to_register if not cmd.guild_ids]:
             json = command.to_dict()
             if len(registered_commands) > 0:
@@ -278,8 +285,9 @@ class ApplicationMixin:
                 ]
                 if matches:
                     json["id"] = matches[0]["id"]
-            commands.append(json)
+                    to_not_re_register.append(matches[0])
 
+            commands.append(json)
         guild_commands = {}
         async for guild in self.fetch_guilds(limit=None):
             guild_commands[guild.id] = []
@@ -287,9 +295,16 @@ class ApplicationMixin:
 
         for command in [cmd for cmd in self.to_register if cmd.guild_ids]:
             json = command.to_dict()
-            for guild_id in command.guild_ids:
-                to_update = guild_commands[guild_id]
-                guild_commands[guild_id] = to_update + [json]
+            if command.guild_ids is ALL_GUILDS:
+                command.guild_ids = []
+                command.all_guilds = True
+                for guild_id in guild_commands:
+                    guild_commands[guild_id] = guild_commands[guild_id]+[json]
+                    command.guild_ids.append(guild_id)
+            else:
+                for guild_id in command.guild_ids:
+                    to_update = guild_commands[guild_id]
+                    guild_commands[guild_id] = to_update + [json]
 
         
         for guild_id in guild_commands:
@@ -298,7 +313,6 @@ class ApplicationMixin:
 
             try:
                 cmds = await self.http.bulk_upsert_guild_commands(self.user.id, guild_id, guild_commands[guild_id])
-                
             except Exception as e:
                 print(f"Failed to add guild commands for guild {guild_id}")
                 traceback.print_exc()
@@ -370,8 +384,8 @@ class ApplicationMixin:
 
     async def __connectlistener(self):
         if not self.__connected:
-            self.__connected = True
             await self.register_commands()
+            self.__connected = True
             self.remove_listener(self.__connectlistener, 'on_connect')
 
     @property
