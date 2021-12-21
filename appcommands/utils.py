@@ -37,6 +37,8 @@ class _MissingSentinel:
 MISSING = _MissingSentinel()
 ALL_GUILDS = _All()
 
+del globals()["_All"]
+
 def missing(f):
     nm = _MissingSentinel()
     nm.__doc__ = f.__doc__
