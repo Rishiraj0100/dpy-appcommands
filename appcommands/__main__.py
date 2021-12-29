@@ -308,6 +308,7 @@ def parse_args():
 
 
     subparser = parser.add_subparsers(dest='subcommand', title='subcommands')
+    add_appbot_args(subparser)
     add_newbot_args(subparser)
     add_newcog_args(subparser)
     return parser, parser.parse_args()
