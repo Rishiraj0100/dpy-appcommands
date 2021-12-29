@@ -543,7 +543,7 @@ class Choice:
 
 
 class Option:
-    """Options for slashcommands that you
+    """Options for slashcommands
     
     Parameters 
     ------------
@@ -641,6 +641,7 @@ class SlashCommand(BaseCommand):
         self.guild_ids: List[int] = guild_ids
         self.cog = None
         self.type: int = 1
+        self.parent=None
         self.is_subcommand = False
         if callback:
             if not asyncio.iscoroutinefunction(callback):
@@ -702,6 +703,12 @@ class SlashCommand(BaseCommand):
 
     def __repr__(self) -> str:
         return "<SlashCommand name={0.name} description={0.description} options={0.options}>".format(self)
+
+    @property
+    def full_name(self):
+        if not self.parent: return self
+        if not self.parent.parent: return self.parent.name + " " + self.name
+        return self.parent.parent.name + " " + self.parent.name + " " + self.name
 
 class SubCommandGroup(BaseCommand):
     """SubCommand wrapper class
@@ -767,7 +774,7 @@ class SubCommandGroup(BaseCommand):
             if not asyncio.iscoroutinefunction(func):
                 raise TypeError('Callback must be a coroutine.')
             command = cls(*args, callback=func, **kwargs)
-            command.is_subcommand = True
+            command.is_subcommand, command.parent = True, self
             command.__func__ = func
             self.subcommands.append(command)
             return command
