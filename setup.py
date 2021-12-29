@@ -42,6 +42,12 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    entry_points={
+        'console_scripts': [
+            "appcommands=appcommands.__main__:main",
+            "appbot=appcommands.__main__:_appbot"
+        ]
+    },
     project_urls={
         "Documentation": "https://dpy-appcommands.rtfd.io/",
         "Issue tracker": "https://github.com/Rishiraj0100/dpy-appcommands/issues"
