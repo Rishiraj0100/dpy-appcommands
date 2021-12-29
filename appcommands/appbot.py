@@ -10,6 +10,7 @@ flags: List[str] = [
   "jishaku force paginator",
   "jishaku no dm traceback",
   "jishaku retain",
+  "jishaku hide"
 ]
 
 class AppBot(appcommands.Bot):
@@ -213,11 +214,7 @@ class RTFMCog(appcommands.Cog):
   rtfm = appcommands.slashgroup(
     name="rtfm",
     description="Rtfm Commands",
-    guild_ids=[
-      821599275929567232,
-      783778325083848755,
-      731072681688039444,
-    ]
+    guild_ids=appcommands.ALL_GUILDS
   )
 
   @rtfm.subcommand(name="appcommands", description="Search documentation of dpy-appcommands objects.")
@@ -233,8 +230,25 @@ class RTFMCog(appcommands.Cog):
     await self.do_rtfm(ctx, "python", query,)
 
 
+@bot.slashcommand(name="help")
+async def help_(ctx, command: str = None):
+  if command is None:
+    embed = discord.Embed(title="App Bot's Help Menu")
+    for cmd in bot.slashcommands.values():
+      embed.add_field(name=cmd.full_name, value=cmd.description, inline=False)
+  elif bot.get_slash_command(command):
+    await ctx.send(f"Command `{command}` not found!", ephemeral=True)
+  else:
+    embed = discord.Embed(title="App Bot's Help Menu")
+  # soon
+    
+
 @bot.usercommand(name="id")
 async def uid(ctx, user: discord.User):
+  await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
+
+@bot.slashcommand(name="id", description="Get ID of a User")
+async def uid_(ctx, user: discord.User):
   await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
 
 @bot.messagecommand(name="id")
@@ -242,6 +256,9 @@ async def mid(ctx, message: discord.Message):
   await ctx.send(f"Id of that message is `{message.id}`", ephemeral=True)
 
 bot.remove_command("help")
+
+der export():
+  return bot
 
 def run():
   try:
