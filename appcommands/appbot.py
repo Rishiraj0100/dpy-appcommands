@@ -236,11 +236,13 @@ async def help_(ctx, command: str = None):
     embed = discord.Embed(title="App Bot's Help Menu")
     for cmd in bot.slashcommands.values():
       embed.add_field(name=cmd.full_name, value=cmd.description, inline=False)
-  elif bot.get_slash_command(command):
+  elif not bot.get_slash_command(command):
     await ctx.send(f"Command `{command}` not found!", ephemeral=True)
   else:
+    cmd=bot.get_slash_command(command)
+    fmt=f"**`/{cmd.full_name}`**\n\n{cmd.description}"
     embed = discord.Embed(title="App Bot's Help Menu")
-  # soon
+  await ctx.send(embed=embed)
     
 
 @bot.usercommand(name="id")
@@ -259,6 +261,9 @@ bot.remove_command("help")
 
 der export():
   return bot
+
+def setup(func):
+  func(bot)
 
 def run():
   try:
