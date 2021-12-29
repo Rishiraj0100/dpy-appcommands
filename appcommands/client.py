@@ -458,9 +458,8 @@ class ApplicationMixin:
         Mapping[:class:`~str`, Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
         """
         ret = {}
-
         for id, cmd in self.__slashcommands.items():
-            ret[self.__slashcommands[id]] = cmd
+            ret[self.__slashcommands[id].name] = cmd
 
         return types.MappingProxyType(ret)
 
@@ -476,9 +475,17 @@ class ApplicationMixin:
 
         Returns
         ---------
-        Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.SubCommandGroup`]
+        Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.SubCommandGroup`, :class:`None`]
             The found thing"""
-        return (self.get_slash_commands()).get(name)
+        if (not " " in name) or (not self.get_slash_commands().get(name.split(" ")[0])): return (self.get_slash_commands()).get(name)
+
+        assert name.count(" ")<3
+        for cmd in self.__subcommands.values():
+            if isinstance(cmd, dict) and name.count(" ")==2 and self.get_slash_commands().get(name.split(" ")[1]):
+                for _cmd in cmd:
+                    if _cmd.name==name.split(" ")[-1]: return _cmd
+            elif (not isinstance(cmd,dict)) and name.split(" ")[-1]==cmd.name: return cmd
+            
 
     def get_user_commands(self) -> Mapping[str, UserCommand]:
         """Gets every user commands registered in the current running instance
@@ -513,7 +520,7 @@ class ApplicationMixin:
         return (self.get_user_commands()).get(name)
 
     def get_message_commands(self) -> Mapping[str, MessageCommand]:
-        """Gets every user commands registered in the current running instance
+        """Gets every message commands registered in the current running instance
 
         .. versionadded:: 2.0
 
@@ -541,6 +548,36 @@ class ApplicationMixin:
         :class:`~appcommands.MessageCommand`
             The found thing"""
         return (self.get_message_commands()).get(name)
+
+    def get_app_commands(self) -> Mapping[str, BaseCommand]:
+        """Gets every app commands registered in the current running instance
+
+        .. versionadded:: 2.0
+
+        Returns
+        ---------
+        Mapping[:class:`~str`, :class:`appcommands.core.BaseCommand`]
+        """
+        ret = {}
+
+        for id, cmd in self.appcommands.items():
+            ret[self.__appcommands[id].name] = cmd
+
+        return types.MappingProxyType(ret)
+
+    def get_app_command(self, name: str) -> BaseCommand:
+        """Gives a app command registered in this module
+        
+        Parameters
+        -----------
+        name: :class:`~str`
+            the name from which the message command is to be found
+
+        Returns
+        ---------
+        :class:`appcommands.core.BaseCommand`
+            The found thing"""
+        return (self.get_app_commands()).get(name)
 
     def get_interaction_context(self, interaction: discord.Interaction) -> InteractionContext:
         """The method usually implemented to use custom contexts
