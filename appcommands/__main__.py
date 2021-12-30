@@ -290,7 +290,7 @@ def run_appbot(parser,args):
     os.environ["APP_BOT_TOKEN"]=args.token
     appbot.run()
 
-def add_appbot_args(subperser):
+def add_appbot_args(subparser):
     parser = subparser.add_parser('appbot', help='run appbot')
     parser.set_defaults(func=run_appbot)
     parser.add_argument("token", help="The token")
