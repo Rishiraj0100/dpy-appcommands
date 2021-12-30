@@ -461,7 +461,9 @@ class ApplicationMixin:
             if not isinstance(cmd, SubCommandGroup): ret[cmd.full_name] = cmd
         for cmd in self.__subcommands.values():
             if not isinstance(cmd, dict): ret[cmd.full_name] = cmd
-            else: ret.update({_cmd.full_name: _cmd for _cmd in cmd.values()})
+            else:
+                for _cmd in cmd.values():
+                    ret[_cmd.full_name] = _cmd
 
         return types.MappingProxyType(ret)
 
