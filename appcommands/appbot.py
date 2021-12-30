@@ -259,7 +259,7 @@ async def mid(ctx, message: discord.Message):
 
 bot.remove_command("help")
 
-der export():
+def export():
   return bot
 
 def setup(func):
