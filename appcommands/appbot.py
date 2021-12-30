@@ -5,6 +5,8 @@ from typing import Any, List
 from appcommands import OptionType, Option, Choice
 
 
+installed: bool = False
+
 flags: List[str] = [
   "jishaku no underscore",
   "jishaku force paginator",
@@ -265,34 +267,40 @@ class RTFMCog(appcommands.Cog):
   ):
     await self.do_rtfm(ctx, f"python{version}", query,)
 
+def install():
+  if installed: return
 
-@bot.slashcommand(name="help", description="Get help of a command")
-async def help_(ctx, command: str = None):
-  if command is None:
-    embed = discord.Embed(title="App Bot's Help Menu")
-    for cmd in bot.get_slash_commands().values():
-      embed.add_field(name=f"`/{cmd.full_name}`", value=cmd.description, inline=False)
-  elif not bot.get_slash_command(command): return await ctx.send(f"Command `{command}` not found!", ephemeral=True)
-  else:
-    cmd=bot.get_slash_command(command)
-    fmt=f"**`/{cmd.full_name}`**\n\n{cmd.description}"
-    embed = discord.Embed(title="App Bot's Help Menu", description=fmt)
-  await ctx.send(embed=embed)
+  @bot.slashcommand(name="help", description="Get help of a command")
+  async def help_(ctx, command: str = None):
+    if command is None:
+      embed = discord.Embed(title="App Bot's Help Menu")
+      for cmd in bot.get_slash_commands().values():
+        embed.add_field(name=f"`/{cmd.full_name}`", value=cmd.description, inline=False)
+    elif not bot.get_slash_command(command): return await ctx.send(f"Command `{command}` not found!", ephemeral=True)
+    else:
+      cmd=bot.get_slash_command(command)
+      fmt=f"**`/{cmd.full_name}`**\n\n{cmd.description}"
+      embed = discord.Embed(title="App Bot's Help Menu", description=fmt)
+      await ctx.send(embed=embed)
     
+  @bot.usercommand(name="id")
+  async def uid(ctx, user: discord.User):
+    await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
 
-@bot.usercommand(name="id")
-async def uid(ctx, user: discord.User):
-  await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
+  @bot.slashcommand(name="id", description="Get ID of a User")
+  async def uid_(ctx, user: discord.User):
+    await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
 
-@bot.slashcommand(name="id", description="Get ID of a User")
-async def uid_(ctx, user: discord.User):
-  await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
+  @bot.messagecommand(name="id")
+  async def mid(ctx, message: discord.Message):
+    await ctx.send(f"Id of that message is `{message.id}`", ephemeral=True)
 
-@bot.messagecommand(name="id")
-async def mid(ctx, message: discord.Message):
-  await ctx.send(f"Id of that message is `{message.id}`", ephemeral=True)
+  bot.remove_command("help")
 
-bot.remove_command("help")
+  globals()["installed"] = True
+
+
+bot.add_cog(RTFMCog(bot))
 
 def export():
   return bot
@@ -303,9 +311,8 @@ def setup(func):
 def run(token: str = None):
   try:
     bot.load_extension("jishaku")
-    bot.add_cog(token or RTFMCog(bot))
   except Exception as e:
     print(e, file=sys.stderr)
     traceback.print_exc()
 
-  bot.run(env.get("APP_BOT_TOKEN"))
+  bot.run(token or env.get("APP_BOT_TOKEN"))
