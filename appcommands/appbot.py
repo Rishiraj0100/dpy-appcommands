@@ -235,7 +235,7 @@ async def help_(ctx, command: str = None):
   if command is None:
     embed = discord.Embed(title="App Bot's Help Menu")
     for cmd in bot.get_slash_commands.values():
-      embed.add_field(name=cmd.full_name, value=cmd.description, inline=False)
+      embed.add_field(name=f"`/{cmd.full_name}", value=cmd.description, inline=False)
   elif not bot.get_slash_command(command): await ctx.send(f"Command `{command}` not found!", ephemeral=True)
   else:
     cmd=bot.get_slash_command(command)
@@ -264,10 +264,10 @@ def export():
 def setup(func):
   func(bot)
 
-def run():
+def run(token: str = None):
   try:
     bot.load_extension("jishaku")
-    bot.add_cog(RTFMCog(bot))
+    bot.add_cog(token or RTFMCog(bot))
   except Exception as e:
     print(e, file=sys.stderr)
     traceback.print_exc()
