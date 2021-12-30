@@ -14,7 +14,7 @@ Bot
 .. attributetable:: appcommands.Bot
 
 .. autoclass:: appcommands.Bot
-    :members: add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands
+    :members: get_interaction_context, get_app_command, get_app_commands, get_slash_command, get_slash_commands, get_user_command, get_user_commands, get_message_command, get_message_commands, add_app_command, remove_app_command, appcommands, slashcommands, subcommands, messagecommands, usercommands, register_commands
 
     .. automethod:: Bot.slashcommand(**kwargs)
         :decorator:
