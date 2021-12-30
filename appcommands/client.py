@@ -81,7 +81,7 @@ class ApplicationMixin:
             needs to be awaited when passed ``True`` (default: ``False``)"""
         self.to_register.append(command)
         if on_discord:
-            return self.to_register()
+            return self.register_commands()
 
     def remove_app_command(self, command: BaseCommand) -> None:
         """Remove an application command from the internal list
@@ -273,7 +273,7 @@ class ApplicationMixin:
         commands = []
         perms = {}
         registered_commands = await self.http.get_global_commands(self.user.id)
-        self.to_register.extend([self.appcommands.values()])
+        self.to_register.extend([c for c in list(self.appcommands.values()) if ((isinstance(c,[SubCommandGroup,SlashCommand])) and (not bool(c.parent))) or (not isinstance(c,[SubCommandGroup,SlashCommand]))])
 
         for command in [cmd for cmd in self.to_register if not cmd.guild_ids]:
             json = command.to_dict()
