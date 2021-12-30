@@ -271,7 +271,7 @@ def add_newbot_args(subparser):
     parser.add_argument('name', help='the bot project name')
     parser.add_argument('directory', help='the directory to place it in (default: .)', nargs='?', default=Path.cwd())
     parser.add_argument('--prefix', help='the bot prefix (default: $)', default='$', metavar='<prefix>')
-    parser.add_ergument('--app-only', help="whether to use appcommands only", action="store_true", dest="app_only")
+    parser.add_argument('--app-only', help="whether to use appcommands only", action="store_true", dest="app_only")
     parser.add_argument('--sharded', help='whether to use AutoShardedBot', action='store_true')
     parser.add_argument('--no-git', help='do not create a .gitignore file', action='store_true', dest='no_git')
 
