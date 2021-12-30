@@ -31,8 +31,8 @@ __all__ = (
 
 class ApplicationMixin:
     """The mixin for appcommands module"""
-    def __init__(self, *args, **oldkwargs) -> None:
-        kwargs = oldkwargs.copy()
+    def __init__(self, *args, **kwargs) -> None:
+        oldkwargs = kwargs.copy()
 
         if not kwargs.get('command_prefix'):
             kwargs["command_prefix"] = " ".join(secrets.token_urlsafe(5000).split('_'))
