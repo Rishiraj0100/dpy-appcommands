@@ -3,7 +3,7 @@ import sys,os
 from pathlib import Path
 
 
-import appcommands
+import appcommands, discord
 import pkg_resources
 import aiohttp
 import platform
@@ -289,12 +289,6 @@ def run_appbot(parser,args):
     from appcommands import appbot
     os.environ["APP_BOT_TOKEN"]=args.token
     appbot.run()
-
-def _appbot():
-    class _:
-      token=sys.argv[-1]
-
-    run_appbot(None, _)
 
 def add_appbot_args(subperser):
     parser = subparser.add_parser('appbot', help='run appbot')
