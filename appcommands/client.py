@@ -457,8 +457,11 @@ class ApplicationMixin:
         Mapping[:class:`~str`, Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
         """
         ret = {}
-        for id, cmd in self.__slashcommands.values():
+        for cmd in self.__slashcommands.values():
             if not isinstance(cmd, SubCommandGroup): ret[cmd.full_name] = cmd
+        for cmd in self.__subcommands.values():
+            if not isinstance(cmd, dict): ret[cmd.full_name] = cmd
+            else: ret.update({_cmd.full_name: _cmd for _cmd in cmd.values()})
 
         return types.MappingProxyType(ret)
 
