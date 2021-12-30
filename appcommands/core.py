@@ -142,6 +142,7 @@ def generate_options(function, description: str = "No description.") -> List['Op
 
 class BaseCommand:
     __permissions__: list = []
+    all_guilds: bool = False
     def __repr__(self) -> str:
         return "<appcommands.core.{0.__class__.__name__} name={0.name} description={1}>".format(self, self.description)
 
