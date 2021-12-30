@@ -457,8 +457,8 @@ class ApplicationMixin:
         Mapping[:class:`~str`, Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.models.SubCommandGroup`]]
         """
         ret = {}
-        for id, cmd in self.__slashcommands.items():
-            ret[self.__slashcommands[id].name] = cmd
+        for id, cmd in self.__slashcommands.values():
+            if not isinstance(cmd, SubCommandGroup): ret[cmd.full_name] = cmd
 
         return types.MappingProxyType(ret)
 
@@ -476,15 +476,7 @@ class ApplicationMixin:
         ---------
         Union[:class:`~appcommands.SlashCommand`, :class:`~appcommands.SubCommandGroup`, :class:`None`]
             The found thing"""
-        if (not " " in name) or (not self.get_slash_commands().get(name.split(" ")[0])): return (self.get_slash_commands()).get(name)
-
-        assert name.count(" ")<3
-        for cmd in self.__subcommands.values():
-            if isinstance(cmd, dict) and name.count(" ")==2 and self.get_slash_commands().get(name.split(" ")[1]):
-                for _cmd in cmd:
-                    if _cmd.name==name.split(" ")[-1]: return _cmd
-            elif (not isinstance(cmd,dict)) and name.split(" ")[-1]==cmd.name: return cmd
-            
+        return (self.get_slash_commands()).get(name)
 
     def get_user_commands(self) -> Mapping[str, UserCommand]:
         """Gets every user commands registered in the current running instance
