@@ -41,12 +41,12 @@ class AppBot(appcommands.Bot):
 
 bot: AppBot = AppBot()
 
-def enable(content: str, t: str = "t") -> None:
+def enable(content: str, v: str = "t") -> None:
   t: str = content.upper()
   while " " in t:
     t: str = t.replace(" ", "_")
 
-  env[t]: str = t
+  env[t]: str = v
 
 for flag in flags:
   enable(flag)
@@ -230,18 +230,17 @@ class RTFMCog(appcommands.Cog):
     await self.do_rtfm(ctx, "python", query,)
 
 
-@bot.slashcommand(name="help")
+@bot.slashcommand(name="help", description="Get help of a command")
 async def help_(ctx, command: str = None):
   if command is None:
     embed = discord.Embed(title="App Bot's Help Menu")
     for cmd in bot.slashcommands.values():
-      embed.add_field(name=cmd.full_name, value=cmd.description, inline=False)
-  elif not bot.get_slash_command(command):
-    await ctx.send(f"Command `{command}` not found!", ephemeral=True)
+      if not isinstance(cmd, appcommands.SubCommandGroup): embed.add_field(name=cmd.full_name, value=cmd.description, inline=False)
+  elif not bot.get_slash_command(command): await ctx.send(f"Command `{command}` not found!", ephemeral=True)
   else:
     cmd=bot.get_slash_command(command)
     fmt=f"**`/{cmd.full_name}`**\n\n{cmd.description}"
-    embed = discord.Embed(title="App Bot's Help Menu")
+    embed = discord.Embed(title="App Bot's Help Menu", description=fmt)
   await ctx.send(embed=embed)
     
 
