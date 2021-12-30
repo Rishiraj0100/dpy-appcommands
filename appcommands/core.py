@@ -194,9 +194,6 @@ class BaseCommand:
 
         self._update_perms(permissions)
 
-    def __hash__(self):
-        return getattr(self, "id", 0) or 0
-
 class InteractionContext:
     """The ctx param given in CMD callbacks
     
@@ -710,7 +707,7 @@ class SlashCommand(BaseCommand):
 
     @property
     def full_name(self):
-        if not self.parent: return self
+        if not self.parent: return self.name
         if not self.parent.parent: return self.parent.name + " " + self.name
         return self.parent.parent.name + " " + self.parent.name + " " + self.name
 
