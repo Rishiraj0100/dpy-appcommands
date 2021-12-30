@@ -219,8 +219,7 @@ class RTFMCog(appcommands.Cog):
 
   rtfm = appcommands.slashgroup(
     name="rtfm",
-    description="Rtfm Commands",
-    guild_ids=appcommands.ALL_GUILDS
+    description="Rtfm Commands"
   )
 
   @rtfm.subcommand(name="appcommands", description="Search documentation of dpy-appcommands objects.")
@@ -287,7 +286,7 @@ def install():
   async def uid(ctx, user: discord.User):
     await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
 
-  @bot.slashcommand(name="id", description="Get ID of a User")
+  @bot.slashcommand(name="id", description="Get ID of a User",guild_ids=appcommands.ALL_GUILDS)
   async def uid_(ctx, user: discord.User):
     await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
 
