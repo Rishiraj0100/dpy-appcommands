@@ -174,8 +174,12 @@ class RTFMCog(appcommands.Cog):
     page_types = {
       "appcommands": "https://dpy-appcommands.readthedocs.io/en/stable",
       "python": "https://docs.python.org/3",
-      "discord": "https://discordpy.readthedocs.io/en/master",
+      "discord_master": "https://discordpy.readthedocs.io/en/master",
+      "discord_stable": "https://discordpy.readthedocs.io/en/stable"
     }
+
+    for v in ["2.7","3.5","3.6","3.7","3.8","3.9","3.10","3.11"]:
+      page_types["python" + v] = "https://docs.python.org/" + v
 
     if obj is None:
       await ctx.send(page_types[key], ephemeral=True)
@@ -222,12 +226,44 @@ class RTFMCog(appcommands.Cog):
     await self.do_rtfm(ctx, "appcommands", query)
 
   @rtfm.subcommand(name="discordpy", description="Search documentation of discord.py objects.")
-  async def rtfm_dsc(self, ctx, *, query: Q = None):
-    await self.do_rtfm(ctx, "discord", query)
+  async def rtfm_dsc(
+    self,
+    ctx,
+    query: Q = None,
+    version: Option(
+      _,
+      "Version (default: master)",
+      required = False,
+      choices = [
+        Choice("master (2.0)", "master"),
+        Choice("stable (1.7.3)", "stable")
+      ]
+    ) = "master"
+  ):
+    await self.do_rtfm(ctx, f"discord_{version}", query)
 
   @rtfm.subcommand(name="python", description="Search documentation of Python objects.")
-  async  def rtfm_py(self, ctx, *, query: Q = None):
-    await self.do_rtfm(ctx, "python", query,)
+  async  def rtfm_py(
+    self,
+    ctx,
+    query: Q = None,
+    version: Option(
+      _,
+      "Version (default: 3.10)",
+      required = False,
+      choices = [
+        Choice("3.11"),
+        Choice("3.10"),
+        Choice("3.9"),
+        Choice("3.8"),
+        Choice("3.7"),
+        Choice("3.6"),
+        Choice("3.5"),
+        Choice("2.7")
+      ]
+    ) = "3.10",
+  ):
+    await self.do_rtfm(ctx, f"python{version}", query,)
 
 
 @bot.slashcommand(name="help", description="Get help of a command")
@@ -235,7 +271,7 @@ async def help_(ctx, command: str = None):
   if command is None:
     embed = discord.Embed(title="App Bot's Help Menu")
     for cmd in bot.get_slash_commands().values():
-      embed.add_field(name=f"`/{cmd.full_name}", value=cmd.description, inline=False)
+      embed.add_field(name=f"`/{cmd.full_name}`", value=cmd.description, inline=False)
   elif not bot.get_slash_command(command): await ctx.send(f"Command `{command}` not found!", ephemeral=True)
   else:
     cmd=bot.get_slash_command(command)
