@@ -36,7 +36,7 @@ import config
 
 class Bot(appcommands.{base}):
     def __init__(self, **kwargs):
-        super().__init__(command_prefix=commands.when_mentioned_or('{prefix}'), **kwargs)
+        super().__init__({prefix} **kwargs)
         for cog in config.cogs:
             try:
                 self.load_extension(cog)
@@ -209,7 +209,9 @@ def newbot(parser, args):
     try:
         with open(str(new_directory / 'bot.py'), 'w', encoding='utf-8') as fp:
             base = 'Bot' if not args.sharded else 'AutoShardedBot'
-            fp.write(_bot_template.format(base=base, prefix=args.prefix))
+            _=_bot_template.format(base=base,)
+            if args.app_only: _=_.format(prefix=f"command_prefix=commands.when_mentioned_or('{args.prefix}'),")
+            fp.write(_)
     except OSError as exc:
         parser.error(f'could not create bot file ({exc})')
 
@@ -265,18 +267,16 @@ def add_newbot_args(subparser):
     parser = subparser.add_parser('newbot', help='creates a command bot project quickly')
     parser.set_defaults(func=newbot)
 
-
     parser.add_argument('name', help='the bot project name')
     parser.add_argument('directory', help='the directory to place it in (default: .)', nargs='?', default=Path.cwd())
     parser.add_argument('--prefix', help='the bot prefix (default: $)', default='$', metavar='<prefix>')
+    parser.add_ergument('--app-only', help="whether to use appcommands only", action="store_true")
     parser.add_argument('--sharded', help='whether to use AutoShardedBot', action='store_true')
     parser.add_argument('--no-git', help='do not create a .gitignore file', action='store_true', dest='no_git')
-
 
 def add_newcog_args(subparser):
     parser = subparser.add_parser('newcog', help='creates a new cog template quickly')
     parser.set_defaults(func=newcog)
-
 
     parser.add_argument('name', help='the cog name')
     parser.add_argument('directory', help='the directory to place it in (default: cogs)', nargs='?', default=Path('cogs'))
