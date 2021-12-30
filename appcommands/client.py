@@ -285,7 +285,6 @@ class ApplicationMixin:
                 ]
                 if matches:
                     json["id"] = matches[0]["id"]
-                    to_not_re_register.append(matches[0])
 
             commands.append(json)
         guild_commands = {}
