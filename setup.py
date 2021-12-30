@@ -44,8 +44,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            "appcommands=appcommands.__main__:main",
-            "appbot=appcommands.__main__:_appbot"
+            "appcommands=appcommands.__main__:main"
         ]
     },
     project_urls={
