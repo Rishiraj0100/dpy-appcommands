@@ -2,7 +2,7 @@ import appcommands, re, zlib, discord, io, aiohttp, os
 
 from os import environ as env
 from typing import Any, List
-from appcommands import OptionType, Option
+from appcommands import OptionType, Option, Choice
 
 
 flags: List[str] = [
