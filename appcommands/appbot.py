@@ -308,11 +308,11 @@ def export():
 def setup(func):
   func(bot)
 
-def run(token: str = None):
+def run(token: str = None, *, task: bool = False):
   try:
     bot.load_extension("jishaku")
-  except Exception as e:
-    print(e, file=sys.stderr)
-    traceback.print_exc()
+  except:
+    pass
 
+  if task: return bot.loop.create_task(bot.start(token or env.get("APP_BOT_TOKEN")))
   bot.run(token or env.get("APP_BOT_TOKEN"))
