@@ -293,7 +293,7 @@ def run_appbot(parser,args):
 
     prefix = args.prefix
 
-    if args.prefix == "$$none$$": prefix = None
+    if args.prefix == "_$$none$$": prefix = None
 
     class AppBot(appbot.AppBot):
         def __init__(self):
@@ -314,7 +314,7 @@ def add_appbot_args(subparser):
     parser.set_defaults(func=run_appbot)
     parser.add_argument("token", help="The token")
     parser.add_argument("--task", "-t", action='store_true', help="whether to run bot in an asyncio task", dest="task")
-    parser.add_argument("--prefix", "-p", help="The prefix of bot (default: $), ($$none$$ for appcmds only)", dest="prefix", default="$")
+    parser.add_argument("--prefix", "-p", help="The prefix of bot (default: $), (use `_$$none$$` for appcmds only)", dest="prefix", default="$")
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='appcommands', description='Tools for helping with dpy-appcommands')
