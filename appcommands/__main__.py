@@ -305,7 +305,7 @@ def run_appbot(parser,args):
             )
 
     appbot.bot = AppBot()
-    appbot.bot.add_cog(appbot.RTFMCog())
+    appbot.bot.add_cog(appbot.RTFMCog(appbot.bot))
     appbot.install()
     appbot.run(task=args.task)
 
