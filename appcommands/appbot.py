@@ -16,7 +16,8 @@ flags: List[str] = [
 ]
 
 class AppBot(appcommands.Bot):
-  def __init__(self) -> None:
+  def __init__(self, **kwargs) -> None:
+    if kwargs.get("_using_super", False) or False: kwargs.pop("_using_super"); return super().__init__(**kwargs)
     super().__init__(
       command_prefix="$",
       strip_after_prefix=True,
