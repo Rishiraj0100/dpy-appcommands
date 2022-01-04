@@ -288,26 +288,44 @@ def add_newcog_args(subparser):
 
 def run_appbot(parser,args):
     from appcommands import appbot
-    os.environ["APP_BOT_TOKEN"]=args.token
-    appbot.run()
+
+    if args.token: os.environ["APP_BOT_TOKEN"]=args.token
+
+    prefix = args.prefix
+
+    if args.prefix == "$$none$$": prefix = None
+
+    class AppBot(appbot.AppBot):
+        def __init__(self):
+            super().__init__(
+                _using_super=True,
+                command_prefix=prefix,
+                case_insensitive=True,
+                strip_after_prefix=True
+            )
+
+    appbot.bot = AppBot()
+    appbot.bot.add_cog(appbot.RTFMCog())
+    appbot.install()
+    appbot.run(task=args.task)
 
 def add_appbot_args(subparser):
     parser = subparser.add_parser('appbot', help='run appbot')
     parser.set_defaults(func=run_appbot)
     parser.add_argument("token", help="The token")
+    parser.add_argument("--task", "-t", action='store_true', help="whether to run bot in an asyncio task", dest="task")
+    parser.add_argument("--prefix", "-p", help="The prefix of bot (default: $), ($$none$$ for appcmds only)", dest="prefix", default="$")
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='appcommands', description='Tools for helping with dpy-appcommands')
-    parser.add_argument('-v', '--version', action='store_true', help='shows the library version')
+    parser.add_argument('-V', '--version', action='store_true', help='shows the library version')
     parser.set_defaults(func=core)
-
 
     subparser = parser.add_subparsers(dest='subcommand', title='subcommands')
     add_appbot_args(subparser)
     add_newbot_args(subparser)
     add_newcog_args(subparser)
     return parser, parser.parse_args()
-
 
 def main():
     parser, args = parse_args()
