@@ -354,7 +354,7 @@ class InteractionContext:
 
     author = user
 
-    def respond(self, *args, **kwargs) -> Coroutine:
+    async def respond(self, *args, **kwargs) -> Coroutine:
         """|coro|
 
         Responds to this interaction by sending a message.
@@ -388,8 +388,14 @@ class InteractionContext:
             The length of ``embeds`` was invalid.
         discord.InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        --------
+        :class:`discord.InteractionMessage`
+            The newly sent message.
         """
-        return self.interaction.response.send_message(*args, **kwargs)
+        await self.interaction.response.send_message(*args, **kwargs)
+        return await self.interaction.original_message()
 
     def edit(self, *args, **kwargs):
         """|coro|
