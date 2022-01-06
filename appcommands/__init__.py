@@ -1,5 +1,5 @@
 __author__ = "Rishiraj0100"
-__version__ = "2.0.4.2b"
+__version__ = "2.0.4.2"
 import discord
 
 if not discord.__version__.startswith("2.0"):
