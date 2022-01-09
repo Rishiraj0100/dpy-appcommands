@@ -791,7 +791,7 @@ class SubCommandGroup(BaseCommand):
     def __eq__(self, other: BaseCommand) -> bool:
         return self.name == other.name and self.description == other.description
 
-    def subcommandgroup(self, name: str) -> 'SubCommandGroup':
+    def subcommandgroup(self, name: str, description: str = "No Description") -> 'SubCommandGroup':
         """The slashgroup for which more subcommand is to be added
 
         Parameters
