@@ -294,7 +294,7 @@ class ApplicationMixin:
 
         for command in [cmd for cmd in self.to_register if cmd.guild_ids]:
             json = command.to_dict()
-            if command.guild_ids is ALL_GUILDS:
+            if (command.guild_ids is ALL_GUILDS) or (getattr(command,"all_guilds",False)):
                 command.guild_ids = []
                 command.all_guilds = True
                 for guild_id in guild_commands:
