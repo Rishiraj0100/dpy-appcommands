@@ -269,6 +269,7 @@ class RTFMCog(appcommands.Cog):
 
 def install():
   if installed: return
+  global bot, help_, uid, uid_, mid
 
   @bot.slashcommand(name="help", description="Get help of a command")
   async def help_(ctx, command: str = None):
