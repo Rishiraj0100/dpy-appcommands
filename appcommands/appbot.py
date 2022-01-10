@@ -288,7 +288,7 @@ def install(bot: AppBot):
   async def uid(ctx, user: discord.User):
     await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
 
-  @bot.slashcommand(name="id", description="Get ID of a User",guild_ids=appcommands.ALL_GUILDS)
+  @bot.slashcommand(name="id", description="Get ID of a User")
   async def uid_(ctx, user: discord.User):
     await ctx.send(f"Id of {user.mention} is `{user.id}`", ephemeral=True)
 
@@ -300,7 +300,6 @@ def install(bot: AppBot):
 
   globals()["installed"] = True
 
-  bot.add_cog(RTFMCog(bot))
   globals()["bot"] = bot
 
 def export():
@@ -311,6 +310,7 @@ def setup(func):
 
 def run(token: str = None, *, task: bool = False):
   try:
+    bot.add_cog(RTFMCog(bot))
     bot.load_extension("jishaku")
   except:
     pass
