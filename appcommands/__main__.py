@@ -305,7 +305,7 @@ def run_appbot(parser,args):
             )
 
     appbot.bot = AppBot()
-    appbot.install()
+    appbot.install(appbot.export())
     appbot.run(task=args.task)
 
 def add_appbot_args(subparser):
