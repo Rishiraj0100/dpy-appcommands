@@ -267,7 +267,7 @@ class RTFMCog(appcommands.Cog):
   ):
     await self.do_rtfm(ctx, f"python{version}", query,)
 
-def install():
+def install(bot: AppBot):
   if installed: return
   global bot, help_, uid, uid_, mid
 
@@ -300,8 +300,7 @@ def install():
 
   globals()["installed"] = True
 
-
-bot.add_cog(RTFMCog(bot))
+  bot.add_cog(RTFMCog(bot))
 
 def export():
   return bot
