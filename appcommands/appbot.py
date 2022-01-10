@@ -269,7 +269,7 @@ class RTFMCog(appcommands.Cog):
 
 def install(bot: AppBot):
   if installed: return
-  global bot, help_, uid, uid_, mid
+  global help_, uid, uid_, mid
 
   @bot.slashcommand(name="help", description="Get help of a command")
   async def help_(ctx, command: str = None):
@@ -301,6 +301,7 @@ def install(bot: AppBot):
   globals()["installed"] = True
 
   bot.add_cog(RTFMCog(bot))
+  globals()["bot"] = bot
 
 def export():
   return bot
