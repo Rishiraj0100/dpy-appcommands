@@ -282,7 +282,7 @@ def install(bot: AppBot):
       cmd=bot.get_slash_command(command)
       fmt=f"**`/{cmd.full_name}`**\n\n{cmd.description}"
       embed = discord.Embed(title="App Bot's Help Menu", description=fmt)
-      await ctx.send(embed=embed)
+    await ctx.send(embed=embed)
     
   @bot.usercommand(name="id")
   async def uid(ctx, user: discord.User):
