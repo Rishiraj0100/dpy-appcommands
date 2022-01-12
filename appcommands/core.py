@@ -194,6 +194,12 @@ class BaseCommand:
 
         self._update_perms(permissions)
 
+  async def __call__(self, *args, **kwargs):
+    if not hasattr(self, callback): raise TypeError(f"'{self.__class__.__name__}' object is not callable")
+    if self.cog: args = [self.cog] + args
+    return await self.callback(*args, **kwargs)
+
+
 class InteractionContext:
     """The ctx param given in CMD callbacks
     
