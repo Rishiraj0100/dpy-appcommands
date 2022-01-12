@@ -340,9 +340,9 @@ class InteractionContext:
     def guild_id(self) -> int:
         return self.interaction.guild_id
 
-    @cached_property
+    @property
     def message(self) -> discord.InteractionMessage:
-        return self.interaction.message
+        return self.interaction._original_message
 
     @cached_property
     def user(self) -> Union[discord.User, discord.Member]:
